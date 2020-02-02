@@ -6,23 +6,16 @@ namespace AsperetaClient
 {
     class GameScreen
     {
-        private GameClient GameClient { get; set; }
-
-        private ResourceManager ResourceManager { get; set; }
-
         private Map map;
 
         private Character player;
 
-        public GameScreen(GameClient client)
+        public GameScreen()
         {
-            this.GameClient = client;
-            this.ResourceManager = new ResourceManager("AsperetaClient/bin/Debug/netcoreapp3.1/data", client.Renderer);
-
             map = new Map(AsperetaMapLoader.Load(1));
-            map.Load(this.ResourceManager);
+            map.Load();
 
-            player = new Character(50, 50, 100, 1, Direction.Down, this.ResourceManager);
+            player = new Character(50, 50, 1, 1, Direction.Down);
         }
 
         public void Render(double dt)
@@ -32,19 +25,69 @@ namespace AsperetaClient
             int start_x = player.PixelXi - half_x - (player.GetWidth() / 2);
             int start_y = player.PixelYi - half_y;
 
-            map.Render(GameClient.Renderer, start_x, start_y);
+            map.Render(start_x, start_y);
 
-            player.Render(dt, GameClient.Renderer, start_x, start_y);
+            player.Render(dt, start_x, start_y);
         }
 
         public void Update(double dt)
         {
+            var keysPtr = SDL.SDL_GetKeyboardState(out int keysLength);
+            byte[] keys = new byte[keysLength];
+            Marshal.Copy(keysPtr, keys, 0, keysLength);
+
+            if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
+            {
+                MoveKeyPressed(Direction.Up);
+            }
+            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
+            {
+                MoveKeyPressed(Direction.Right);
+            }
+            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
+            {
+                MoveKeyPressed(Direction.Down);
+            }
+            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
+            {
+                MoveKeyPressed(Direction.Left);
+            }
+
             player.Update(dt);
         }
 
         public void HandleEvent(SDL.SDL_Event ev)
         {
+            
+        }
 
+        public void MoveKeyPressed(Direction direction)
+        {
+            if (player.Moving) return;
+
+            int destX = player.TileX;
+            int destY = player.TileY;
+
+            switch (direction)
+            {
+                case Direction.Up:
+                    destY -= 1;
+                    break;
+                case Direction.Right:
+                    destX += 1;
+                    break;
+                case Direction.Down:
+                    destY += 1;
+                    break;
+                case Direction.Left:
+                    destX -= 1;
+                    break;
+            }
+
+            if (map.CanMoveTo(destX, destY))
+            {
+                map.MoveCharacter(player, destX, destY);
+            }
         }
     }
 }

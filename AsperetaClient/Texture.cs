@@ -24,7 +24,7 @@ namespace AsperetaClient
             Rect = tRect;
         }
 
-        public void Render(IntPtr renderer, int x, int y)
+        public void Render(int x, int y)
         {
             int y_off = 0;
             if (Rect.h > Constants.TileSize)
@@ -41,7 +41,7 @@ namespace AsperetaClient
             dRect.w = Rect.w;
             dRect.h = Rect.h;
 
-            SDL.SDL_RenderCopy(renderer, SDLTexture, ref Rect, ref dRect);
+            SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
         }
     }
 }

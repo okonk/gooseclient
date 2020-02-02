@@ -32,11 +32,20 @@ namespace AsperetaClient
 
         public Animation BodyAnimation { get; set; }
 
+        public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
+
+
+
         public bool Moving { get; set; }
 
         public bool Attacking { get; set; }
 
-        public Character(int tileX, int tileY, int bodyId, int bodyState, Direction facing, ResourceManager resourceManager)
+
+        public double MoveSpeedX { get; set; }
+
+        public double MoveSpeedY { get; set; }
+
+        public Character(int tileX, int tileY, int bodyId, int bodyState, Direction facing)
         {
             this.TileX = tileX;
             this.TileY = tileY;
@@ -49,29 +58,83 @@ namespace AsperetaClient
             this.Moving = false;
             this.Attacking = false;
 
-            this.UpdateAnimations(resourceManager);
+            this.UpdateAnimations();
         }
 
-        public void UpdateAnimations(ResourceManager resourceManager)
+        public void UpdateAnimations()
         {
-            var compiledAnimations = resourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.BodyId && a.Type == AnimationType.Body);
-            this.BodyAnimation = resourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
+            var compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.BodyId && a.Type == AnimationType.Body);
+            this.BodyAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
+            this.BodyAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
             this.BodyAnimation.SetAnimating(Moving | Attacking);
         }
 
         public void Update(double dt)
         {
+            if (Moving)
+            {
+                this.PixelX += (dt * MoveSpeedX);
+                this.PixelY += (dt * MoveSpeedY);
+
+                if ((MoveSpeedX < 0 && PixelX <= TileX * Constants.TileSize)
+                    || (MoveSpeedX > 0 && PixelX >= TileX * Constants.TileSize)
+                    || (MoveSpeedY < 0 && PixelY <= TileY * Constants.TileSize)
+                    || (MoveSpeedY > 0 && PixelY >= TileY * Constants.TileSize)) {
+
+                    Moving = false;
+                    PixelX = TileX * Constants.TileSize;
+                    PixelY = TileY * Constants.TileSize;
+                    MoveSpeedX = 0;
+                    MoveSpeedY = 0;
+
+                    this.UpdateAnimations();
+                }
+            }
+
             this.BodyAnimation.Update(dt);
         }
 
-        public void Render(double dt, IntPtr renderer, int x_offset, int y_offset)
+        public void Render(double dt, int x_offset, int y_offset)
         {
-            this.BodyAnimation.Render(dt, renderer, this.PixelXi - x_offset, this.PixelYi - y_offset);
+            this.BodyAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
         }
 
         public int GetWidth()
         {
             return this.BodyAnimation.GetWidth();
+        }
+
+        public void MoveTo(int destX, int destY)
+        {
+            Moving = true;
+            MoveSpeedX = 0;
+            MoveSpeedY = 0;
+
+            if (destY < TileY)
+            {
+                Facing = Direction.Up;
+                MoveSpeedY = (-1000d * Constants.TileSize) / MoveSpeed;
+            }
+            else if (destX > TileX)
+            {
+                Facing = Direction.Right;
+                MoveSpeedX = (1000d * Constants.TileSize) / MoveSpeed;
+            }
+            else if (destY > TileY)
+            {
+                Facing = Direction.Down;
+                MoveSpeedY = (1000d * Constants.TileSize) / MoveSpeed;
+            }
+            else if (destX < TileX)
+            {
+                Facing = Direction.Left;
+                MoveSpeedX = (-1000d * Constants.TileSize) / MoveSpeed;
+            }
+
+            TileX = destX;
+            TileY = destY;
+
+            this.UpdateAnimations();
         }
     }
 }

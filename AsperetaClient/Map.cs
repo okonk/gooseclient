@@ -8,8 +8,16 @@ namespace AsperetaClient
         public bool Blocked { get; set; }
         public Texture[] Layers { get; set; }
 
-        public Tile(Texture[] layers)
+        public Character Character { get; set; }
+
+        public bool IsBlocked()
         {
+            return Blocked || Character != null;
+        }
+
+        public Tile(bool blocked, Texture[] layers)
+        {
+            this.Blocked = blocked;
             this.Layers = layers;
         }
     }
@@ -17,6 +25,9 @@ namespace AsperetaClient
     internal class Map
     {
         const int NUM_LAYERS = 4;
+
+        // Draw this many tiles additionally to stop trees popping in/out
+        const int OVERDRAW = 5 * Constants.TileSize;
 
         public MapFile MapFile { get; private set; }
         public int MapNumber { get { return MapFile.MapNumber; } }
@@ -36,44 +47,60 @@ namespace AsperetaClient
             set { this.Tiles[y * this.Width + x] = value; }
         }
 
-        public void Load(ResourceManager resourceManager)
+        public void Load()
         {
             for (int y = 0; y < this.Height; y++)
             {
                 for (int x = 0; x < this.Width; x++)
                 {
                     var tileData = MapFile[x, y];
-                    var tile = new Tile(tileData.Layers.Select(l => l > 0 ? resourceManager.GetTexture(l) : null).ToArray());
+                    var tile = new Tile(tileData.Blocked, tileData.Layers.Select(l => l > 0 ? GameClient.ResourceManager.GetTexture(l) : null).ToArray());
 
                     this[x, y] = tile;
                 }
             }
         }
 
-        public void Render(IntPtr renderer, int start_x, int start_y)
+        public void Render(int start_x, int start_y)
         {
             for (int l = 0; l < NUM_LAYERS; l++)
             {
-                for (int y = start_y / Constants.TileSize; y < this.Height; y++)
+                for (int y = (start_y - OVERDRAW) / Constants.TileSize; y < this.Height; y++)
                 {
                     if (y < 0) y = 0; // always start at the first tile
                     // break when this tile is off the bottom of the screen
-                    if (y * Constants.TileSize - start_y > Constants.ScreenHeight) break;
+                    if (y * Constants.TileSize - start_y - OVERDRAW > Constants.ScreenHeight) break;
 
-                    for (int x = start_x / Constants.TileSize; x < this.Width; x++)
+                    for (int x = (start_x - OVERDRAW) / Constants.TileSize; x < this.Width; x++)
                     {
                         if (x < 0) x = 0; // always start at the first tile
                         // break when this tile is off the right of the screen
-                        if (x * Constants.TileSize - start_x > Constants.ScreenWidth) break;
+                        if (x * Constants.TileSize - start_x - OVERDRAW > Constants.ScreenWidth) break;
 
                         var tile = this[x, y];
                         var graphic = tile.Layers[l];
 
                         if (graphic != null)
-                            graphic.Render(renderer, x * 32 - start_x, y * 32 - start_y);
+                            graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
                     }
                 }
             }
+        }
+
+        public bool CanMoveTo(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                return false;
+
+            return !this[x, y].IsBlocked();
+        }
+
+        public void MoveCharacter(Character character, int destX, int destY)
+        {
+            this[character.TileX, character.TileY].Character = null;
+            this[destX, destY].Character = character;
+
+            character.MoveTo(destX, destY);
         }
     }
 }

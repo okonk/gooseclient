@@ -47,9 +47,9 @@ namespace AsperetaClient
             }
         }
 
-        public void Render(double dt, IntPtr renderer, int x, int y)
+        public void Render(double dt, int x, int y)
         {
-            this.Frames[this.CurrentFrame].Render(renderer, x, y);
+            this.Frames[this.CurrentFrame].Render(x, y);
         }
 
         public void SetAnimating(bool animating)
