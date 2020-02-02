@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace AsperetaClient
 {
@@ -19,6 +20,14 @@ namespace AsperetaClient
 
         public static ResourceManager ResourceManager { get; set; }
 
+        public static StateManager StateManager { get; set; } = new StateManager();
+
+        public static int ScreenWidth { get; set; } = 640;
+
+        public static int ScreenHeight { get; set; } = 480;
+
+        public static GameSettings GameSettings { get; set; } = new GameSettings();
+
         public GameClient()
         {
             this.Running = true;
@@ -26,6 +35,8 @@ namespace AsperetaClient
 
         public void Run()
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
             if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
             {
                 Console.WriteLine("Unable to initialize SDL. Error: {0}", SDL.SDL_GetError());
@@ -36,8 +47,8 @@ namespace AsperetaClient
                 Window = SDL.SDL_CreateWindow("Goose Client",
                     SDL.SDL_WINDOWPOS_CENTERED,
                     SDL.SDL_WINDOWPOS_CENTERED,
-                    640,
-                    480,
+                    800,
+                    600,
                     SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE
                 );
 
@@ -49,9 +60,10 @@ namespace AsperetaClient
                 {
                     Renderer = SDL.SDL_CreateRenderer(Window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
-                    ResourceManager = new ResourceManager("AsperetaClient/bin/Debug/netcoreapp3.1/data", Renderer);
+                    ResourceManager = new ResourceManager("data", Renderer);
 
-                    var game = new GameScreen();
+                    StateManager.AppendState(new LoginScreen());
+
                     long lastUpdate = Stopwatch.GetTimestamp();
 
                     SDL.SDL_Event ev;
@@ -62,7 +74,7 @@ namespace AsperetaClient
                         double timeDiff = (timeNow - lastUpdate) / (double)Stopwatch.Frequency;
                         lastUpdate = timeNow;
 
-                        game.Update(timeDiff);
+                        StateManager.Update(timeDiff);
 
                         while (SDL.SDL_PollEvent(out ev) != 0)
                         {
@@ -73,13 +85,12 @@ namespace AsperetaClient
                                     break;
                             }
 
-                            game.HandleEvent(ev);
+                            StateManager.HandleEvent(ev);
                         }
 
-                        //SDL.SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
                         SDL.SDL_RenderClear(Renderer);
 
-                        game.Render(timeDiff);
+                        StateManager.Render(timeDiff);
 
                         SDL.SDL_RenderPresent(Renderer);
                         SDL.SDL_Delay(1);

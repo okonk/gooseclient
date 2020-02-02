@@ -39,6 +39,8 @@ namespace AsperetaClient
         {
             this.MapFile = fileData;
             this.Tiles = new Tile[this.Width * this.Height];
+
+            Load();
         }
 
         public Tile this[int x, int y]
@@ -69,13 +71,13 @@ namespace AsperetaClient
                 {
                     if (y < 0) y = 0; // always start at the first tile
                     // break when this tile is off the bottom of the screen
-                    if (y * Constants.TileSize - start_y - OVERDRAW > Constants.ScreenHeight) break;
+                    if (y * Constants.TileSize - start_y - OVERDRAW > GameClient.ScreenHeight) break;
 
                     for (int x = (start_x - OVERDRAW) / Constants.TileSize; x < this.Width; x++)
                     {
                         if (x < 0) x = 0; // always start at the first tile
                         // break when this tile is off the right of the screen
-                        if (x * Constants.TileSize - start_x - OVERDRAW > Constants.ScreenWidth) break;
+                        if (x * Constants.TileSize - start_x - OVERDRAW > GameClient.ScreenWidth) break;
 
                         var tile = this[x, y];
                         var graphic = tile.Layers[l];

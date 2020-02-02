@@ -15,6 +15,8 @@ namespace AsperetaClient
 
         public Dictionary<int, Texture> FrameIdToTexture { get; set; }
 
+        public Dictionary<string, Texture> FileToTexture { get; set; }
+
         public IntPtr Renderer { get; set; }
 
         public ResourceManager(string dataPath, IntPtr renderer)
@@ -22,6 +24,7 @@ namespace AsperetaClient
             this.AdfManager = new AdfManager(dataPath);
             this.AdfFileToSDLTexture = new Dictionary<int, IntPtr>();
             this.FrameIdToTexture = new Dictionary<int, Texture>();
+            this.FileToTexture = new Dictionary<string, Texture>();
             this.Renderer = renderer;
         }
 
@@ -64,6 +67,33 @@ namespace AsperetaClient
             animation.Interval = 1.0d / animationData.Interval;
 
             return animation;
+        }
+
+        public Texture GetTexture(string filepath)
+        {
+            Texture texture;
+            if (this.FileToTexture.TryGetValue(filepath, out texture))
+                return texture;
+
+            var fileBytes = File.ReadAllBytes(filepath);
+            var handle = GCHandle.Alloc(fileBytes, GCHandleType.Pinned);
+            var ptr = handle.AddrOfPinnedObject();
+
+            var sdlRWops = SDL.SDL_RWFromConstMem(ptr, fileBytes.Length);
+            handle.Free();
+
+            var surfacePointer = SDL_image.IMG_Load_RW(sdlRWops, 1);
+            SDL.SDL_SetColorKey(surfacePointer, 1, 0);
+            var sdlTexture = SDL.SDL_CreateTextureFromSurface(this.Renderer, surfacePointer);
+
+            var surfaceStruct = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePointer);
+
+            texture = new Texture(sdlTexture, 0, 0, surfaceStruct.w, surfaceStruct.h, needsOffset: false);
+
+            SDL.SDL_FreeSurface(surfacePointer);
+
+            this.FileToTexture[filepath] = texture;
+            return texture;
         }
     }
 }

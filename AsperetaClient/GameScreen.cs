@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class GameScreen
+    class GameScreen : State
     {
         private Map map;
 
@@ -13,15 +13,19 @@ namespace AsperetaClient
         public GameScreen()
         {
             map = new Map(AsperetaMapLoader.Load(1));
-            map.Load();
 
             player = new Character(50, 50, 1, 1, Direction.Down);
         }
 
-        public void Render(double dt)
+        public override void Starting()
         {
-            int half_x = Constants.ScreenWidth / 2 - Constants.TileSize;
-            int half_y = Constants.ScreenHeight / 2 - Constants.TileSize;
+            SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, 640, 480);
+        }
+        
+        public override void Render(double dt)
+        {
+            int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize;
+            int half_y = GameClient.ScreenHeight / 2 - Constants.TileSize;
             int start_x = player.PixelXi - half_x - (player.GetWidth() / 2);
             int start_y = player.PixelYi - half_y;
 
@@ -30,7 +34,7 @@ namespace AsperetaClient
             player.Render(dt, start_x, start_y);
         }
 
-        public void Update(double dt)
+        public override void Update(double dt)
         {
             var keysPtr = SDL.SDL_GetKeyboardState(out int keysLength);
             byte[] keys = new byte[keysLength];
@@ -56,7 +60,7 @@ namespace AsperetaClient
             player.Update(dt);
         }
 
-        public void HandleEvent(SDL.SDL_Event ev)
+        public override void HandleEvent(SDL.SDL_Event ev)
         {
             
         }

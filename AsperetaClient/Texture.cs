@@ -11,7 +11,10 @@ namespace AsperetaClient
 
         public int Width { get { return Rect.w; } }
 
-        public Texture(IntPtr texture, int x, int y, int w, int h)
+        private int xOffset = 0;
+        private int yOffset = 0;
+
+        public Texture(IntPtr texture, int x, int y, int w, int h, bool needsOffset = true)
         {
             this.SDLTexture = texture;
 
@@ -22,22 +25,22 @@ namespace AsperetaClient
             tRect.h = h;
 
             Rect = tRect;
+
+            if (needsOffset)
+            {
+                // offset to center the sprite on the tile
+                if (Rect.h > Constants.TileSize)
+                    yOffset = -Rect.h + Constants.TileSize;
+
+                xOffset = (Constants.TileSize / 2) - Rect.w / 2;
+            }
         }
 
         public void Render(int x, int y)
         {
-            int y_off = 0;
-            if (Rect.h > Constants.TileSize)
-                y_off = Rect.h - Constants.TileSize;
-
-            // center the sprite on the tile
-            int x_offset = x;
-            int y_offset = y;
-            int draw_x = x_offset + (Constants.TileSize / 2) - Rect.w / 2;
-
             SDL.SDL_Rect dRect;
-            dRect.x = draw_x;
-            dRect.y = (y_offset - y_off);
+            dRect.x = x + xOffset;
+            dRect.y = y + yOffset;
             dRect.w = Rect.w;
             dRect.h = Rect.h;
 

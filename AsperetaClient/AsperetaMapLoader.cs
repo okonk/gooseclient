@@ -7,7 +7,7 @@ namespace AsperetaClient
     {
         public static MapFile Load(int mapNumber)
         {
-            string filePath = $"AsperetaClient/bin/Debug/netcoreapp3.1/maps/Map{mapNumber}.map";
+            string filePath = $"maps/Map{mapNumber}.map";
 
             var map = new MapFile(mapNumber, 100, 100);
 
