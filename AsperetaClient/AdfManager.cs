@@ -8,7 +8,7 @@ namespace AsperetaClient
     {
         public CompiledEnc CompiledEnc { get; set; }
 
-        public List<AdfFile> Files { get; set; }
+        public Dictionary<int, AdfFile> Files { get; set; }
 
         public Dictionary<int, AdfFile> FrameToFile { get; set; }
 
@@ -16,7 +16,7 @@ namespace AsperetaClient
 
         public AdfManager(string dataPath)
         {
-            this.Files = new List<AdfFile>();
+            this.Files = new Dictionary<int, AdfFile>();
             this.FrameToFile = new Dictionary<int, AdfFile>();
             this.Animations = new Dictionary<int, AnimationData>();
 
@@ -28,7 +28,7 @@ namespace AsperetaClient
             foreach (string file in Directory.GetFiles(dataPath, "*.adf"))
             {
                 var adfFile = new AdfFile(file);
-                this.Files.Add(adfFile);
+                this.Files.Add(adfFile.FileNumber, adfFile);
 
                 foreach (var frame in adfFile.Frames)
                 {

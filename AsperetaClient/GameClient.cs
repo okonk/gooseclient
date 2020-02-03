@@ -28,6 +28,8 @@ namespace AsperetaClient
 
         public static GameSettings GameSettings { get; set; } = new GameSettings();
 
+        public static FontRenderer FontRenderer { get; set; }
+
         public GameClient()
         {
             this.Running = true;
@@ -61,6 +63,7 @@ namespace AsperetaClient
                     Renderer = SDL.SDL_CreateRenderer(Window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
                     ResourceManager = new ResourceManager("data", Renderer);
+                    FontRenderer = new FontRenderer();
 
                     StateManager.AppendState(new LoginScreen());
 
@@ -88,6 +91,7 @@ namespace AsperetaClient
                             StateManager.HandleEvent(ev);
                         }
 
+                        SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 0, 0, 0);
                         SDL.SDL_RenderClear(Renderer);
 
                         StateManager.Render(timeDiff);

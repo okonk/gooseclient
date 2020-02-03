@@ -28,14 +28,8 @@ namespace AsperetaClient
             this.Renderer = renderer;
         }
 
-        public Texture GetTexture(int frameId)
+        public IntPtr GetSDLTexture(AdfFile adfFile)
         {
-            var adfFile = this.AdfManager.FrameToFile[frameId];
-
-            Texture frameTexture;
-            if (this.FrameIdToTexture.TryGetValue(frameId, out frameTexture))
-                return frameTexture;
-
             IntPtr texture;
             if (!this.AdfFileToSDLTexture.TryGetValue(adfFile.FileNumber, out texture))
             {
@@ -50,7 +44,22 @@ namespace AsperetaClient
                 texture = SDL.SDL_CreateTextureFromSurface(this.Renderer, surface);
 
                 SDL.SDL_FreeSurface(surface);
+
+                this.AdfFileToSDLTexture[adfFile.FileNumber] = texture;
             }
+
+            return texture;
+        }
+
+        public Texture GetTexture(int frameId)
+        {
+            var adfFile = this.AdfManager.FrameToFile[frameId];
+
+            Texture frameTexture;
+            if (this.FrameIdToTexture.TryGetValue(frameId, out frameTexture))
+                return frameTexture;
+
+            var texture = GetSDLTexture(adfFile);
 
             var frame = adfFile.Frames[frameId];
             frameTexture = new Texture(texture, frame.X, frame.Y, frame.W, frame.H);
