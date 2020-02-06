@@ -34,8 +34,9 @@ namespace AsperetaClient
             GameClient.NetworkClient.Connected += OnConnected;
             GameClient.NetworkClient.ConnectionError += OnConnectionError;
 
-            GameClient.NetworkClient.PacketHandler.Listen<LoginSuccessPacket>(OnLoginSuccess);
-            GameClient.NetworkClient.PacketHandler.Listen<LoginFailPacket>(OnLoginFail);
+            GameClient.NetworkClient.PacketManager.Listen<LoginSuccessPacket>(OnLoginSuccess);
+            GameClient.NetworkClient.PacketManager.Listen<LoginFailPacket>(OnLoginFail);
+            GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
 
             GameClient.NetworkClient.Connect();
         }
@@ -103,8 +104,15 @@ namespace AsperetaClient
 
         public void OnLoginSuccess(object packet)
         {
+            GameClient.RealmName = ((LoginSuccessPacket)packet).RealmName;
+            GameClient.NetworkClient.LoginContinued();
+        }
+
+        public void OnSendCurrentMap(object packet)
+        {
             Close();
-            GameClient.StateManager.AppendState(new GameScreen(((LoginSuccessPacket)packet).RealmName));
+            var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
+            GameClient.StateManager.AppendState(new GameScreen(sendCurrentMapPacket.MapNumber, sendCurrentMapPacket.MapName));
         }
 
         public void OnLoginFail(object packet)

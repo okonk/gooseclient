@@ -6,26 +6,37 @@ namespace AsperetaClient
 {
     class GameScreen : State
     {
-        private Map map;
+        private int mapNumber;
+        private string mapName;
+        public Map Map { get; set; }
 
         private Character player;
 
-        private string realmName;
-
-        public GameScreen(string realmName)
+        public GameScreen(int mapNumber, string mapName)
         {
-            this.realmName = realmName;
+            this.mapNumber = mapNumber;
+            this.mapName = mapName;
 
-            map = new Map(AsperetaMapLoader.Load(1));
-
-            player = new Character(50, 50, 1, 1, Direction.Down);
+            GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
         }
 
-        public override void Starting()
+        public override void Resuming()
         {
             GameClient.ScreenWidth = 640;
             GameClient.ScreenHeight = 480;
             SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
+        }
+
+        public override void Starting()
+        {
+            Resuming();
+
+            LoadMap();
+        }
+
+        public void LoadMap()
+        {
+            GameClient.StateManager.AppendState(new MapLoadingScreen(mapNumber, mapName, this));
         }
         
         public override void Render(double dt)
@@ -35,7 +46,7 @@ namespace AsperetaClient
             int start_x = player.PixelXi - half_x - (player.GetWidth() / 2);
             int start_y = player.PixelYi - half_y;
 
-            map.Render(start_x, start_y);
+            Map.Render(start_x, start_y);
 
             player.Render(dt, start_x, start_y);
         }
@@ -94,10 +105,17 @@ namespace AsperetaClient
                     break;
             }
 
-            if (map.CanMoveTo(destX, destY))
+            if (Map.CanMoveTo(destX, destY))
             {
-                map.MoveCharacter(player, destX, destY);
+                Map.MoveCharacter(player, destX, destY);
             }
+        }
+
+        public void OnMakeCharacter(object packet)
+        {
+            var p = (MakeCharacterPacket)packet;
+
+            player = new Character(p.MapX, p.MapY, p.BodyId, p.BodyState, (Direction)p.Facing);
         }
     }
 }

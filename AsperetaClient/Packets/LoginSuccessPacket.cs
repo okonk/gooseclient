@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    class LoginSuccessPacket : PacketParser
+    class LoginSuccessPacket : PacketHandler
     {
         public string RealmName { get; set; }
 
         public override string Prefix { get; } = "LOK";
 
-        public override object Parse(string packet)
+        public override object Parse(PacketParser p)
         {
-            return new LoginSuccessPacket() { RealmName = packet.Substring(Prefix.Length) };
+            return new LoginSuccessPacket() { RealmName = p.GetRemaining() };
         }
     }
 }

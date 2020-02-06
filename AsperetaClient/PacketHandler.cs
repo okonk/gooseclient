@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    abstract class PacketParser
+    abstract class PacketHandler
     {
         public abstract string Prefix { get; }
 
         public List<Action<object>> Observers = new List<Action<object>>();
 
-        public abstract object Parse(string packet);
+        public abstract object Parse(PacketParser p);
 
         public virtual void CallObservers(object obj)
         {
@@ -20,42 +20,107 @@ namespace AsperetaClient
         }
     }
 
-    class PacketHandler
+    class PacketManager
     {
-        private Dictionary<string, PacketParser> parsers = new Dictionary<string, PacketParser>();
-        private Dictionary<Type, PacketParser> typeToParser = new Dictionary<Type, PacketParser>();
+        private Dictionary<string, PacketHandler> handlers = new Dictionary<string, PacketHandler>();
+        private Dictionary<Type, PacketHandler> typeToHandler = new Dictionary<Type, PacketHandler>();
 
-        public void Register<T>() where T : PacketParser, new()
+        public void Register<T>() where T : PacketHandler, new()
         {
-            var parser = new T();
-            parsers[parser.Prefix] = parser;
-            typeToParser[typeof(T)] = parser;
+            var handler = new T();
+            handlers[handler.Prefix] = handler;
+            typeToHandler[typeof(T)] = handler;
         }
 
-        public void Listen<T>(Action<object> callback) where T : PacketParser, new()
+        public void Listen<T>(Action<object> callback) where T : PacketHandler, new()
         {
-            typeToParser[typeof(T)].Observers.Add(callback);
+            typeToHandler[typeof(T)].Observers.Add(callback);
         }
 
-        public void Remove<T>(Action<object> callback) where T : PacketParser, new()
+        public void Remove<T>(Action<object> callback) where T : PacketHandler, new()
         {
-            typeToParser[typeof(T)].Observers.Remove(callback);
+            typeToHandler[typeof(T)].Observers.Remove(callback);
         }
 
         public void Handle(string packet)
         {
             for (int i = 0; i < packet.Length; i++)
             {
-                if (parsers.TryGetValue(packet.Substring(0, i), out PacketParser parser))
+                if (handlers.TryGetValue(packet.Substring(0, i + 1), out PacketHandler handler))
                 {
-                    var obj = parser.Parse(packet);
-                    parser.CallObservers(obj);
+                    var obj = handler.Parse(new PacketParser(packet, handler.Prefix));
+                    handler.CallObservers(obj);
 
                     return;
                 }
             }
+        }
+    }
 
-            Console.WriteLine($"Couldn't handle packet: {packet}");
+    class PacketParser
+    {
+        private string packet;
+        private string prefix;
+        private int index;
+
+        public char Delimeter { get; set; } = ',';
+
+        public PacketParser(string packet, string prefix)
+        {
+            this.packet = packet;
+            this.prefix = prefix;
+            this.index = prefix.Length;
+        }
+
+        public string GetRemaining()
+        {
+            if (index >= packet.Length)
+                throw new InvalidOperationException($"Index {index} is out of bounds for packet {prefix}");
+
+            return packet.Substring(index);
+        }
+
+        public string GetNextToken()
+        {
+            if (index >= packet.Length)
+                throw new InvalidOperationException($"Index {index} is out of bounds for packet {prefix}");
+
+            string strValue = null;
+
+            for (int i = index; i < packet.Length; i++)
+            {
+                if (packet[i] == Delimeter)
+                {
+                    strValue = packet.Substring(index, i - index);
+                    index = i + 1;
+                    break;
+                }
+            }
+
+            if (strValue == null)
+            {
+                strValue = packet.Substring(index);
+                index = packet.Length;
+            }
+
+            //Console.WriteLine(strValue);
+
+            return strValue;
+        }
+
+        public int GetInt32()
+        {
+            return Convert.ToInt32(GetNextToken());
+        }
+
+        public string GetString()
+        {
+            return GetNextToken();
+        }
+
+        public char Peek()
+        {
+            return packet[index];
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AsperetaClient
@@ -35,12 +36,12 @@ namespace AsperetaClient
         public int Height { get { return MapFile.Height; } }
         public Tile[] Tiles { get; set; }
 
+        public bool Loaded { get; private set; } = false;
+
         public Map(MapFile fileData)
         {
             this.MapFile = fileData;
             this.Tiles = new Tile[this.Width * this.Height];
-
-            Load();
         }
 
         public Tile this[int x, int y]
@@ -49,7 +50,7 @@ namespace AsperetaClient
             set { this.Tiles[y * this.Width + x] = value; }
         }
 
-        public void Load()
+        public IEnumerable<int> Load()
         {
             for (int y = 0; y < this.Height; y++)
             {
@@ -60,7 +61,11 @@ namespace AsperetaClient
 
                     this[x, y] = tile;
                 }
+
+                yield return (int)((y / (double)this.Height) * 100);
             }
+
+            Loaded = true;
         }
 
         public void Render(int start_x, int start_y)

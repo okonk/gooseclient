@@ -10,7 +10,7 @@ namespace AsperetaClient
         public event Action Connected;
         public event Action<Exception> ReceiveError;
 
-        public PacketHandler PacketHandler { get; set; } = new PacketHandler();
+        public PacketManager PacketManager { get; set; } = new PacketManager();
 
         public bool IsConnected { get { return socket == null ? false : socket.Connected; } }
 
@@ -20,8 +20,11 @@ namespace AsperetaClient
 
         public NetworkClient()
         {
-            PacketHandler.Register<LoginSuccessPacket>();
-            PacketHandler.Register<LoginFailPacket>();
+            PacketManager.Register<LoginSuccessPacket>();
+            PacketManager.Register<LoginFailPacket>();
+            PacketManager.Register<SendCurrentMapPacket>();
+            PacketManager.Register<DoneSendingMapPacket>();
+            PacketManager.Register<MakeCharacterPacket>();
         }
 
         public void Connect()
@@ -95,7 +98,7 @@ namespace AsperetaClient
 
                     for (int i = 0; i < limit; i++)
                     {
-                        PacketHandler.Handle(packets[i]);
+                        PacketManager.Handle(packets[i]);
                     }
                 }
                 catch (Exception e)
@@ -108,8 +111,18 @@ namespace AsperetaClient
 
 
         public void Login(string username, string password)
-        {
+        {            
             Send($"LOGIN{username},{password},GooseClient");
+        }
+
+        public void LoginContinued()
+        {
+            Send($"LCNT");
+        }
+
+        public void DoneLoadingMap()
+        {
+            Send($"DLM");
         }
     }
 }
