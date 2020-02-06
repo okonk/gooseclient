@@ -6,13 +6,13 @@ namespace AsperetaClient
 {
     class LoginScreen : State
     {
-        private int width = 800;
-        private int height = 600;
-
         private Texture background;
         private Texture loginBox;
 
-        private List<GuiElement> guiElements = new List<GuiElement>();
+        private TextBox usernameTextbox;
+        private TextBox passwordTextbox;
+
+        private BaseContainer guiContainer = new BaseContainer();
 
         // login box: 464, 328
         // login button: 544, 472
@@ -31,49 +31,39 @@ namespace AsperetaClient
 
         public override void Starting()
         {
-            SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, width, height);
+            GameClient.ScreenWidth = 800;
+            GameClient.ScreenHeight = 600;
+            SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
+
             background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/backdrop.bmp");
             loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/login_box.bmp");
 
-            SDL.SDL_Color backgroundColour;
-            backgroundColour.r = 192;
-            backgroundColour.g = 255;
-            backgroundColour.b = 192;
-            backgroundColour.a = 255;
+            usernameTextbox = new TextBox(608, 366, 125, 31, new Colour(192, 255, 192), Colour.Black) { HasFocus = true };
+            passwordTextbox = new TextBox(608, 408, 125, 31, new Colour(192, 255, 192), Colour.Black) { PasswordMask = '*' };
+            passwordTextbox.EnterPressed += Connect;
 
-            SDL.SDL_Color foregroundColour;
-            foregroundColour.r = 0;
-            foregroundColour.g = 0;
-            foregroundColour.b = 0;
-            foregroundColour.a = 255;
-
-            var usernameTextbox = new TextBox(608, 366, 125, 31, backgroundColour, foregroundColour) { HasFocus = true };
-            var passwordTextbox = new TextBox(608, 408, 125, 31, backgroundColour, foregroundColour) { PasswordMask = '*' };
-
-            guiElements.Add(usernameTextbox);
-            guiElements.Add(passwordTextbox);
+            guiContainer.AddChild(usernameTextbox);
+            guiContainer.AddChild(passwordTextbox);
 
             var loginButton = new Button(524, 450, 83, 43)
             { 
-                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/login_button.bmp"),
-                Clicked = (_) => { GameClient.StateManager.AppendState(new GameScreen()); }
+                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/login_button.bmp")
             };
+            loginButton.Clicked += Connect;
 
             var exitButton = new Button(640, 450, 83, 43)
             {
                 UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/exit_button.bmp")
             };
+            exitButton.Clicked += (_) => { GameClient.Running = false; };
 
-            guiElements.Add(loginButton);
-            guiElements.Add(exitButton);
+            guiContainer.AddChild(loginButton);
+            guiContainer.AddChild(exitButton);
         }
 
         public override void Update(double dt)
         {
-            foreach (var gui in guiElements)
-            {
-                gui.Update(dt);
-            }
+            guiContainer.Update(dt);
         }
 
         public override void Render(double dt)
@@ -81,20 +71,35 @@ namespace AsperetaClient
             background.Render(0, 0);
             loginBox.Render(464, 328);
 
-            foreach (var gui in guiElements)
-            {
-                gui.Render(dt);
-            }
+            guiContainer.Render(dt, 0, 0);
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
         {
-            foreach (var gui in guiElements)
-            {
-                bool preventFurtherEvents = gui.HandleEvent(ev);
-                if (preventFurtherEvents)
-                    return;
-            }
+            guiContainer.HandleEvent(ev, 0, 0);
+        }
+
+        public void Connect(Button b)
+        {
+            Connect();
+        }
+
+        public void Connect()
+        {
+            if (usernameTextbox.Value.Length <= 1 || passwordTextbox.Value.Length <= 1)
+                return;
+
+            GameClient.NetworkClient = new NetworkClient();
+            GameClient.NetworkClient.ReceiveError += OnReceiveError;
+
+            var connectingWindow = new ConnectingWindow(usernameTextbox.Value, passwordTextbox.Value);
+            guiContainer.AddChild(connectingWindow);
+        }
+
+        public void OnReceiveError(Exception e)
+        {
+            Console.WriteLine($"Socket error receiving data: {e}");
+            GameClient.StateManager.RemoveState();
         }
     }
 }

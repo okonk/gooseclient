@@ -70,6 +70,19 @@ namespace AsperetaClient
             newState.Starting();
         }
 
+        public void RemoveState()
+        {
+            if (states.TryPop(out State lastState))
+            {
+                lastState.Ending();
+            }
+
+            if (states.TryPeek(out State nextState))
+            {
+                nextState.Resuming();
+            }
+        }
+
         public void Update(double dt)
         {
             if (states.TryPeek(out State state))

@@ -27,9 +27,10 @@ namespace AsperetaClient
             }
         }
 
-        public void RenderText(string text, int x, int y, byte r, byte g, byte b, byte a, int limitX = 0)
+        public void RenderText(string text, int x, int y, Colour colour, int limitX = 0)
         {
-            SDL.SDL_SetTextureColorMod(this.FontTexture, r, g, b);
+            SDL.SDL_SetTextureColorMod(this.FontTexture, colour.R, colour.G, colour.B);
+            SDL.SDL_SetTextureAlphaMod(this.FontTexture, colour.A);
 
             SDL.SDL_Rect dRect;
             dRect.y = y;
@@ -43,6 +44,12 @@ namespace AsperetaClient
 
             foreach (var c in text)
             {
+                if (c == ' ')
+                {
+                    x += CharWidth;
+                    continue;
+                }
+
                 int i = c;
                 if (c > 256)
                     i = '`';

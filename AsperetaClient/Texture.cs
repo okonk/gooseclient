@@ -46,5 +46,16 @@ namespace AsperetaClient
 
             SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
         }
+
+        public void Render(int x, int y, int w, int h)
+        {
+            SDL.SDL_Rect dRect;
+            dRect.x = x + xOffset;
+            dRect.y = y + yOffset;
+            dRect.w = w;
+            dRect.h = h;
+
+            SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
+        }
     }
 }

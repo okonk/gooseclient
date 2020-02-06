@@ -12,7 +12,7 @@ namespace AsperetaClient
 {
     class GameClient : IDisposable
     {
-        public bool Running { get; set; }
+        public static bool Running { get; set; }
 
         public static IntPtr Window { get; set; }
 
@@ -22,17 +22,19 @@ namespace AsperetaClient
 
         public static StateManager StateManager { get; set; } = new StateManager();
 
-        public static int ScreenWidth { get; set; } = 640;
+        public static int ScreenWidth { get; set; } = 800;
 
-        public static int ScreenHeight { get; set; } = 480;
+        public static int ScreenHeight { get; set; } = 600;
 
         public static GameSettings GameSettings { get; set; } = new GameSettings();
 
         public static FontRenderer FontRenderer { get; set; }
 
+        public static NetworkClient NetworkClient { get; set; } = new NetworkClient();
+
         public GameClient()
         {
-            this.Running = true;
+            Running = true;
         }
 
         public void Run()
@@ -49,8 +51,8 @@ namespace AsperetaClient
                 Window = SDL.SDL_CreateWindow("Goose Client",
                     SDL.SDL_WINDOWPOS_CENTERED,
                     SDL.SDL_WINDOWPOS_CENTERED,
-                    800,
-                    600,
+                    ScreenWidth,
+                    ScreenHeight,
                     SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE
                 );
 
@@ -62,6 +64,8 @@ namespace AsperetaClient
                 {
                     Renderer = SDL.SDL_CreateRenderer(Window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
+                    SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
                     ResourceManager = new ResourceManager("data", Renderer);
                     FontRenderer = new FontRenderer();
 
@@ -71,20 +75,21 @@ namespace AsperetaClient
 
                     SDL.SDL_Event ev;
 
-                    while (this.Running)
+                    while (Running)
                     {
                         long timeNow = Stopwatch.GetTimestamp();
                         double timeDiff = (timeNow - lastUpdate) / (double)Stopwatch.Frequency;
                         lastUpdate = timeNow;
 
                         StateManager.Update(timeDiff);
+                        NetworkClient.Update();
 
                         while (SDL.SDL_PollEvent(out ev) != 0)
                         {
                             switch (ev.type)
                             {
                                 case SDL.SDL_EventType.SDL_QUIT:
-                                    this.Running = false;
+                                    Running = false;
                                     break;
                             }
 

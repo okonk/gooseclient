@@ -24,7 +24,9 @@ namespace AsperetaClient
         private double cursorFlashTime = 0;
         private bool cursorVisible = true;
 
-        public TextBox(int x, int y, int w, int h, SDL.SDL_Color backgroundColour, SDL.SDL_Color foregroundColour) : base(x, y, w, h, backgroundColour, foregroundColour)
+        public event Action EnterPressed;
+
+        public TextBox(int x, int y, int w, int h, Colour backgroundColour, Colour foregroundColour) : base(x, y, w, h, backgroundColour, foregroundColour)
         {
             this.Value = "";
             this.CursorPosition = 0;
@@ -42,9 +44,9 @@ namespace AsperetaClient
             }
         }
 
-        public override void Render(double dt)
+        public override void Render(double dt, int xOffset, int yOffset)
         {
-            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, BackgroundColour.r, BackgroundColour.g, BackgroundColour.b, BackgroundColour.a);
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, BackgroundColour.R, BackgroundColour.G, BackgroundColour.B, BackgroundColour.A);
             SDL.SDL_RenderFillRect(GameClient.Renderer, ref Rect);
 
             int centeredY = (H - GameClient.FontRenderer.CharHeight) / 2;
@@ -53,28 +55,27 @@ namespace AsperetaClient
             if (PasswordMask != 0)
                 renderText = new string(PasswordMask, Value.Length);
 
-            GameClient.FontRenderer.RenderText(renderText, this.X + this.Padding, this.Y + centeredY, ForegroundColour.r, ForegroundColour.g, ForegroundColour.b, ForegroundColour.a, this.X + this.W - this.Padding * 2);
+            GameClient.FontRenderer.RenderText(renderText, xOffset + this.X + this.Padding, yOffset + this.Y + centeredY, ForegroundColour, this.X + this.W - this.Padding * 2);
 
             if (this.HasFocus && cursorVisible)
             {
-                int cursorX = this.X + this.Padding + this.CursorPosition * GameClient.FontRenderer.CharWidth;
+                int cursorX = xOffset + this.X + this.Padding + this.CursorPosition * GameClient.FontRenderer.CharWidth;
 
-                SDL.SDL_SetRenderDrawColor(GameClient.Renderer, ForegroundColour.r, ForegroundColour.g, ForegroundColour.b, ForegroundColour.a);
+                SDL.SDL_SetRenderDrawColor(GameClient.Renderer, ForegroundColour.R, ForegroundColour.G, ForegroundColour.B, ForegroundColour.A);
                 SDL.SDL_RenderDrawLine(GameClient.Renderer, 
                     cursorX, 
-                    this.Y + centeredY - 1, 
+                    yOffset + this.Y + centeredY - 1, 
                     cursorX, 
-                    this.Y + centeredY + GameClient.FontRenderer.CharHeight);
+                    yOffset + this.Y + centeredY + GameClient.FontRenderer.CharHeight);
             }
         }
 
-        public override bool HandleEvent(SDL.SDL_Event ev)
+        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
-                    if (ev.button.x >= this.X && ev.button.x <= this.X + this.W &&
-                        ev.button.y >= this.Y && ev.button.y <= this.Y + this.H)
+                    if (Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {
                         this.HasFocus = true;
                         SDL.SDL_StartTextInput();
@@ -105,11 +106,15 @@ namespace AsperetaClient
                         SDL.SDL_SetClipboardText(this.Value);
                     }
                     // Handle paste
-                    else if(ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_v && (SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE)
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_v && (SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE)
                     {
                         var pastedText = SDL.SDL_GetClipboardText();
                         this.Value = this.Value.Substring(0, this.CursorPosition) + pastedText + this.Value.Substring(this.CursorPosition);
                         this.CursorPosition += pastedText.Length;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
+                    {
+                        EnterPressed?.Invoke();
                     }
                     break;
                 case SDL.SDL_EventType.SDL_TEXTINPUT:

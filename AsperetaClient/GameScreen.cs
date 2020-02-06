@@ -10,8 +10,12 @@ namespace AsperetaClient
 
         private Character player;
 
-        public GameScreen()
+        private string realmName;
+
+        public GameScreen(string realmName)
         {
+            this.realmName = realmName;
+
             map = new Map(AsperetaMapLoader.Load(1));
 
             player = new Character(50, 50, 1, 1, Direction.Down);
@@ -19,7 +23,9 @@ namespace AsperetaClient
 
         public override void Starting()
         {
-            SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, 640, 480);
+            GameClient.ScreenWidth = 640;
+            GameClient.ScreenHeight = 480;
+            SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
         }
         
         public override void Render(double dt)
