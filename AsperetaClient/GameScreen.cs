@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using SDL2;
 
@@ -18,6 +19,7 @@ namespace AsperetaClient
             this.mapName = mapName;
 
             GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
         }
 
         public override void Resuming()
@@ -43,12 +45,10 @@ namespace AsperetaClient
         {
             int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize;
             int half_y = GameClient.ScreenHeight / 2 - Constants.TileSize;
-            int start_x = player.PixelXi - half_x - (player.GetWidth() / 2);
-            int start_y = player.PixelYi - half_y;
+            int start_x = player != null ? player.PixelXi - half_x - (player.GetWidth() / 2) : 0;
+            int start_y = player != null ? player.PixelYi - half_y : 0;
 
             Map.Render(start_x, start_y);
-
-            player.Render(dt, start_x, start_y);
         }
 
         public override void Update(double dt)
@@ -74,7 +74,7 @@ namespace AsperetaClient
                 MoveKeyPressed(Direction.Left);
             }
 
-            player.Update(dt);
+            Map.Update(dt);
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
@@ -84,7 +84,7 @@ namespace AsperetaClient
 
         public void MoveKeyPressed(Direction direction)
         {
-            if (player.Moving) return;
+            if (player == null || player.Moving) return;
 
             int destX = player.TileX;
             int destY = player.TileY;
@@ -115,7 +115,15 @@ namespace AsperetaClient
         {
             var p = (MakeCharacterPacket)packet;
 
-            player = new Character(p.MapX, p.MapY, p.BodyId, p.BodyState, (Direction)p.Facing);
+            var character = new Character(p);
+            Map.AddCharacter(character);
+        }
+
+        public void OnSetYourCharacter(object packet)
+        {
+            var p = (SetYourCharacterPacket)packet;
+
+            this.player = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
         }
     }
 }

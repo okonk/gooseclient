@@ -64,5 +64,10 @@ namespace AsperetaClient
         {
             return this.Frames[this.CurrentFrame].Width;
         }
+
+        public int GetYOffset()
+        {
+            return this.Frames[this.CurrentFrame].YOffset;
+        }
     }
 }

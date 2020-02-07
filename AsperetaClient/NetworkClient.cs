@@ -25,6 +25,7 @@ namespace AsperetaClient
             PacketManager.Register<SendCurrentMapPacket>();
             PacketManager.Register<DoneSendingMapPacket>();
             PacketManager.Register<MakeCharacterPacket>();
+            PacketManager.Register<SetYourCharacterPacket>();
         }
 
         public void Connect()

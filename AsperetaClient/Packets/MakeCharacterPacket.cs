@@ -38,9 +38,9 @@ namespace AsperetaClient
                 Title = p.GetString(),
                 Surname = p.GetString(),
                 GuildName = p.GetString(),
-                MapX = p.GetInt32(),
-                MapY = p.GetInt32(),
-                Facing = p.GetInt32(),
+                MapX = p.GetInt32() - 1,
+                MapY = p.GetInt32() - 1,
+                Facing = RemapFacing(p.GetInt32()),
                 HPPercent = p.GetInt32(),
                 BodyId = p.GetInt32(),
                 BodyState = p.GetInt32(),
@@ -81,6 +81,15 @@ namespace AsperetaClient
             }
 
             return equipped;
+        }
+
+        public int RemapFacing(int facing)
+        {
+            if (facing == 3) return 2;
+            if (facing == 4) return 3;
+            if (facing == 2) return 4;
+
+            return facing;
         }
     }
 }

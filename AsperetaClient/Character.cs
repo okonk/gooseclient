@@ -13,6 +13,10 @@ namespace AsperetaClient
 
     class Character
     {
+        public int LoginId { get; set; }
+
+        public string Name { get; set; }
+
         public int TileX { get; set; }
         public int TileY { get; set; }
 
@@ -32,7 +36,19 @@ namespace AsperetaClient
 
         public Animation BodyAnimation { get; set; }
 
+        public Animation FaceAnimation { get; set; }
+
+        public Animation HairAnimation { get; set; }
+
         public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
+        
+        public int FaceId { get; set; }
+
+        public int HairId { get; set; }
+        public int HairR { get; set; }
+        public int HairG { get; set; }
+        public int HairB { get; set; }
+        public int HairA { get; set; }
 
 
 
@@ -45,18 +61,26 @@ namespace AsperetaClient
 
         public double MoveSpeedY { get; set; }
 
-        public Character(int tileX, int tileY, int bodyId, int bodyState, Direction facing)
+        public Character(MakeCharacterPacket p)
         {
-            this.TileX = tileX;
-            this.TileY = tileY;
-            this.PixelX = tileX * Constants.TileSize;
-            this.PixelY = tileY * Constants.TileSize;
-            this.BodyId = bodyId;
-            this.BodyState = bodyState;
-            this.Facing = facing;
-
             this.Moving = false;
             this.Attacking = false;
+
+            this.LoginId = p.LoginId;
+            this.Name = p.Name;
+            this.TileX = p.MapX;
+            this.TileY = p.MapY;
+            this.PixelX = this.TileX * Constants.TileSize;
+            this.PixelY = this.TileY * Constants.TileSize;
+            this.BodyId = p.BodyId;
+            this.BodyState = p.BodyState;
+            this.Facing = (Direction)p.Facing;
+            this.FaceId = p.FaceId;
+            this.HairId = p.HairId;
+            this.HairR = p.HairR;
+            this.HairG = p.HairG;
+            this.HairB = p.HairB;
+            this.HairA = p.HairA;
 
             this.UpdateAnimations();
         }
@@ -67,6 +91,16 @@ namespace AsperetaClient
             this.BodyAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
             this.BodyAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
             this.BodyAnimation.SetAnimating(Moving | Attacking);
+
+            compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.HairId && a.Type == AnimationType.Hair);
+            this.HairAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
+            this.HairAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
+            this.HairAnimation.SetAnimating(Moving | Attacking);
+
+            compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.FaceId && a.Type == AnimationType.Hair);
+            this.FaceAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
+            this.FaceAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
+            this.FaceAnimation.SetAnimating(Moving | Attacking);
         }
 
         public void Update(double dt)
@@ -97,6 +131,18 @@ namespace AsperetaClient
         public void Render(double dt, int x_offset, int y_offset)
         {
             this.BodyAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+            this.FaceAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+            this.HairAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+        }
+
+        public void RenderName(int x_offset, int y_offset)
+        {
+            string name = Name;
+            int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
+            int y = this.PixelYi - y_offset + this.BodyAnimation.GetYOffset() - GameClient.FontRenderer.CharHeight - 10;
+
+            GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
+            GameClient.FontRenderer.RenderText(this.Name, x, y, Colour.White);
         }
 
         public int GetWidth()

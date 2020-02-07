@@ -54,6 +54,8 @@ namespace AsperetaClient
                     return;
                 }
             }
+
+            Console.WriteLine($"Can't handle packet: {packet}");
         }
     }
 

@@ -36,6 +36,8 @@ namespace AsperetaClient
         public int Height { get { return MapFile.Height; } }
         public Tile[] Tiles { get; set; }
 
+        public List<Character> Characters { get; set; } = new List<Character>();
+
         public bool Loaded { get; private set; } = false;
 
         public Map(MapFile fileData)
@@ -68,6 +70,14 @@ namespace AsperetaClient
             Loaded = true;
         }
 
+        public void Update(double dt)
+        {
+            foreach (var character in Characters)
+            {
+                character.Update(dt);
+            }
+        }
+
         public void Render(int start_x, int start_y)
         {
             for (int l = 0; l < NUM_LAYERS; l++)
@@ -89,8 +99,19 @@ namespace AsperetaClient
 
                         if (graphic != null)
                             graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
+
+                        if (l == 2)
+                        {
+                            if (tile.Character != null)
+                                tile.Character.Render(0, start_x, start_y);
+                        }
                     }
                 }
+            }
+
+            foreach (var character in Characters)
+            {
+                character.RenderName(start_x, start_y);
             }
         }
 
@@ -108,6 +129,12 @@ namespace AsperetaClient
             this[destX, destY].Character = character;
 
             character.MoveTo(destX, destY);
+        }
+
+        public void AddCharacter(Character character)
+        {
+            this[character.TileX, character.TileY].Character = character;
+            this.Characters.Add(character);
         }
     }
 }
