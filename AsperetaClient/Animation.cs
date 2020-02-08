@@ -18,6 +18,8 @@ namespace AsperetaClient
 
         public double CurrentTime { get; set; }
 
+        public Colour Colour { get; set; }
+
         public Animation()
         {
             this.Animating = true;
@@ -49,7 +51,7 @@ namespace AsperetaClient
 
         public void Render(double dt, int x, int y)
         {
-            this.Frames[this.CurrentFrame].Render(x, y);
+            this.Frames[this.CurrentFrame].Render(x, y, Colour);
         }
 
         public void SetAnimating(bool animating)

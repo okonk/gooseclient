@@ -18,7 +18,7 @@ namespace AsperetaClient
         public int BodyId { get; set; }
         public int BodyState { get; set; }
         public int HairId { get; set; }
-        public int[] EquippedItems { get; set; }
+        public int[][] DisplayedEquipment { get; set; }
         public int HairR { get; set; }
         public int HairG { get; set; }
         public int HairB { get; set; }
@@ -40,12 +40,12 @@ namespace AsperetaClient
                 GuildName = p.GetString(),
                 MapX = p.GetInt32() - 1,
                 MapY = p.GetInt32() - 1,
-                Facing = RemapFacing(p.GetInt32()),
+                Facing = p.GetInt32() - 1,
                 HPPercent = p.GetInt32(),
                 BodyId = p.GetInt32(),
                 BodyState = p.GetInt32(),
                 HairId = p.GetInt32(),
-                EquippedItems = ParseEquippedItems(p),
+                DisplayedEquipment = ParseEquippedItems(p),
                 HairR = p.GetInt32(),
                 HairG = p.GetInt32(),
                 HairB = p.GetInt32(),
@@ -55,41 +55,34 @@ namespace AsperetaClient
             };
         }
 
-        public int[] ParseEquippedItems(PacketParser p)
+        public int[][] ParseEquippedItems(PacketParser p)
         {
             // Chest, Head, Legs, Feet, Shield, Weapon
-            var equipped = new int[6 * 5];
-            for (int i = 0; i < equipped.Length; )
+            var equipped = new int[6][];
+            for (int i = 0; i < 6; i++)
             {
-                equipped[i++] = p.GetInt32(); // item graphic id
+                equipped[i] = new int[5];
+                int j = 0;
+                equipped[i][j++] = p.GetInt32(); // item graphic id
 
                 if (p.Peek() == '*')
                 {
                     p.GetString(); // eat the string
-                    equipped[i++] = 0; // r
-                    equipped[i++] = 0; // g
-                    equipped[i++] = 0; // b
-                    equipped[i++] = 0; // a
+                    equipped[i][j++] = 0; // r
+                    equipped[i][j++] = 0; // g
+                    equipped[i][j++] = 0; // b
+                    equipped[i][j++] = 0; // a
                 }
                 else
                 {
-                    equipped[i++] = p.GetInt32(); // r
-                    equipped[i++] = p.GetInt32(); // g
-                    equipped[i++] = p.GetInt32(); // b
-                    equipped[i++] = p.GetInt32(); // a
+                    equipped[i][j++] = p.GetInt32(); // r
+                    equipped[i][j++] = p.GetInt32(); // g
+                    equipped[i][j++] = p.GetInt32(); // b
+                    equipped[i][j++] = p.GetInt32(); // a
                 }
             }
 
             return equipped;
-        }
-
-        public int RemapFacing(int facing)
-        {
-            if (facing == 3) return 2;
-            if (facing == 4) return 3;
-            if (facing == 2) return 4;
-
-            return facing;
         }
     }
 }

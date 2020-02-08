@@ -97,14 +97,14 @@ namespace AsperetaClient
                         var tile = this[x, y];
                         var graphic = tile.Layers[l];
 
-                        if (graphic != null)
-                            graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
-
                         if (l == 2)
                         {
                             if (tile.Character != null)
                                 tile.Character.Render(0, start_x, start_y);
                         }
+
+                        if (graphic != null)
+                            graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
                     }
                 }
             }

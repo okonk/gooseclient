@@ -20,6 +20,10 @@ namespace AsperetaClient
 
             GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
+            GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
+            GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
         }
 
         public override void Resuming()
@@ -124,6 +128,38 @@ namespace AsperetaClient
             var p = (SetYourCharacterPacket)packet;
 
             this.player = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+        }
+
+        public void OnPing(object packet)
+        {
+            GameClient.NetworkClient.Pong();
+        }
+
+        public void OnMoveCharacter(object packet)
+        {
+            var p = (MoveCharacterPacket)packet;
+
+            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+
+            Map.MoveCharacter(character, p.MapX, p.MapY);
+        }
+
+        public void OnChangeHeading(object packet)
+        {
+            var p = (ChangeHeadingPacket)packet;
+            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            character.Facing = (Direction)p.Facing;
+        }
+
+        public void OnSetYourPosition(object packet)
+        {
+            var p = (SetYourPositionPacket)packet;
+
+            if (Map[player.TileX, player.TileY].Character == player)
+                Map[player.TileX, player.TileY].Character = null;
+
+            player.SetPosition(p.MapX, p.MapY);
+            Map[player.TileX, player.TileY].Character = player;
         }
     }
 }

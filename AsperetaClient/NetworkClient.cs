@@ -26,6 +26,10 @@ namespace AsperetaClient
             PacketManager.Register<DoneSendingMapPacket>();
             PacketManager.Register<MakeCharacterPacket>();
             PacketManager.Register<SetYourCharacterPacket>();
+            PacketManager.Register<PingPacket>();
+            PacketManager.Register<MoveCharacterPacket>();
+            PacketManager.Register<ChangeHeadingPacket>();
+            PacketManager.Register<SetYourPositionPacket>();
         }
 
         public void Connect()
@@ -124,6 +128,11 @@ namespace AsperetaClient
         public void DoneLoadingMap()
         {
             Send($"DLM");
+        }
+
+        public void Pong()
+        {
+            Send($"PONG");
         }
     }
 }

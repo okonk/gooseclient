@@ -14,6 +14,21 @@ namespace AsperetaClient
         public int XOffset { get; private set; }
         public int YOffset { get; private set; }
 
+        private static SDL.SDL_BlendMode Blender { get; set; }
+
+        static Texture()
+        {
+            Blender = SDL.SDL_ComposeCustomBlendMode(
+                srcColorFactor: SDL.SDL_BlendFactor.SDL_BLENDFACTOR_DST_COLOR,
+                dstColorFactor: SDL.SDL_BlendFactor.SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                colorOperation: SDL.SDL_BlendOperation.SDL_BLENDOPERATION_ADD,
+
+                srcAlphaFactor: SDL.SDL_BlendFactor.SDL_BLENDFACTOR_SRC_COLOR,
+                dstAlphaFactor: SDL.SDL_BlendFactor.SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                alphaOperation: SDL.SDL_BlendOperation.SDL_BLENDOPERATION_ADD
+            );
+        }
+
         public Texture(IntPtr texture, int x, int y, int w, int h, bool needsOffset = true)
         {
             this.SDLTexture = texture;
@@ -29,20 +44,37 @@ namespace AsperetaClient
             if (needsOffset)
             {
                 // offset to center the sprite on the tile
-                if (Rect.h > Constants.TileSize)
-                    YOffset = -Rect.h + Constants.TileSize;
+                // first part is a hack to get trees to render correctly, not sure if this will break other things later
+                if (Rect.h > Constants.TileSize * 2)
+                     YOffset = -Rect.h + Constants.TileSize;
+                else if (Rect.h > Constants.TileSize)
+                    YOffset = (-Rect.h + Constants.TileSize / 2) / 2;
 
                 XOffset = (Constants.TileSize / 2) - Rect.w / 2;
             }
         }
 
-        public void Render(int x, int y)
+        public void Render(int x, int y, Colour colour = null)
         {
             SDL.SDL_Rect dRect;
             dRect.x = x + XOffset;
             dRect.y = y + YOffset;
             dRect.w = Rect.w;
             dRect.h = Rect.h;
+
+            if (colour == null || colour.A == 0)
+            {
+                SDL.SDL_SetTextureColorMod(SDLTexture, 255, 255, 255);
+                // SDL.SDL_SetTextureAlphaMod(SDLTexture, 0);
+            }
+            else
+            {
+                // https://github.com/dgoodlad/vbdabl -- look at this for how asp's is done.. still need to figure out how to do this in SDL
+                // https://discourse.libsdl.org/t/sdl2-renderer-sdl-blendmode-mod-with-alpha/26947/4
+                SDL.SDL_SetTextureBlendMode(SDLTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+                SDL.SDL_SetTextureColorMod(SDLTexture, (byte)(colour.R * (400d / colour.A)), (byte)(colour.G * (400d / colour.A)), (byte)(colour.B * (400d / colour.A)));
+                //SDL.SDL_SetTextureAlphaMod(SDLTexture, colour.A);
+            }
 
             SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
         }

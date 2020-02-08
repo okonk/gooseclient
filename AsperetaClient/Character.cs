@@ -15,7 +15,9 @@ namespace AsperetaClient
     {
         public int LoginId { get; set; }
 
+        public string Title { get; set; }
         public string Name { get; set; }
+        public string Surname { get; set; }
 
         public int TileX { get; set; }
         public int TileY { get; set; }
@@ -26,29 +28,34 @@ namespace AsperetaClient
         public int PixelXi { get { return (int)PixelX; } }
         public int PixelYi { get { return (int)PixelY; } }
 
-        public int[] DisplayedEquipmentIds { get; set; }
+        public int[][] DisplayedEquipment { get; set; }
 
         public int BodyState { get; set; }
 
         public int BodyId { get; set; }
 
-        public Direction Facing { get; set; }
+        private Direction facing;
+        public Direction Facing
+        { 
+            get { return facing; }
+            set
+            {
+                if (facing != value)
+                {
+                    facing = value;
+                    UpdateAnimations();
+                }
+            }
+        }
 
-        public Animation BodyAnimation { get; set; }
-
-        public Animation FaceAnimation { get; set; }
-
-        public Animation HairAnimation { get; set; }
+        public Animation[] EquippedAnimations { get; set; }
 
         public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
         
         public int FaceId { get; set; }
 
         public int HairId { get; set; }
-        public int HairR { get; set; }
-        public int HairG { get; set; }
-        public int HairB { get; set; }
-        public int HairA { get; set; }
+        public Colour HairColour { get; set; }
 
 
 
@@ -67,40 +74,83 @@ namespace AsperetaClient
             this.Attacking = false;
 
             this.LoginId = p.LoginId;
+            this.Title = p.Title;
             this.Name = p.Name;
+            this.Surname = p.Surname;
             this.TileX = p.MapX;
             this.TileY = p.MapY;
             this.PixelX = this.TileX * Constants.TileSize;
             this.PixelY = this.TileY * Constants.TileSize;
             this.BodyId = p.BodyId;
             this.BodyState = p.BodyState;
-            this.Facing = (Direction)p.Facing;
+            this.facing = (Direction)p.Facing;
             this.FaceId = p.FaceId;
             this.HairId = p.HairId;
-            this.HairR = p.HairR;
-            this.HairG = p.HairG;
-            this.HairB = p.HairB;
-            this.HairA = p.HairA;
+            this.HairColour = new Colour(p.HairR, p.HairG, p.HairB, p.HairA);
+
+            this.DisplayedEquipment = p.DisplayedEquipment;
+            this.EquippedAnimations = new Animation[9];
 
             this.UpdateAnimations();
         }
 
+        public enum DrawAnimations
+        {
+            Body,
+            Face,
+            Hair,
+            Feet,
+            Legs,
+            Chest,
+            Head,
+            Shield,
+            Weapon
+        }
+
+        public void UpdateAnimation(int id, DrawAnimations slot, AnimationType type, Colour colour = null)
+        {
+            if (id == 0)
+            {
+                this.EquippedAnimations[(int)slot] = null;
+                return;
+            }
+
+            var compiledAnimation = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == id && a.Type == type);
+            if (compiledAnimation == null)
+            {
+                Console.WriteLine($"Couldn't find animation id {id} of type {type} for slot {slot}");
+                this.EquippedAnimations[(int)slot] = null;
+                return;
+            }
+
+            var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
+            animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
+            animation.SetAnimating(Moving | Attacking);
+            animation.Colour = colour;
+
+            this.EquippedAnimations[(int)slot] = animation;
+        }
+
         public void UpdateAnimations()
         {
-            var compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.BodyId && a.Type == AnimationType.Body);
-            this.BodyAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
-            this.BodyAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
-            this.BodyAnimation.SetAnimating(Moving | Attacking);
+            UpdateAnimation(this.BodyId, DrawAnimations.Body, AnimationType.Body);
+            UpdateAnimation(this.FaceId, DrawAnimations.Face, AnimationType.Hair);
+            UpdateAnimation(this.HairId, DrawAnimations.Hair, AnimationType.Hair, HairColour);
+            UpdateAnimation(this.DisplayedEquipment[0][0], DrawAnimations.Chest, AnimationType.Chest, EquipmentColour(0));
+            UpdateAnimation(this.DisplayedEquipment[1][0], DrawAnimations.Head, AnimationType.Helm, EquipmentColour(1));
+            UpdateAnimation(this.DisplayedEquipment[2][0], DrawAnimations.Legs, AnimationType.Legs, EquipmentColour(2));
+            UpdateAnimation(this.DisplayedEquipment[3][0], DrawAnimations.Feet, AnimationType.Feet, EquipmentColour(3));
+            UpdateAnimation(this.DisplayedEquipment[4][0], DrawAnimations.Shield, AnimationType.Hand, EquipmentColour(4));
+            UpdateAnimation(this.DisplayedEquipment[5][0], DrawAnimations.Weapon, AnimationType.Hand, EquipmentColour(5));
+        }
 
-            compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.HairId && a.Type == AnimationType.Hair);
-            this.HairAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
-            this.HairAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
-            this.HairAnimation.SetAnimating(Moving | Attacking);
+        public Colour EquipmentColour(int i)
+        {
+            var equip = this.DisplayedEquipment[i];
+            if (equip[0] == 0 || equip[4] == 0)
+                return null;
 
-            compiledAnimations = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == this.FaceId && a.Type == AnimationType.Hair);
-            this.FaceAnimation = GameClient.ResourceManager.GetAnimation(compiledAnimations.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
-            this.FaceAnimation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
-            this.FaceAnimation.SetAnimating(Moving | Attacking);
+            return new Colour(equip[1], equip[2], equip[3], equip[4]);
         }
 
         public void Update(double dt)
@@ -125,21 +175,25 @@ namespace AsperetaClient
                 }
             }
 
-            this.BodyAnimation.Update(dt);
+            foreach (var animation in this.EquippedAnimations)
+            {
+                animation?.Update(dt);
+            }
         }
 
         public void Render(double dt, int x_offset, int y_offset)
         {
-            this.BodyAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
-            this.FaceAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
-            this.HairAnimation.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+            foreach (var animation in this.EquippedAnimations)
+            {
+                animation?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+            }
         }
 
         public void RenderName(int x_offset, int y_offset)
         {
-            string name = Name;
+            string name = (string.IsNullOrWhiteSpace(Title) ? "" : Title + " ") + Name + (string.IsNullOrWhiteSpace(Surname) ? "" : " " + Surname);
             int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
-            int y = this.PixelYi - y_offset + this.BodyAnimation.GetYOffset() - GameClient.FontRenderer.CharHeight - 10;
+            int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 10;
 
             GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
             GameClient.FontRenderer.RenderText(this.Name, x, y, Colour.White);
@@ -147,7 +201,12 @@ namespace AsperetaClient
 
         public int GetWidth()
         {
-            return this.BodyAnimation.GetWidth();
+            return this.EquippedAnimations[0]?.GetWidth() ?? 32;
+        }
+
+        public int GetYOffset()
+        {
+            return this.EquippedAnimations[0]?.GetYOffset() ?? 32;
         }
 
         public void MoveTo(int destX, int destY)
@@ -181,6 +240,17 @@ namespace AsperetaClient
             TileY = destY;
 
             this.UpdateAnimations();
+        }
+
+        public void SetPosition(int tileX, int tileY)
+        {
+            TileX = tileX;
+            TileY = tileY;
+            Moving = false;
+            PixelX = TileX * Constants.TileSize;
+            PixelY = TileY * Constants.TileSize;
+            MoveSpeedX = 0;
+            MoveSpeedY = 0;
         }
     }
 }

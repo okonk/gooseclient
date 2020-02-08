@@ -46,16 +46,16 @@ namespace AsperetaClient
         AttackSwordLeft,
     }
 
+    // NOTE: For Illutia this is different. Hand -> Eyes and Hand is at the end. (I think)
     public enum AnimationType
     {
         Body,
         Hair,
-        Eyes,
+        Hand,
         Chest,
         Helm,
         Legs,
-        Feet,
-        Hand
+        Feet
     }
 
     public class CompiledAnimation
