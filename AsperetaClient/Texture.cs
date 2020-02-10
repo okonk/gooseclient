@@ -9,7 +9,8 @@ namespace AsperetaClient
 
         private SDL.SDL_Rect Rect;
 
-        public int Width { get { return Rect.w; } }
+        public int W { get { return Rect.w; } }
+        public int H { get { return Rect.h; } }
 
         public int XOffset { get; private set; }
         public int YOffset { get; private set; }
@@ -87,6 +88,18 @@ namespace AsperetaClient
             dRect.w = w;
             dRect.h = h;
 
+            SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
+        }
+
+        public void Render(int x, int y, int alpha)
+        {
+            SDL.SDL_Rect dRect;
+            dRect.x = x + XOffset;
+            dRect.y = y + YOffset;
+            dRect.w = Rect.w;
+            dRect.h = Rect.h;
+
+            SDL.SDL_SetTextureAlphaMod(SDLTexture, (byte)alpha);
             SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
         }
     }

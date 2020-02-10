@@ -31,6 +31,7 @@ namespace AsperetaClient
             PacketManager.Register<ChangeHeadingPacket>();
             PacketManager.Register<SetYourPositionPacket>();
             PacketManager.Register<VitalsPercentagePacket>();
+            PacketManager.Register<EraseCharacterPacket>();
         }
 
         public void Connect()

@@ -11,6 +11,11 @@ namespace AsperetaClient
 
         }
 
+        public BaseContainer(int x, int y, int w, int h) : base(x, y, w, h)
+        {
+
+        }
+
         public override void Update(double dt)
         {
             foreach (var gui in Children.ToArray())

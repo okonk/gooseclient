@@ -1,26 +1,47 @@
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using SDL2;
 
 namespace AsperetaClient
 {
-    class BaseWindow : GuiElement
+    class BaseWindow : BaseContainer
     {
+        public bool Hidden { get; set; } = false;
 
+        protected Texture background;
 
-        public BaseWindow(int x, int y, int w, int h) : base(x, y, w, h)
+        private int focusAlpha;
+        private int unfocusAlpha;
+
+        public BaseWindow(string windowName)
         {
+            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings[windowName]["image"]}");
 
-        }
+            var winloc = GameClient.UserSettings.GetCoords(windowName, "winloc");
+            SDL.SDL_Rect rect;
+            rect.x = winloc.ElementAt(0);
+            rect.y = winloc.ElementAt(1);
+            rect.w = background.W;
+            rect.h = background.H;
 
-        public override void Update(double dt)
-        {
+            this.Rect = rect;
 
+            this.HasFocus = false;
+            this.ZIndex = -1;
+
+            Hidden = GameClient.UserSettings[windowName]["startup"] == "0";
+
+            var alphas = GameClient.WindowSettings.GetCoords(windowName, "focus");
+            unfocusAlpha = alphas.ElementAt(0);
+            focusAlpha = alphas.ElementAt(1);
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
         {
-  
+            background?.Render(X + xOffset, Y + yOffset, unfocusAlpha);
+
+            base.Render(dt, xOffset, yOffset);
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)

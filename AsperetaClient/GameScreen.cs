@@ -18,6 +18,8 @@ namespace AsperetaClient
         private Direction moveKeyDirection = Direction.Down;
         private double moveKeyPressedTime = 0;
 
+        private BaseContainer uiContainer;
+
         public GameScreen(int mapNumber, string mapName)
         {
             this.mapNumber = mapNumber;
@@ -30,6 +32,8 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
             GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
+            GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
+            GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
         }
 
         public override void Resuming()
@@ -43,12 +47,27 @@ namespace AsperetaClient
         {
             Resuming();
 
+            CreateGui();
+
             LoadMap();
         }
 
         public void LoadMap()
         {
             GameClient.StateManager.AppendState(new MapLoadingScreen(mapNumber, mapName, this));
+        }
+
+        public void CreateGui()
+        {
+            this.uiContainer = new BaseContainer();
+
+            this.uiContainer.AddChild(new FpsWindow());
+            this.uiContainer.AddChild(new ChatWindow());
+            this.uiContainer.AddChild(new BuffBarWindow());
+            this.uiContainer.AddChild(new HotkeyBarWindow());
+            this.uiContainer.AddChild(new HPBarWindow());
+            this.uiContainer.AddChild(new MPBarWindow());
+            this.uiContainer.AddChild(new XPBarWindow());
         }
         
         public override void Render(double dt)
@@ -59,6 +78,7 @@ namespace AsperetaClient
             int start_y = player != null ? player.PixelYi - half_y : 0;
 
             Map.Render(start_x, start_y);
+            this.uiContainer.Render(dt, 0, 0);
         }
 
         public override void Update(double dt)
@@ -95,6 +115,8 @@ namespace AsperetaClient
             {
                 moveKeyPressedTime += dt;
             }
+
+            this.uiContainer.Update(dt);
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
@@ -208,6 +230,27 @@ namespace AsperetaClient
             character.MPPercentage = p.MPPercentage;
             character.ShouldRenderHPMPBars = true;
             character.RenderHPMPBarsTime = 0;
+        }
+
+        public void OnSendCurrentMap(object packet)
+        {
+            var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
+            this.mapNumber = sendCurrentMapPacket.MapNumber;
+            this.mapName = sendCurrentMapPacket.MapName;
+            LoadMap();
+        }
+
+        public void OnEraseCharacter(object packet)
+        {
+            var p = (EraseCharacterPacket)packet;
+
+            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            if (Map[character.TileX, character.TileY].Character == character)
+                Map[character.TileX, character.TileY].Character = null;
+
+            Map.Characters.Remove(character);
         }
     }
 }

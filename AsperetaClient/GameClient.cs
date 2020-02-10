@@ -26,7 +26,17 @@ namespace AsperetaClient
 
         public static int ScreenHeight { get; set; } = 600;
 
-        public static GameSettings GameSettings { get; set; } = new GameSettings();
+        public static IniFile GameSettings { get; set; }
+
+        public static IniFile ServerInfoSettings { get; set; }
+
+        public static IniFile WindowSettings { get; set; }
+
+        public static IniFile ButtonSettings { get; set; }
+
+        public static IniFile LoginScreenSettings { get; set; }
+
+        public static IniFile UserSettings { get; set; }
 
         public static FontRenderer FontRenderer { get; set; }
 
@@ -67,6 +77,11 @@ namespace AsperetaClient
                     Renderer = SDL.SDL_CreateRenderer(Window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
                     SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
+                    GameSettings = new IniFile("Game.ini");
+                    ServerInfoSettings = new IniFile("serverinfo.ini");
+                    WindowSettings = new IniFile($"skins/{GameSettings["INIT"]["Skin"]}/Window.ini");
+                    ButtonSettings = new IniFile($"skins/{GameSettings["INIT"]["Skin"]}/Button.ini");
 
                     ResourceManager = new ResourceManager("data", Renderer);
                     FontRenderer = new FontRenderer();

@@ -36,9 +36,14 @@ namespace AsperetaClient
             GameClient.ScreenHeight = 480;
             SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
 
-            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/Background.bmp");
+            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/Background.bmp");
 
             label = new Label(-1, -1, Colour.White, $"Loading {mapName}");
+        }
+
+        public override void Ending()
+        {
+            GameClient.NetworkClient.PacketManager.Remove<DoneSendingMapPacket>(OnDoneSendingMap);
         }
 
         public override void Update(double dt)

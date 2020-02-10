@@ -35,25 +35,29 @@ namespace AsperetaClient
             GameClient.ScreenHeight = 600;
             SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
 
-            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/backdrop.bmp");
-            loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/login_box.bmp");
+            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/backdrop.bmp");
+            loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/login_box.bmp");
 
             usernameTextbox = new TextBox(608, 366, 125, 31, new Colour(192, 255, 192), Colour.Black) { HasFocus = true };
             passwordTextbox = new TextBox(608, 408, 125, 31, new Colour(192, 255, 192), Colour.Black) { PasswordMask = '*' };
             passwordTextbox.EnterPressed += Connect;
+
+            usernameTextbox.Value = GameClient.GameSettings["INIT"]["Name"];
+            if (GameClient.GameSettings["INIT"].ContainsKey("Password"))
+                passwordTextbox.Value = GameClient.GameSettings["INIT"]["Password"];
 
             guiContainer.AddChild(usernameTextbox);
             guiContainer.AddChild(passwordTextbox);
 
             var loginButton = new Button(524, 450, 83, 43)
             { 
-                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/login_button.bmp")
+                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/login_button.bmp")
             };
             loginButton.Clicked += Connect;
 
             var exitButton = new Button(640, 450, 83, 43)
             {
-                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/exit_button.bmp")
+                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/exit_button.bmp")
             };
             exitButton.Clicked += (_) => { GameClient.Running = false; };
 

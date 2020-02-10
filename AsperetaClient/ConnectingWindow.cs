@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using SDL2;
 
 namespace AsperetaClient
@@ -17,11 +18,11 @@ namespace AsperetaClient
             this.ZIndex = 10;
             this.Padding = 10;
 
-            backgroundTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/Working.bmp");
+            backgroundTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/Working.bmp");
 
             var cancelButton = new Button(-1, 55, 66, 34, "Cancel");
-            cancelButton.UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/blankbuttonup.bmp");
-            cancelButton.DownTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings.Skin}/blankbuttondown.bmp");
+            cancelButton.UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttonup.bmp");
+            cancelButton.DownTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttondown.bmp");
             cancelButton.Clicked += CancelConnect;
             AddChild(cancelButton);
 
@@ -105,6 +106,7 @@ namespace AsperetaClient
         public void OnLoginSuccess(object packet)
         {
             GameClient.RealmName = ((LoginSuccessPacket)packet).RealmName;
+            CreateAndSetUserSettings(GameClient.RealmName);
             GameClient.NetworkClient.LoginContinued();
         }
 
@@ -113,11 +115,26 @@ namespace AsperetaClient
             Close();
             var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
             GameClient.StateManager.AppendState(new GameScreen(sendCurrentMapPacket.MapNumber, sendCurrentMapPacket.MapName));
+            GameClient.NetworkClient.PacketManager.Remove<SendCurrentMapPacket>(OnSendCurrentMap);
         }
 
         public void OnLoginFail(object packet)
         {
             messageLabel.Value = $"Could not connect to server. {((LoginFailPacket)packet).Message}";
+        }
+
+        public void CreateAndSetUserSettings(string realmName)
+        {
+            string userSettingsPath = $"user/{realmName}-{username}.ini";
+            if (!File.Exists(userSettingsPath))
+            {
+                if (File.Exists($"user/Goose-Default.ini"))
+                    File.Copy($"user/Goose-Default.ini", userSettingsPath);
+                else if (File.Exists($"user/Maisemore-Default.ini"))
+                    File.Copy($"user/Maisemore-Default.ini", userSettingsPath);
+            }
+
+            GameClient.UserSettings = new IniFile(userSettingsPath);
         }
     }
 }
