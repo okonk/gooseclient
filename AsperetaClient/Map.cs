@@ -112,6 +112,7 @@ namespace AsperetaClient
             foreach (var character in Characters)
             {
                 character.RenderName(start_x, start_y);
+                character.RenderHPMPBars(start_x, start_y);
             }
         }
 

@@ -30,6 +30,7 @@ namespace AsperetaClient
             PacketManager.Register<MoveCharacterPacket>();
             PacketManager.Register<ChangeHeadingPacket>();
             PacketManager.Register<SetYourPositionPacket>();
+            PacketManager.Register<VitalsPercentagePacket>();
         }
 
         public void Connect()
@@ -133,6 +134,20 @@ namespace AsperetaClient
         public void Pong()
         {
             Send($"PONG");
+        }
+
+        public void Facing(Direction d)
+        {
+            int facing = (int)d + 1;
+            // old asp client remaps facing for some reason...
+            facing = (facing == 3 ? 2 : (facing == 4 ? 3 : (facing == 2 ? 4 : facing)));
+
+            Send($"F{facing}");
+        }
+
+        public void Move(Direction d)
+        {
+            Send($"M{(int)d + 1}");
         }
     }
 }

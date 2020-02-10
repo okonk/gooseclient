@@ -13,6 +13,11 @@ namespace AsperetaClient
 
         private Character player;
 
+
+        private bool moveKeyDown = false;
+        private Direction moveKeyDirection = Direction.Down;
+        private double moveKeyPressedTime = 0;
+
         public GameScreen(int mapNumber, string mapName)
         {
             this.mapNumber = mapNumber;
@@ -24,6 +29,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
             GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
+            GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
         }
 
         public override void Resuming()
@@ -77,8 +83,18 @@ namespace AsperetaClient
             {
                 MoveKeyPressed(Direction.Left);
             }
+            else
+            {
+                moveKeyDown = false;
+                moveKeyPressedTime = 0;
+            }
 
             Map.Update(dt);
+
+            if (moveKeyDown)
+            {
+                moveKeyPressedTime += dt;
+            }
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
@@ -89,6 +105,27 @@ namespace AsperetaClient
         public void MoveKeyPressed(Direction direction)
         {
             if (player == null || player.Moving) return;
+
+            bool delay = true;
+            if (!moveKeyDown || moveKeyDirection != direction)
+            {
+                moveKeyDown = true;
+                moveKeyDirection = direction;
+                moveKeyPressedTime = 0;
+
+                if (player.Facing != direction)
+                {
+                    player.Facing = direction;
+                    GameClient.NetworkClient.Facing(direction);
+                    return;
+                }
+                else
+                {
+                    delay = false;
+                }
+            }
+
+            if (delay && moveKeyPressedTime < 0.1) return;
 
             int destX = player.TileX;
             int destY = player.TileY;
@@ -112,6 +149,7 @@ namespace AsperetaClient
             if (Map.CanMoveTo(destX, destY))
             {
                 Map.MoveCharacter(player, destX, destY);
+                GameClient.NetworkClient.Move(direction);
             }
         }
 
@@ -160,6 +198,16 @@ namespace AsperetaClient
 
             player.SetPosition(p.MapX, p.MapY);
             Map[player.TileX, player.TileY].Character = player;
+        }
+
+        public void OnVitalsPercentage(object packet)
+        {
+            var p = (VitalsPercentagePacket)packet;
+            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            character.HPPercentage = p.HPPercentage;
+            character.MPPercentage = p.MPPercentage;
+            character.ShouldRenderHPMPBars = true;
+            character.RenderHPMPBarsTime = 0;
         }
     }
 }

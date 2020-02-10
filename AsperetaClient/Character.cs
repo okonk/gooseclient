@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using SDL2;
 
 namespace AsperetaClient
 {
@@ -57,6 +58,11 @@ namespace AsperetaClient
         public int HairId { get; set; }
         public Colour HairColour { get; set; }
 
+        public int HPPercentage { get; set; }
+        public int MPPercentage { get; set; }
+        public bool ShouldRenderHPMPBars { get; set; }
+        public double RenderHPMPBarsTime { get; set; }
+
 
 
         public bool Moving { get; set; }
@@ -87,6 +93,11 @@ namespace AsperetaClient
             this.FaceId = p.FaceId;
             this.HairId = p.HairId;
             this.HairColour = new Colour(p.HairR, p.HairG, p.HairB, p.HairA);
+            this.HPPercentage = p.HPPercent;
+            this.MPPercentage = 0;
+
+            this.ShouldRenderHPMPBars = true;
+            this.RenderHPMPBarsTime = 0;
 
             this.DisplayedEquipment = p.DisplayedEquipment;
             this.EquippedAnimations = new Animation[9];
@@ -179,6 +190,14 @@ namespace AsperetaClient
             {
                 animation?.Update(dt);
             }
+
+            if (ShouldRenderHPMPBars)
+            {
+                RenderHPMPBarsTime += dt;
+
+                if (RenderHPMPBarsTime >= 2)
+                    ShouldRenderHPMPBars = false;
+            }
         }
 
         public void Render(double dt, int x_offset, int y_offset)
@@ -193,10 +212,44 @@ namespace AsperetaClient
         {
             string name = (string.IsNullOrWhiteSpace(Title) ? "" : Title + " ") + Name + (string.IsNullOrWhiteSpace(Surname) ? "" : " " + Surname);
             int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
-            int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 10;
+            int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 7;
 
             GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
             GameClient.FontRenderer.RenderText(this.Name, x, y, Colour.White);
+        }
+
+        public void RenderHPMPBars(int x_offset, int y_offset)
+        {
+            if (!ShouldRenderHPMPBars) return;
+
+            const int BAR_LENGTH = 24;
+            const int HP_BAR_HEIGHT = 3;
+            const int MP_BAR_HEIGHT = 2;
+
+            int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - BAR_LENGTH / 2;
+            int y = this.PixelYi - y_offset + this.GetYOffset() - 8;
+
+            SDL.SDL_Rect rect;
+            rect.x = x;
+            rect.y = y;
+            rect.w = BAR_LENGTH;
+            rect.h = HP_BAR_HEIGHT;
+
+            // hp bar background
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 1, 1, 1, 255);
+            SDL.SDL_RenderFillRect(GameClient.Renderer, ref rect);
+
+            // hp bar
+            rect.w = (int)(BAR_LENGTH * (HPPercentage / 100d));
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 252, 0, 255);
+            SDL.SDL_RenderFillRect(GameClient.Renderer, ref rect);
+
+            // mp bar
+            rect.y = rect.y + HP_BAR_HEIGHT;
+            rect.w = (int)(BAR_LENGTH * (MPPercentage / 100d));
+            rect.h = MP_BAR_HEIGHT;
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 0, 248, 255);
+            SDL.SDL_RenderFillRect(GameClient.Renderer, ref rect);
         }
 
         public int GetWidth()
