@@ -6,6 +6,12 @@ namespace AsperetaClient
     {
         public static Colour White = new Colour(255, 255, 255, 255);
         public static Colour Black = new Colour(1, 1, 1, 255);
+        public static Colour Yellow = new Colour(248, 208, 0, 255);
+        public static Colour Green = new Colour(136, 204, 64, 255);
+        public static Colour Red = new Colour(254, 81, 28, 255);
+        public static Colour Blue = new Colour(0, 146, 255, 255);
+        public static Colour Purple = new Colour(135, 138, 255, 255);
+
 
         public byte R { get; set; }
 

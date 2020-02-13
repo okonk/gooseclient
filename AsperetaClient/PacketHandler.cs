@@ -82,7 +82,7 @@ namespace AsperetaClient
             return packet.Substring(index);
         }
 
-        public string GetNextToken()
+        private string GetNextToken()
         {
             if (index >= packet.Length)
                 throw new InvalidOperationException($"Index {index} is out of bounds for packet {prefix}");
@@ -118,6 +118,16 @@ namespace AsperetaClient
         public string GetString()
         {
             return GetNextToken();
+        }
+
+        public string GetSubstring(int length)
+        {
+            if (index + length >= packet.Length)
+                throw new InvalidOperationException($"Substring is out of bounds for packet {prefix}");
+
+            string result = packet.Substring(index, length);
+            index += length;
+            return result;
         }
 
         public char Peek()

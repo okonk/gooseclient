@@ -32,6 +32,9 @@ namespace AsperetaClient
             PacketManager.Register<SetYourPositionPacket>();
             PacketManager.Register<VitalsPercentagePacket>();
             PacketManager.Register<EraseCharacterPacket>();
+            PacketManager.Register<ServerMessagePacket>();
+            PacketManager.Register<ChatPacket>();
+            PacketManager.Register<HashMessagePacket>();
         }
 
         public void Connect()
@@ -149,6 +152,16 @@ namespace AsperetaClient
         public void Move(Direction d)
         {
             Send($"M{(int)d + 1}");
+        }
+
+        public void ChatMessage(string message)
+        {
+            Send($";{message}");
+        }
+
+        public void Command(string command)
+        {
+            Send(command);
         }
     }
 }

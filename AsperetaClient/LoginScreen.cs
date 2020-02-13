@@ -42,9 +42,9 @@ namespace AsperetaClient
             passwordTextbox = new TextBox(608, 408, 125, 31, new Colour(192, 255, 192), Colour.Black) { PasswordMask = '*' };
             passwordTextbox.EnterPressed += Connect;
 
-            usernameTextbox.Value = GameClient.GameSettings["INIT"]["Name"];
+            usernameTextbox.SetValue(GameClient.GameSettings["INIT"]["Name"]);
             if (GameClient.GameSettings["INIT"].ContainsKey("Password"))
-                passwordTextbox.Value = GameClient.GameSettings["INIT"]["Password"];
+                passwordTextbox.SetValue(GameClient.GameSettings["INIT"]["Password"]);
 
             guiContainer.AddChild(usernameTextbox);
             guiContainer.AddChild(passwordTextbox);

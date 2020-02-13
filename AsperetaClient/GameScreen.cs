@@ -121,7 +121,7 @@ namespace AsperetaClient
 
         public override void HandleEvent(SDL.SDL_Event ev)
         {
-            
+            this.uiContainer.HandleEvent(ev, 0, 0);
         }
 
         public void MoveKeyPressed(Direction direction)

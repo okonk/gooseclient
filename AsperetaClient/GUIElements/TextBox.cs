@@ -17,7 +17,7 @@ namespace AsperetaClient
     {
         public char PasswordMask { get; set; }
 
-        public string Value { get; set; }
+        public string Value { get; private set; }
 
         public int CursorPosition { get; set; }
 
@@ -25,6 +25,7 @@ namespace AsperetaClient
         private bool cursorVisible = true;
 
         public event Action EnterPressed;
+        public event Action EscapePressed;
 
         public TextBox(int x, int y, int w, int h, Colour backgroundColour, Colour foregroundColour) : base(x, y, w, h, backgroundColour, foregroundColour)
         {
@@ -46,8 +47,16 @@ namespace AsperetaClient
 
         public override void Render(double dt, int xOffset, int yOffset)
         {
-            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, BackgroundColour.R, BackgroundColour.G, BackgroundColour.B, BackgroundColour.A);
-            SDL.SDL_RenderFillRect(GameClient.Renderer, ref Rect);
+            if (BackgroundColour != null)
+            {
+                SDL.SDL_SetRenderDrawColor(GameClient.Renderer, BackgroundColour.R, BackgroundColour.G, BackgroundColour.B, BackgroundColour.A);
+                SDL.SDL_Rect dRect;
+                dRect.x = X + xOffset;
+                dRect.y = Y + yOffset;
+                dRect.w = W;
+                dRect.h = H;
+                SDL.SDL_RenderFillRect(GameClient.Renderer, ref dRect);
+            }
 
             int centeredY = (H - GameClient.FontRenderer.CharHeight) / 2;
 
@@ -112,9 +121,13 @@ namespace AsperetaClient
                         this.Value = this.Value.Substring(0, this.CursorPosition) + pastedText + this.Value.Substring(this.CursorPosition);
                         this.CursorPosition += pastedText.Length;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER)
                     {
                         EnterPressed?.Invoke();
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+                    {
+                        EscapePressed?.Invoke();
                     }
                     break;
                 case SDL.SDL_EventType.SDL_TEXTINPUT:
@@ -138,6 +151,12 @@ namespace AsperetaClient
             }
 
             return false;
+        }
+
+        public void SetValue(string value)
+        {
+            this.Value = value;
+            this.CursorPosition = value.Length;
         }
     }
 }

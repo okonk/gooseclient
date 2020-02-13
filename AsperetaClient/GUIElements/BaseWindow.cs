@@ -7,6 +7,8 @@ namespace AsperetaClient
 {
     class BaseWindow : BaseContainer
     {
+        public string Name { get; private set; }
+
         public bool Hidden { get; set; } = false;
 
         protected Texture background;
@@ -16,6 +18,8 @@ namespace AsperetaClient
 
         public BaseWindow(string windowName)
         {
+            this.Name = windowName;
+
             background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings[windowName]["image"]}");
 
             var winloc = GameClient.UserSettings.GetCoords(windowName, "winloc");
@@ -39,6 +43,8 @@ namespace AsperetaClient
 
         public override void Render(double dt, int xOffset, int yOffset)
         {
+            if (Hidden) return;
+
             background?.Render(X + xOffset, Y + yOffset, unfocusAlpha);
 
             base.Render(dt, xOffset, yOffset);
@@ -46,12 +52,9 @@ namespace AsperetaClient
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
-            switch (ev.type)
-            {
-                
-            }
+            if (Hidden) return false;
 
-            return false;
+            return base.HandleEvent(ev, xOffset, yOffset);
         }
     }
 }
