@@ -35,6 +35,8 @@ namespace AsperetaClient
             PacketManager.Register<ServerMessagePacket>();
             PacketManager.Register<ChatPacket>();
             PacketManager.Register<HashMessagePacket>();
+            PacketManager.Register<StatusInfoPacket>();
+            PacketManager.Register<ExperienceBarPacket>();
         }
 
         public void Connect()

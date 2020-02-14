@@ -25,7 +25,9 @@ namespace AsperetaClient
 
             var inputXY = GameClient.WindowSettings.GetCoords(this.Name, "obj2off");
             var inputWH = GameClient.WindowSettings.GetCoords(this.Name, "obj2dim");
-            inputBox = new TextBox(inputXY.ElementAt(0) + 1, inputXY.ElementAt(1), inputWH.ElementAt(0), inputWH.ElementAt(1), null, Colour.White);
+            inputBox = new TextBox(inputXY.ElementAt(0), inputXY.ElementAt(1), inputWH.ElementAt(0), inputWH.ElementAt(1), null, Colour.White);
+            inputBox.Padding = 6;
+            inputBox.MaxLength = 200;
             inputBox.EnterPressed += ChatEnterPressed;
             inputBox.EscapePressed += ChatEscapePressed;
             AddChild(inputBox);
@@ -92,7 +94,7 @@ namespace AsperetaClient
                              ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || 
                              ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER))
                     {
-                        inputBox.HasFocus = true;
+                        inputBox.SetFocussed();
                         return true;
                     }
                     break;

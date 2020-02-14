@@ -115,6 +115,10 @@ namespace AsperetaClient
             return Convert.ToInt32(GetNextToken());
         }
 
+        public long GetInt64()
+        {
+            return Convert.ToInt64(GetNextToken());
+        }
         public string GetString()
         {
             return GetNextToken();

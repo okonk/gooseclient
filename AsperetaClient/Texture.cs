@@ -102,5 +102,22 @@ namespace AsperetaClient
             SDL.SDL_SetTextureAlphaMod(SDLTexture, (byte)alpha);
             SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref Rect, ref dRect);
         }
+
+        public void RenderClipped(int x, int y, int w, int h)
+        {
+            SDL.SDL_Rect sRect;
+            sRect.x = Rect.x;
+            sRect.y = Rect.y;
+            sRect.w = w;
+            sRect.h = h;
+
+            SDL.SDL_Rect dRect;
+            dRect.x = x + XOffset;
+            dRect.y = y + YOffset;
+            dRect.w = w;
+            dRect.h = h;
+
+            SDL.SDL_RenderCopy(GameClient.Renderer, SDLTexture, ref sRect, ref dRect);
+        }
     }
 }

@@ -6,11 +6,9 @@ namespace AsperetaClient
 {
     // TODO: Right now this is only a basic textbox. Still need to support:
     // * Scrolling text in textbox when text is too large
-    // * Enter event callback
     // * arrow keys for moving the cursor
     // * clicking in textbox to change cursor position
     // * Selecting text and associated functions (copy/overwrite/delete)
-    // * Esc to lose focus
     // * Somehow disable 'SDL_StartTextInput' if no textboxes have focus (no clue if it actually matters though)
 
     class TextBox : GuiElement
@@ -20,6 +18,8 @@ namespace AsperetaClient
         public string Value { get; private set; }
 
         public int CursorPosition { get; set; }
+
+        public int MaxLength = 0;
 
         private double cursorFlashTime = 0;
         private bool cursorVisible = true;
@@ -86,7 +86,7 @@ namespace AsperetaClient
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
                     if (Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {
-                        this.HasFocus = true;
+                        this.SetFocussed();
                         SDL.SDL_StartTextInput();
                     }
                     else
@@ -120,6 +120,12 @@ namespace AsperetaClient
                         var pastedText = SDL.SDL_GetClipboardText();
                         this.Value = this.Value.Substring(0, this.CursorPosition) + pastedText + this.Value.Substring(this.CursorPosition);
                         this.CursorPosition += pastedText.Length;
+
+                        if (this.MaxLength > 0 && this.Value.Length >= this.MaxLength)
+                        {
+                            this.Value = this.Value.Substring(0, this.MaxLength);
+                            this.CursorPosition = Math.Min(this.MaxLength, this.CursorPosition);
+                        }
                     }
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER)
                     {
@@ -131,7 +137,7 @@ namespace AsperetaClient
                     }
                     break;
                 case SDL.SDL_EventType.SDL_TEXTINPUT:
-                    if (!this.HasFocus) break;
+                    if (!this.HasFocus || (this.MaxLength > 0 && this.Value.Length >= this.MaxLength)) break;
 
                     byte[] rawBytes = new byte[SDL.SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
@@ -157,6 +163,13 @@ namespace AsperetaClient
         {
             this.Value = value;
             this.CursorPosition = value.Length;
+        }
+
+        public void SetFocussed()
+        {
+            this.HasFocus = true;
+            cursorFlashTime = 1; // Make cursor appear immediately
+            cursorVisible = false;
         }
     }
 }
