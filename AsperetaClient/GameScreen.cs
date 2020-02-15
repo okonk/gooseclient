@@ -61,13 +61,15 @@ namespace AsperetaClient
         {
             this.uiContainer = new BaseContainer();
 
-            this.uiContainer.AddChild(new FpsWindow());
             this.uiContainer.AddChild(new ChatWindow());
+            this.uiContainer.AddChild(new FpsWindow());
             this.uiContainer.AddChild(new BuffBarWindow());
             this.uiContainer.AddChild(new HotkeyBarWindow());
             this.uiContainer.AddChild(new HPBarWindow());
             this.uiContainer.AddChild(new MPBarWindow());
             this.uiContainer.AddChild(new XPBarWindow());
+
+            this.uiContainer.AddChild(new InventoryWindow());
         }
         
         public override void Render(double dt)

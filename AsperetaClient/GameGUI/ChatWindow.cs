@@ -97,6 +97,11 @@ namespace AsperetaClient
                         inputBox.SetFocussed();
                         return true;
                     }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F4)
+                    {
+                        this.Hidden = !this.Hidden;
+                        return true;
+                    }
                     break;
             }
 

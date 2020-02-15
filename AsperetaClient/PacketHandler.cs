@@ -138,5 +138,13 @@ namespace AsperetaClient
         {
             return packet[index];
         }
+
+        public int LengthRemaining()
+        {
+            if (index >= packet.Length)
+                return 0;
+            
+            return packet.Length - index;
+        }
     }
 }
