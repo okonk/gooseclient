@@ -96,5 +96,11 @@ namespace AsperetaClient
             return (check_x >= this.X + xOffset && check_x <= this.X + xOffset + this.W &&
                     check_y >= this.Y + yOffset && check_y <= this.Y + yOffset + this.H);
         }
+
+        public void SetPosition(int x, int y)
+        {
+            Rect.x = x;
+            Rect.y = y;
+        }
     }
 }

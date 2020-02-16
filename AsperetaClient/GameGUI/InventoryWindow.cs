@@ -34,7 +34,8 @@ namespace AsperetaClient
                     int x = offsetX + c * slotW;
                     int y = offsetY + r * slotH;
 
-                    var slot = new ItemSlot(x, y, slotW, slotH);
+                    var slot = new ItemSlot(r * columns + c, x, y, slotW, slotH);
+                    slot.DoubleClicked += OnSlotDoubleClicked;
                     this.AddChild(slot);
 
                     slots[r * columns + c] = slot;
@@ -70,8 +71,13 @@ namespace AsperetaClient
             }
             else
             {
-                slots[p.SlotNumber].SetSlot(p);
+                slots[p.SlotNumber].SetSlot(p.ItemId, p.ItemName, p.StackSize, p.GraphicId, new Colour(p.GraphicR, p.GraphicG, p.GraphicB, p.GraphicA));
             }
+        }
+
+        public void OnSlotDoubleClicked(GuiElement element)
+        {
+            GameClient.NetworkClient.Use(((ItemSlot)element).SlotNumber);
         }
     }
 }

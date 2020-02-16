@@ -19,6 +19,8 @@ namespace AsperetaClient
 
         public int CursorPosition { get; set; }
 
+        public bool PreventFurtherEventsOnInput { get; set; }
+
         public int MaxLength = 0;
 
         private double cursorFlashTime = 0;
@@ -32,6 +34,7 @@ namespace AsperetaClient
             this.Value = "";
             this.CursorPosition = 0;
             this.Padding = 5;
+            this.PreventFurtherEventsOnInput = false;
         }
 
         public override void Update(double dt)
@@ -135,6 +138,10 @@ namespace AsperetaClient
                     {
                         EscapePressed?.Invoke();
                     }
+
+                    // To stop opening of inventory/etc windows while typing
+                    if (PreventFurtherEventsOnInput) return true;
+
                     break;
                 case SDL.SDL_EventType.SDL_TEXTINPUT:
                     if (!this.HasFocus || (this.MaxLength > 0 && this.Value.Length >= this.MaxLength)) break;

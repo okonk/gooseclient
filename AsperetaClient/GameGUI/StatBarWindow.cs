@@ -34,6 +34,8 @@ namespace AsperetaClient
 
         public override void Render(double dt, int xOffset, int yOffset)
         {
+            if (Hidden) return;
+
             base.Render(dt, xOffset, yOffset);
 
             int w = (int)(barW * GetPercentage());

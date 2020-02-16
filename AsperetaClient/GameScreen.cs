@@ -25,15 +25,11 @@ namespace AsperetaClient
             this.mapNumber = mapNumber;
             this.mapName = mapName;
 
-            GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
+            
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
             GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
-            GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
-            GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
-            GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
             GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
-            GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
         }
 
         public override void Resuming()
@@ -69,6 +65,7 @@ namespace AsperetaClient
             this.uiContainer.AddChild(new MPBarWindow());
             this.uiContainer.AddChild(new XPBarWindow());
 
+            this.uiContainer.AddChild(new CharacterWindow());
             this.uiContainer.AddChild(new InventoryWindow());
         }
         
@@ -177,19 +174,13 @@ namespace AsperetaClient
             }
         }
 
-        public void OnMakeCharacter(object packet)
-        {
-            var p = (MakeCharacterPacket)packet;
-
-            var character = new Character(p);
-            Map.AddCharacter(character);
-        }
-
         public void OnSetYourCharacter(object packet)
         {
             var p = (SetYourCharacterPacket)packet;
 
             this.player = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+
+            GameClient.UserName = this.player.Name;
         }
 
         public void OnPing(object packet)
@@ -197,20 +188,12 @@ namespace AsperetaClient
             GameClient.NetworkClient.Pong();
         }
 
-        public void OnMoveCharacter(object packet)
+        public void OnSendCurrentMap(object packet)
         {
-            var p = (MoveCharacterPacket)packet;
-
-            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
-
-            Map.MoveCharacter(character, p.MapX, p.MapY);
-        }
-
-        public void OnChangeHeading(object packet)
-        {
-            var p = (ChangeHeadingPacket)packet;
-            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
-            character.Facing = (Direction)p.Facing;
+            var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
+            this.mapNumber = sendCurrentMapPacket.MapNumber;
+            this.mapName = sendCurrentMapPacket.MapName;
+            LoadMap();
         }
 
         public void OnSetYourPosition(object packet)
@@ -222,37 +205,6 @@ namespace AsperetaClient
 
             player.SetPosition(p.MapX, p.MapY);
             Map[player.TileX, player.TileY].Character = player;
-        }
-
-        public void OnVitalsPercentage(object packet)
-        {
-            var p = (VitalsPercentagePacket)packet;
-            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
-            character.HPPercentage = p.HPPercentage;
-            character.MPPercentage = p.MPPercentage;
-            character.ShouldRenderHPMPBars = true;
-            character.RenderHPMPBarsTime = 0;
-        }
-
-        public void OnSendCurrentMap(object packet)
-        {
-            var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
-            this.mapNumber = sendCurrentMapPacket.MapNumber;
-            this.mapName = sendCurrentMapPacket.MapName;
-            LoadMap();
-        }
-
-        public void OnEraseCharacter(object packet)
-        {
-            var p = (EraseCharacterPacket)packet;
-
-            var character = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
-            if (character == null) return;
-
-            if (Map[character.TileX, character.TileY].Character == character)
-                Map[character.TileX, character.TileY].Character = null;
-
-            Map.Characters.Remove(character);
         }
     }
 }

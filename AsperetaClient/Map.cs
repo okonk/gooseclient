@@ -44,6 +44,12 @@ namespace AsperetaClient
         {
             this.MapFile = fileData;
             this.Tiles = new Tile[this.Width * this.Height];
+
+            GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
+            GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
+            GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
         }
 
         public Tile this[int x, int y]
@@ -136,6 +142,58 @@ namespace AsperetaClient
         {
             this[character.TileX, character.TileY].Character = character;
             this.Characters.Add(character);
+        }
+
+        public void OnMakeCharacter(object packet)
+        {
+            var p = (MakeCharacterPacket)packet;
+
+            var character = new Character(p);
+            AddCharacter(character);
+        }
+
+        public void OnMoveCharacter(object packet)
+        {
+            var p = (MoveCharacterPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            MoveCharacter(character, p.MapX, p.MapY);
+        }
+
+        public void OnChangeHeading(object packet)
+        {
+            var p = (ChangeHeadingPacket)packet;
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.Facing = (Direction)p.Facing;
+        }
+
+        public void OnVitalsPercentage(object packet)
+        {
+            var p = (VitalsPercentagePacket)packet;
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.HPPercentage = p.HPPercentage;
+            character.MPPercentage = p.MPPercentage;
+            character.ShouldRenderHPMPBars = true;
+            character.RenderHPMPBarsTime = 0;
+        }
+
+        public void OnEraseCharacter(object packet)
+        {
+            var p = (EraseCharacterPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            if (this[character.TileX, character.TileY].Character == character)
+                this[character.TileX, character.TileY].Character = null;
+
+            Characters.Remove(character);
         }
     }
 }

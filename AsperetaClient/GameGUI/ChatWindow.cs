@@ -30,6 +30,7 @@ namespace AsperetaClient
             inputBox.MaxLength = 200;
             inputBox.EnterPressed += ChatEnterPressed;
             inputBox.EscapePressed += ChatEscapePressed;
+            inputBox.PreventFurtherEventsOnInput = true;
             AddChild(inputBox);
 
             GameClient.NetworkClient.PacketManager.Listen<ServerMessagePacket>(OnServerMessage);

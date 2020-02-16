@@ -37,7 +37,7 @@ namespace AsperetaClient
                 string value = line.Substring(equals + 1, line.Length - equals - 1);
                 Sections[currentSection][key] = value;
 
-                Console.WriteLine($"{currentSection} {key} = {value}");
+                //Console.WriteLine($"{currentSection} {key} = {value}");
             }
         }
 

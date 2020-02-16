@@ -38,6 +38,7 @@ namespace AsperetaClient
             PacketManager.Register<StatusInfoPacket>();
             PacketManager.Register<ExperienceBarPacket>();
             PacketManager.Register<InventorySlotPacket>();
+            PacketManager.Register<WindowLinePacket>();
         }
 
         public void Connect()
@@ -165,6 +166,11 @@ namespace AsperetaClient
         public void Command(string command)
         {
             Send(command);
+        }
+
+        public void Use(int slotNumber)
+        {
+            Send($"USE{slotNumber + 1}");
         }
     }
 }
