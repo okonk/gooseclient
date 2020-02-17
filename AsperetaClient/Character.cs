@@ -202,9 +202,24 @@ namespace AsperetaClient
 
         public void Render(double dt, int x_offset, int y_offset)
         {
-            foreach (var animation in this.EquippedAnimations)
+            switch (Facing)
             {
-                animation?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                case Direction.Right:
+                case Direction.Up:
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    for (int i = 0; i < EquippedAnimations.Length - 2; i++)
+                    {
+                        EquippedAnimations[i]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    }
+                    break;
+                case Direction.Down:
+                case Direction.Left:
+                    foreach (var animation in this.EquippedAnimations)
+                    {
+                        animation?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    }
+                    break;
             }
         }
 

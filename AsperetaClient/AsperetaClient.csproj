@@ -8,6 +8,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RuntimeIdentifiers>linux-x64;win-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
-
 </Project>

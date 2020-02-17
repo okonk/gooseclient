@@ -32,9 +32,9 @@ namespace AsperetaClient
         public override void Render(double dt, int xOffset, int yOffset)
         {
             if (pressed && DownTexture != null)
-                DownTexture.Render(this.X + xOffset, this.Y + yOffset);
+                DownTexture?.Render(this.X + xOffset, this.Y + yOffset);
             else
-                UpTexture.Render(this.X + xOffset, this.Y + yOffset);
+                UpTexture?.Render(this.X + xOffset, this.Y + yOffset);
 
             label?.Render(dt, this.X + xOffset, this.Y + yOffset + (pressed ? 1 : 0));
         }

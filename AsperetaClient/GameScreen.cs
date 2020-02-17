@@ -18,7 +18,7 @@ namespace AsperetaClient
         private Direction moveKeyDirection = Direction.Down;
         private double moveKeyPressedTime = 0;
 
-        private BaseContainer uiContainer;
+        private RootPanel uiRoot;
 
         public GameScreen(int mapNumber, string mapName)
         {
@@ -55,18 +55,18 @@ namespace AsperetaClient
 
         public void CreateGui()
         {
-            this.uiContainer = new BaseContainer();
+            this.uiRoot = new RootPanel();
 
-            this.uiContainer.AddChild(new ChatWindow());
-            this.uiContainer.AddChild(new FpsWindow());
-            this.uiContainer.AddChild(new BuffBarWindow());
-            this.uiContainer.AddChild(new HotkeyBarWindow());
-            this.uiContainer.AddChild(new HPBarWindow());
-            this.uiContainer.AddChild(new MPBarWindow());
-            this.uiContainer.AddChild(new XPBarWindow());
+            this.uiRoot.AddChild(new ChatWindow());
+            this.uiRoot.AddChild(new FpsWindow());
+            this.uiRoot.AddChild(new BuffBarWindow());
+            this.uiRoot.AddChild(new HotkeyBarWindow());
+            this.uiRoot.AddChild(new HPBarWindow());
+            this.uiRoot.AddChild(new MPBarWindow());
+            this.uiRoot.AddChild(new XPBarWindow());
 
-            this.uiContainer.AddChild(new CharacterWindow());
-            this.uiContainer.AddChild(new InventoryWindow());
+            this.uiRoot.AddChild(new CharacterWindow());
+            this.uiRoot.AddChild(new InventoryWindow());
         }
         
         public override void Render(double dt)
@@ -77,7 +77,7 @@ namespace AsperetaClient
             int start_y = player != null ? player.PixelYi - half_y : 0;
 
             Map.Render(start_x, start_y);
-            this.uiContainer.Render(dt, 0, 0);
+            this.uiRoot.Render(dt, 0, 0);
         }
 
         public override void Update(double dt)
@@ -115,12 +115,12 @@ namespace AsperetaClient
                 moveKeyPressedTime += dt;
             }
 
-            this.uiContainer.Update(dt);
+            this.uiRoot.Update(dt);
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
         {
-            this.uiContainer.HandleEvent(ev, 0, 0);
+            this.uiRoot.HandleEvent(ev, 0, 0);
         }
 
         public void MoveKeyPressed(Direction direction)

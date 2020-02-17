@@ -14,7 +14,7 @@ namespace AsperetaClient
         int stackSize;
 
         int itemId;
-        string itemName;
+        public string itemName;
 
         Tooltip tooltip;
 
@@ -39,8 +39,33 @@ namespace AsperetaClient
         {
             switch (ev.type)
             {
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case SDL.SDL_EventType.SDL_USEREVENT:
+                    if (ev.user.type == GameClient.DRAG_DROP_EVENT_ID)
+                    {
+                        int x = ev.user.code >> 16;
+                        int y = ev.user.code & 0xFFFF;
+                        if (Contains(xOffset, yOffset, x, y))
+                        {
+                            object data = UiRoot.GetDragDropEventData(ev);
 
+                            if (data is ItemSlot)
+                            {
+                                var fromSlot = data as ItemSlot;
+                                // TODO: Dragging/dropping with character window sends "USE"
+                                GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
+                            }
+
+                            return true;
+                        }
+                    }
+                    break;
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                    if (itemGraphic != null && ev.button.button == SDL.SDL_BUTTON_LEFT && Contains(xOffset, yOffset, ev.button.x, ev.button.y))
+                    {
+                        UiRoot.StartDragDrop(ev.button.x, ev.button.y, itemGraphic, this);
+
+                        return true;
+                    }
                     break;
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
                     if (!Contains(xOffset, yOffset, ev.button.x, ev.button.y))
@@ -75,6 +100,7 @@ namespace AsperetaClient
                         this.Parent.RemoveChild(tooltip);
                         tooltip = null;
                     }
+
                     break;
             }
 

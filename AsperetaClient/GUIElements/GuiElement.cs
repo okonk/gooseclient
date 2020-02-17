@@ -30,6 +30,8 @@ namespace AsperetaClient
 
         public bool HasFocus { get; set; }
 
+        public static RootPanel UiRoot { get; set; }
+
         public GuiElement(int x, int y, int w, int h)
         {
             SDL.SDL_Rect rect;

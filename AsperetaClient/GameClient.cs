@@ -45,6 +45,8 @@ namespace AsperetaClient
         public static string RealmName { get; set; }
         public static string UserName { get; set; }
 
+        public static uint DRAG_DROP_EVENT_ID;
+
         public GameClient()
         {
             Running = true;
@@ -88,6 +90,8 @@ namespace AsperetaClient
                     FontRenderer = new FontRenderer();
 
                     StateManager.AppendState(new LoginScreen());
+
+                    RegisterCustomEvents();
 
                     long lastUpdate = Stopwatch.GetTimestamp();
 
@@ -133,6 +137,11 @@ namespace AsperetaClient
         public void Dispose()
         {
 
+        }
+
+        public void RegisterCustomEvents()
+        {
+            DRAG_DROP_EVENT_ID = SDL.SDL_RegisterEvents(1);
         }
     }
 }

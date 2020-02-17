@@ -37,10 +37,6 @@ namespace AsperetaClient
         {
             this.windowId = 11;
 
-            // close button
-            //cboff=184,4
-            //cbdim=8,8
-
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
             rows = windim.ElementAt(0);
             columns = windim.ElementAt(1);
@@ -94,6 +90,12 @@ namespace AsperetaClient
             earth = CreateLabel("earth");
             air = CreateLabel("air");
             spirit = CreateLabel("spirit");
+
+            var cboff = GameClient.WindowSettings.GetCoords(this.Name, "cboff");
+            var cbdim = GameClient.WindowSettings.GetCoords(this.Name, "cbdim");
+            var closeButton = new Button(cboff.ElementAt(0), cboff.ElementAt(1), cbdim.ElementAt(0), cbdim.ElementAt(1));
+            closeButton.Clicked += (b) => { this.Hidden = true; };
+            this.AddChild(closeButton);
 
             GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
             GameClient.NetworkClient.PacketManager.Listen<ExperienceBarPacket>(OnExperienceBar);

@@ -47,7 +47,7 @@ namespace AsperetaClient
             {
                 packetBuffer = "";
                 socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect("127.0.0.1", 2006);
+                socket.Connect(GameClient.ServerInfoSettings.Sections["Settings"]["IP"], GameClient.ServerInfoSettings.GetInt("Settings", "Port"));
 
                 Connected?.Invoke();
             }
@@ -172,5 +172,15 @@ namespace AsperetaClient
         {
             Send($"USE{slotNumber + 1}");
         }
+
+        public void Change(int fromSlot, int toSlot)
+        {
+            Send($"CHANGE{fromSlot + 1},{toSlot + 1}");
+        }
+
+        // SPLITslotid1,slotid2
+        // ITWinvslot,windowid,windowslot
+        // WTIwindowid,windowslot,invslot
+        // WTWfromWindowId,fromWindowSlot,toWindowId,toWindowSlot
     }
 }
