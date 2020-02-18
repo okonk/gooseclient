@@ -5,34 +5,30 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class ItemSlot : GuiElement
+    class SpellSlot : GuiElement
     {
         public int SlotNumber { get; set; }
 
-        Texture itemGraphic;
-        Colour colour;
-        int stackSize;
+        private Texture graphic;
 
-        int itemId;
-        public string itemName;
+        public string name;
 
-        Tooltip tooltip;
+        private bool targetable;
+
+        private Tooltip tooltip;
 
         public event Action<GuiElement> DoubleClicked;
 
-        public ItemSlot(int slotNumber, int x, int y, int w, int h) : base(x, y, w, h)
+        public SpellSlot(int slotNumber, int x, int y, int w, int h) : base(x, y, w, h)
         {
             this.SlotNumber = slotNumber;
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
         {
-            if (itemGraphic == null) return;
+            if (graphic == null) return;
 
-            itemGraphic.Render(X + xOffset, Y + yOffset, colour);
-
-            if (stackSize > 1)
-                GameClient.FontRenderer.RenderText(stackSize.ToString(), X + xOffset + 6, Y + yOffset + 2, Colour.White);
+            graphic.Render(X + xOffset, Y + yOffset);
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
@@ -55,9 +51,9 @@ namespace AsperetaClient
                     }
                     break;
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                    if (itemGraphic != null && ev.button.button == SDL.SDL_BUTTON_LEFT && Contains(xOffset, yOffset, ev.button.x, ev.button.y))
+                    if (graphic != null && ev.button.button == SDL.SDL_BUTTON_LEFT && Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {
-                        UiRoot.StartDragDrop(ev.button.x, ev.button.y, itemGraphic, this);
+                        UiRoot.StartDragDrop(ev.button.x, ev.button.y, graphic, this);
 
                         return true;
                     }
@@ -75,14 +71,14 @@ namespace AsperetaClient
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
                     bool contains = Contains(xOffset, yOffset, ev.motion.x, ev.motion.y);
                     
-                    if (contains && itemGraphic != null)
+                    if (contains && graphic != null)
                     {
                         int x = ev.motion.x;
                         int y = ev.motion.y - GameClient.FontRenderer.CharHeight - 10;
 
                         if (tooltip == null)
                         {
-                            tooltip = new Tooltip(x, y, Colour.Black, Colour.White, itemName);
+                            tooltip = new Tooltip(x, y, Colour.Black, Colour.White, name);
                             this.Parent.AddChild(tooltip);
                         }
                         else
@@ -104,33 +100,19 @@ namespace AsperetaClient
 
         public void Clear()
         {
-            itemGraphic = null;
+            graphic = null;
         }
 
-        public void SetSlot(int itemId, string itemName, int stackSize, int graphicId, Colour colour)
+        public void SetSlot(string name, int graphicId, bool targetable)
         {
-            this.itemId = itemId;
-            this.itemName = itemName;
-            this.stackSize = stackSize;
-            this.itemGraphic = GameClient.ResourceManager.GetTexture(graphicId);
-            this.colour = colour;
+            this.name = name;
+            this.graphic = GameClient.ResourceManager.GetTexture(graphicId);
+            this.targetable = targetable;
         }
 
         public void HandleDrop(object data)
         {
-            if (data is ItemSlot)
-            {
-                var fromSlot = data as ItemSlot;
 
-                if (this.Parent is CharacterWindow || fromSlot.Parent is CharacterWindow)
-                {
-                    GameClient.NetworkClient.Use(fromSlot.SlotNumber);
-                }
-                else
-                {
-                    GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
-                }
-            }
         }
     }
 }

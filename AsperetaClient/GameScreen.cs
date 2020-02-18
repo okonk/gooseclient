@@ -66,6 +66,7 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new XPBarWindow());
 
             this.uiRoot.AddChild(new CharacterWindow());
+            this.uiRoot.AddChild(new SpellbookWindow());
             this.uiRoot.AddChild(new InventoryWindow());
         }
         

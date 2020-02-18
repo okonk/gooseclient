@@ -39,6 +39,8 @@ namespace AsperetaClient
             PacketManager.Register<ExperienceBarPacket>();
             PacketManager.Register<InventorySlotPacket>();
             PacketManager.Register<WindowLinePacket>();
+            PacketManager.Register<UpdateCharacterPacket>();
+            PacketManager.Register<SpellbookSlotPacket>();
         }
 
         public void Connect()
@@ -182,5 +184,10 @@ namespace AsperetaClient
         // ITWinvslot,windowid,windowslot
         // WTIwindowid,windowslot,invslot
         // WTWfromWindowId,fromWindowSlot,toWindowId,toWindowSlot
+
+        public void Cast(int slot, int targetId)
+        {
+            Send($"CAST{slot + 1},{targetId}");
+        }
     }
 }

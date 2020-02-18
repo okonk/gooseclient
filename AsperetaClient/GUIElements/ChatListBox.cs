@@ -110,6 +110,7 @@ namespace AsperetaClient
             const int INDENT_CHARS = 2;
 
             int availableSpace = this.W;
+            int availableCharacters = (availableSpace / GameClient.FontRenderer.CharWidth) - 1;
             int neededSpace = input.Length * GameClient.FontRenderer.CharWidth;
             int currentIndex = 0;
 
@@ -126,14 +127,22 @@ namespace AsperetaClient
                 }
 
                 bool failedToSplit = true;
-                for (int i = (availableSpace / GameClient.FontRenderer.CharWidth) - 1; i > 0; i--)
+                for (int i = availableCharacters; i > 0; i--)
                 {
                     if (input[currentIndex + i] == ' ')
                     {
                         if (indent)
                         {
-                            yield return "  " + input.Substring(currentIndex, i - 2);
-                            currentIndex += i - 1;
+                            if (i > availableCharacters - 2)
+                            {
+                                yield return "  " + input.Substring(currentIndex, i - 2);
+                                currentIndex += i - 2;
+                            }
+                            else
+                            {
+                                yield return "  " + input.Substring(currentIndex, i);
+                                currentIndex += i + 1;
+                            }
                         }
                         else
                         {
@@ -153,7 +162,7 @@ namespace AsperetaClient
 
                 if (failedToSplit)
                 {
-                    int splitPoint = (availableSpace / GameClient.FontRenderer.CharWidth) - 1;
+                    int splitPoint = availableCharacters;
 
                     if (indent)
                     {

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Linq;
 using SDL2;
 
 namespace AsperetaClient
@@ -34,7 +35,7 @@ namespace AsperetaClient
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
-            foreach (var gui in Children.ToArray())
+            foreach (var gui in Children.Reverse<GuiElement>().ToArray())
             {
                 bool preventFurtherEvents = gui.HandleEvent(ev, X + xOffset, Y + yOffset);
                 if (preventFurtherEvents)

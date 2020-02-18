@@ -50,6 +50,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
             GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
             GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<UpdateCharacterPacket>(OnUpdateCharacter);
         }
 
         public Tile this[int x, int y]
@@ -194,6 +195,16 @@ namespace AsperetaClient
                 this[character.TileX, character.TileY].Character = null;
 
             Characters.Remove(character);
+        }
+
+        public void OnUpdateCharacter(object packet)
+        {
+            var p = (UpdateCharacterPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.UpdateCharacter(p);
         }
     }
 }

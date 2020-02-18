@@ -320,5 +320,18 @@ namespace AsperetaClient
             MoveSpeedX = 0;
             MoveSpeedY = 0;
         }
+
+        public void UpdateCharacter(UpdateCharacterPacket p)
+        {
+            this.BodyId = p.BodyId;
+            this.BodyState = p.BodyState;
+            this.FaceId = p.FaceId;
+            this.HairId = p.HairId;
+            this.HairColour = new Colour(p.HairR, p.HairG, p.HairB, p.HairA);
+
+            this.DisplayedEquipment = p.DisplayedEquipment;
+
+            this.UpdateAnimations();
+        }
     }
 }
