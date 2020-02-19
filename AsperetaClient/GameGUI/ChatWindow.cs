@@ -6,6 +6,9 @@ using SDL2;
 
 namespace AsperetaClient
 {
+    // TODO: Handle input history (up/down to load previous messages)
+    // TODO: Handle shortcuts like g, t, r for /guild, /tell, reply /tell
+
     class ChatWindow : BaseWindow
     {
         private ChatListBox chatListBox;

@@ -67,6 +67,16 @@ namespace AsperetaClient
             return this.Frames[this.CurrentFrame].W;
         }
 
+        public int GetHeight()
+        {
+            return this.Frames[this.CurrentFrame].H;
+        }
+
+        public int GetXOffset()
+        {
+            return this.Frames[this.CurrentFrame].XOffset;
+        }
+
         public int GetYOffset()
         {
             return this.Frames[this.CurrentFrame].YOffset;

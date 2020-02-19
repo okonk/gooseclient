@@ -43,7 +43,6 @@ namespace AsperetaClient
         public static NetworkClient NetworkClient { get; set; } = new NetworkClient();
 
         public static string RealmName { get; set; }
-        public static string UserName { get; set; }
 
         public static uint DRAG_DROP_EVENT_ID;
 

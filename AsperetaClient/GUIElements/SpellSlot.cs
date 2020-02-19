@@ -9,6 +9,10 @@ namespace AsperetaClient
     {
         public int SlotNumber { get; set; }
 
+        public bool IsEmpty { get { return name == null; } }
+
+        public bool Targetable { get { return targetable; } }
+
         private Texture graphic;
 
         public string name;

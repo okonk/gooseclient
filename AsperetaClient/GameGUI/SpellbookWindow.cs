@@ -11,6 +11,8 @@ namespace AsperetaClient
         private int rows;
         private int columns;
 
+        public event Action<SpellSlot> CastSpell;
+
         public SpellbookWindow() : base("SpellBook")
         {
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
@@ -77,7 +79,9 @@ namespace AsperetaClient
 
         public void OnSlotDoubleClicked(GuiElement element)
         {
-            GameClient.NetworkClient.Cast(((SpellSlot)element).SlotNumber, 1); // TODO: Need to support casting target window and stuff..
+            var slot = (SpellSlot)element;
+            if (!slot.IsEmpty)
+                this.CastSpell?.Invoke(slot);
         }
     }
 }

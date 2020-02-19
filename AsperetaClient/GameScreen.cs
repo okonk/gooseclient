@@ -13,7 +13,6 @@ namespace AsperetaClient
 
         private Character player;
 
-
         private bool moveKeyDown = false;
         private Direction moveKeyDirection = Direction.Down;
         private double moveKeyPressedTime = 0;
@@ -66,7 +65,11 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new XPBarWindow());
 
             this.uiRoot.AddChild(new CharacterWindow());
-            this.uiRoot.AddChild(new SpellbookWindow());
+
+            var spellbookWindow = new SpellbookWindow();
+            spellbookWindow.CastSpell += (slot) => { Map.OnCastSpell(slot); };
+            this.uiRoot.AddChild(spellbookWindow);
+
             this.uiRoot.AddChild(new InventoryWindow());
         }
         
@@ -87,29 +90,32 @@ namespace AsperetaClient
             byte[] keys = new byte[keysLength];
             Marshal.Copy(keysPtr, keys, 0, keysLength);
 
-            if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
+            if (!Map.Targeting)
             {
-                MoveKeyPressed(Direction.Up);
-            }
-            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
-            {
-                MoveKeyPressed(Direction.Right);
-            }
-            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
-            {
-                MoveKeyPressed(Direction.Down);
-            }
-            else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
-            {
-                MoveKeyPressed(Direction.Left);
-            }
-            else
-            {
-                moveKeyDown = false;
-                moveKeyPressedTime = 0;
+                if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
+                {
+                    MoveKeyPressed(Direction.Up);
+                }
+                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
+                {
+                    MoveKeyPressed(Direction.Right);
+                }
+                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
+                {
+                    MoveKeyPressed(Direction.Down);
+                }
+                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
+                {
+                    MoveKeyPressed(Direction.Left);
+                }
+                else
+                {
+                    moveKeyDown = false;
+                    moveKeyPressedTime = 0;
+                }
             }
 
-            Map.Update(dt);
+            this.Map.Update(dt);
 
             if (moveKeyDown)
             {
@@ -121,6 +127,10 @@ namespace AsperetaClient
 
         public override void HandleEvent(SDL.SDL_Event ev)
         {
+            bool preventFurtherEvents = this.Map.HandleEvent(ev);
+            if (preventFurtherEvents)
+                return;
+
             this.uiRoot.HandleEvent(ev, 0, 0);
         }
 
@@ -181,7 +191,7 @@ namespace AsperetaClient
 
             this.player = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
 
-            GameClient.UserName = this.player.Name;
+            this.uiRoot.Player = this.player;
         }
 
         public void OnPing(object packet)

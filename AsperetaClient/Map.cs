@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SDL2;
 
 namespace AsperetaClient
 {
@@ -40,6 +41,11 @@ namespace AsperetaClient
 
         public bool Loaded { get; private set; } = false;
 
+        public bool Targeting { get; private set; }= false;
+        private Character spellCastTarget;
+        private int spellCastSlotNumber;
+        private Character player;
+
         public Map(MapFile fileData)
         {
             this.MapFile = fileData;
@@ -51,6 +57,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
             GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
             GameClient.NetworkClient.PacketManager.Listen<UpdateCharacterPacket>(OnUpdateCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
         }
 
         public Tile this[int x, int y]
@@ -118,8 +125,137 @@ namespace AsperetaClient
 
             foreach (var character in Characters)
             {
+                if (Targeting && character == spellCastTarget)
+                {
+                    RenderSpellTargetBox(start_x, start_y);
+                }
+
                 character.RenderName(start_x, start_y);
                 character.RenderHPMPBars(start_x, start_y);
+            }
+        }
+
+        public void RenderSpellTargetBox(int start_x, int start_y)
+        {
+            var rect = new SDL.SDL_Rect();
+            rect.x = spellCastTarget.PixelXi + spellCastTarget.GetXOffset() - start_x;
+            rect.y = spellCastTarget.PixelYi + spellCastTarget.GetYOffset() - start_y;
+            rect.w = spellCastTarget.GetWidth();
+            rect.h = spellCastTarget.GetHeight();
+
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 255, 255, 255, 255);
+            SDL.SDL_RenderDrawRect(GameClient.Renderer, ref rect);
+
+            rect.x += 1;
+            rect.y += 1;
+            rect.w -= 2;
+            rect.h -= 2;
+
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 100, 248, 255);
+            SDL.SDL_RenderDrawRect(GameClient.Renderer, ref rect);
+        }
+
+        public bool HandleEvent(SDL.SDL_Event ev)
+        {
+            switch (ev.type)
+            {
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (!Targeting) return false;
+
+                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_UP)
+                    {
+                        SetNextSpellCastTarget(searchDown: false);
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT)
+                    {
+                        SetNextSpellCastTarget(searchDown: true);
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN)
+                    {
+                        SetNextSpellCastTarget(searchDown: true);
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT)
+                    {
+                        SetNextSpellCastTarget(searchDown: false);
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_HOME)
+                    {
+                        spellCastTarget = player;
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER)
+                    {
+                        Targeting = false;
+                        GameClient.NetworkClient.Cast(spellCastSlotNumber, spellCastTarget.LoginId);
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+                    {
+                        Targeting = false;
+                        return true;
+                    }
+
+                    break;
+            }
+
+            return false;
+        }
+
+        // Esssentially what the Asp client does is searches up or down going row by row with a wrap around to opposite end of screen
+        private void SetNextSpellCastTarget(bool searchDown)
+        {
+            const int RangeX = 10;
+            const int RangeY = 8;
+
+            int currentPosition = spellCastTarget.TileY * this.Width + spellCastTarget.TileX;
+            int lowestPosition = int.MaxValue;
+            int highestPosition = int.MinValue;
+            int closestPosition = currentPosition;
+
+            foreach (var character in Characters)
+            {
+                if (character == spellCastTarget) continue;
+
+                // Filter out things off screen
+                if (Math.Abs(character.TileX - player.TileX) > RangeX || 
+                    Math.Abs(character.TileY - player.TileY) > RangeY)
+                {
+                    continue;
+                }
+
+                int characterPosition = character.TileY * this.Width + character.TileX;
+
+                if (characterPosition < lowestPosition)
+                    lowestPosition = characterPosition;
+                if (characterPosition > highestPosition)
+                    highestPosition = characterPosition;
+
+                if (searchDown && characterPosition > currentPosition && (closestPosition == currentPosition || currentPosition - closestPosition < currentPosition - characterPosition))
+                {
+                    closestPosition = characterPosition;
+                }
+                else if (!searchDown && characterPosition < currentPosition && (closestPosition == currentPosition || closestPosition - currentPosition < characterPosition - currentPosition))
+                {
+                    closestPosition = characterPosition;
+                }
+            }
+
+            int nextTarget = closestPosition;
+            if (nextTarget == currentPosition)
+            {
+                if (searchDown && lowestPosition != int.MaxValue)
+                    nextTarget = lowestPosition;
+                else if (!searchDown && highestPosition != int.MinValue)
+                    nextTarget = highestPosition;
+            }
+
+            if (nextTarget != currentPosition)
+            {
+                spellCastTarget = Tiles[nextTarget].Character ?? player;
             }
         }
 
@@ -205,6 +341,27 @@ namespace AsperetaClient
             if (character == null) return;
 
             character.UpdateCharacter(p);
+        }
+
+        public void OnSetYourCharacter(object packet)
+        {
+            var p = (SetYourCharacterPacket)packet;
+
+            this.player = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+        }
+
+        public void OnCastSpell(SpellSlot slot)
+        {
+            if (slot.Targetable)
+            {
+                Targeting = true;
+                spellCastTarget = spellCastTarget ?? this.player;
+                spellCastSlotNumber = slot.SlotNumber;
+            }
+            else
+            {
+                GameClient.NetworkClient.Cast(slot.SlotNumber, this.player.LoginId);
+            }
         }
     }
 }

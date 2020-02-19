@@ -114,7 +114,7 @@ namespace AsperetaClient
         {
             var p = (StatusInfoPacket)packet;
 
-            name.Value = GameClient.UserName ?? "";
+            name.Value = UiRoot.Player?.Name ?? "";
             guild.Value = p.GuildName;
             level.Value = p.Level.ToString();
             className.Value = p.ClassName;
@@ -139,7 +139,7 @@ namespace AsperetaClient
             var p = (ExperienceBarPacket)packet;
 
             experience.Value = p.Experience.ToString();
-            name.Value = GameClient.UserName ?? "";
+            name.Value = UiRoot.Player?.Name ?? "";
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)

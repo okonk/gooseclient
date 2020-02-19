@@ -272,6 +272,16 @@ namespace AsperetaClient
             return this.EquippedAnimations[0]?.GetWidth() ?? 32;
         }
 
+        public int GetHeight()
+        {
+            return this.EquippedAnimations[0]?.GetHeight() ?? 32;
+        }
+
+        public int GetXOffset()
+        {
+            return this.EquippedAnimations[0]?.GetXOffset() ?? 32;
+        }
+
         public int GetYOffset()
         {
             return this.EquippedAnimations[0]?.GetYOffset() ?? 32;

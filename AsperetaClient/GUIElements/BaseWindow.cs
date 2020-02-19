@@ -70,6 +70,8 @@ namespace AsperetaClient
                         mouseDown = true;
                         lastMouseDragX = ev.button.x;
                         lastMouseDragY = ev.button.y;
+
+                        return true;
                     }
                     break;
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
@@ -91,6 +93,7 @@ namespace AsperetaClient
                         lastMouseDragY = ev.motion.y;
                     }
 
+                    // TODO: Window with focus also becomes on top of other windows
                     this.HasFocus = Contains(xOffset, yOffset, ev.motion.x, ev.motion.y);
                     break;
             }

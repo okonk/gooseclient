@@ -17,6 +17,9 @@ namespace AsperetaClient
 
         public Dictionary<int, object> DragDropEventData { get; set; } = new Dictionary<int, object>();
 
+        // Kind of ugly, but don't know what else to do, some parts of the UI need to know the player character
+        public Character Player { get; set; }
+
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
 
