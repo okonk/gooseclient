@@ -51,6 +51,8 @@ namespace AsperetaClient
 
         public Animation[] EquippedAnimations { get; set; }
 
+        public Animation SpellAnimation { get; set; }
+
         public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
         
         public int FaceId { get; set; }
@@ -135,7 +137,7 @@ namespace AsperetaClient
             }
 
             var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
-            animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
+            //animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
             animation.SetAnimating(Moving | Attacking);
             animation.Colour = colour;
 
@@ -191,6 +193,13 @@ namespace AsperetaClient
                 animation?.Update(dt);
             }
 
+            if (SpellAnimation != null)
+            {
+                SpellAnimation.Update(dt);
+                if (SpellAnimation.Finished)
+                    SpellAnimation = null;
+            }
+
             if (ShouldRenderHPMPBars)
             {
                 RenderHPMPBarsTime += dt;
@@ -200,27 +209,29 @@ namespace AsperetaClient
             }
         }
 
-        public void Render(double dt, int x_offset, int y_offset)
+        public void Render(int x_offset, int y_offset)
         {
             switch (Facing)
             {
                 case Direction.Right:
                 case Direction.Up:
-                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
-                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     for (int i = 0; i < EquippedAnimations.Length - 2; i++)
                     {
-                        EquippedAnimations[i]?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     }
                     break;
                 case Direction.Down:
                 case Direction.Left:
                     foreach (var animation in this.EquippedAnimations)
                     {
-                        animation?.Render(dt, this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        animation?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     }
                     break;
             }
+
+            SpellAnimation?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
         }
 
         public void RenderName(int x_offset, int y_offset)

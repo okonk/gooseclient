@@ -41,6 +41,10 @@ namespace AsperetaClient
             PacketManager.Register<WindowLinePacket>();
             PacketManager.Register<UpdateCharacterPacket>();
             PacketManager.Register<SpellbookSlotPacket>();
+            PacketManager.Register<SpellCharacterPacket>();
+            PacketManager.Register<SpellTilePacket>();
+            PacketManager.Register<MapObjectPacket>();
+            PacketManager.Register<EraseObjectPacket>();
         }
 
         public void Connect()
@@ -188,6 +192,11 @@ namespace AsperetaClient
         public void Cast(int slot, int targetId)
         {
             Send($"CAST{slot + 1},{targetId}");
+        }
+
+        public void Get()
+        {
+            Send($"GET");
         }
     }
 }

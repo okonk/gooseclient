@@ -49,7 +49,7 @@ namespace AsperetaClient
             }
         }
 
-        public void Render(double dt, int x, int y)
+        public void Render(int x, int y)
         {
             this.Frames[this.CurrentFrame].Render(x, y, Colour);
         }

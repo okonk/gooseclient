@@ -5,12 +5,21 @@ using SDL2;
 
 namespace AsperetaClient
 {
+    internal class MapObject
+    {
+        public Texture Graphic { get; set; }
+        public Colour Colour { get; set; }
+        public string Name { get; set; }
+        public int StackSize { get; set; }
+    }
+
     internal class Tile
     {
         public bool Blocked { get; set; }
         public Texture[] Layers { get; set; }
-
         public Character Character { get; set; }
+        public SpellTileAnimation SpellAnimation { get; set; }
+        public MapObject MapObject { get; set; }
 
         public bool IsBlocked()
         {
@@ -21,6 +30,22 @@ namespace AsperetaClient
         {
             this.Blocked = blocked;
             this.Layers = layers;
+        }
+    }
+
+    internal class SpellTileAnimation
+    {
+        public int TileX { get; set; }
+
+        public int TileY { get; set; }
+
+        public Animation Animation { get; set; }
+
+        public SpellTileAnimation(int x, int y, Animation animation)
+        {
+            this.TileX = x;
+            this.TileY = y;
+            this.Animation = animation;
         }
     }
 
@@ -38,6 +63,8 @@ namespace AsperetaClient
         public Tile[] Tiles { get; set; }
 
         public List<Character> Characters { get; set; } = new List<Character>();
+
+        public List<SpellTileAnimation> SpellAnimations { get; set; } = new List<SpellTileAnimation>();
 
         public bool Loaded { get; private set; } = false;
 
@@ -58,6 +85,10 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
             GameClient.NetworkClient.PacketManager.Listen<UpdateCharacterPacket>(OnUpdateCharacter);
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<SpellCharacterPacket>(OnSpellCharacter);
+            GameClient.NetworkClient.PacketManager.Listen<SpellTilePacket>(OnSpellTile);
+            GameClient.NetworkClient.PacketManager.Listen<MapObjectPacket>(OnMapObject);
+            GameClient.NetworkClient.PacketManager.Listen<EraseObjectPacket>(OnEraseObject);
         }
 
         public Tile this[int x, int y]
@@ -90,6 +121,22 @@ namespace AsperetaClient
             {
                 character.Update(dt);
             }
+
+            for (int i = 0; i < SpellAnimations.Count; i++)
+            {
+                var tile = SpellAnimations[i];
+                tile.Animation.Update(dt);
+                if (tile.Animation.Finished)
+                {
+                    if (this[tile.TileX, tile.TileY].SpellAnimation == tile)
+                    {
+                        this[tile.TileX, tile.TileY].SpellAnimation = null;
+                    }
+
+                    SpellAnimations.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         public void Render(int start_x, int start_y)
@@ -113,8 +160,14 @@ namespace AsperetaClient
 
                         if (l == 2)
                         {
+                            if (tile.MapObject != null)
+                                tile.MapObject.Graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y, tile.MapObject.Colour);
+
                             if (tile.Character != null)
-                                tile.Character.Render(0, start_x, start_y);
+                                tile.Character.Render(start_x, start_y);
+
+                            if (tile.SpellAnimation != null)
+                                tile.SpellAnimation.Animation.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
                         }
 
                         if (graphic != null)
@@ -160,6 +213,12 @@ namespace AsperetaClient
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_COMMA)
+                    {
+                        GameClient.NetworkClient.Get();
+                        return true;
+                    }
+
                     if (!Targeting) return false;
 
                     if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_UP)
@@ -212,8 +271,8 @@ namespace AsperetaClient
             const int RangeY = 8;
 
             int currentPosition = spellCastTarget.TileY * this.Width + spellCastTarget.TileX;
-            int lowestPosition = int.MaxValue;
-            int highestPosition = int.MinValue;
+            int lowestPosition = currentPosition;
+            int highestPosition = currentPosition;
             int closestPosition = currentPosition;
 
             foreach (var character in Characters)
@@ -247,10 +306,7 @@ namespace AsperetaClient
             int nextTarget = closestPosition;
             if (nextTarget == currentPosition)
             {
-                if (searchDown && lowestPosition != int.MaxValue)
-                    nextTarget = lowestPosition;
-                else if (!searchDown && highestPosition != int.MinValue)
-                    nextTarget = highestPosition;
+                nextTarget = searchDown ? lowestPosition : highestPosition;
             }
 
             if (nextTarget != currentPosition)
@@ -259,9 +315,14 @@ namespace AsperetaClient
             }
         }
 
+        public bool ValidTile(int x, int y)
+        {
+            return x > 0 && y > 0 && x < Width && y < Height;
+        }
+
         public bool CanMoveTo(int x, int y)
         {
-            if (x < 0 || y < 0 || x >= Width || y >= Height)
+            if (!ValidTile(x, y))
                 return false;
 
             return !this[x, y].IsBlocked();
@@ -331,6 +392,9 @@ namespace AsperetaClient
                 this[character.TileX, character.TileY].Character = null;
 
             Characters.Remove(character);
+
+            if (character == spellCastTarget)
+                spellCastTarget = player;
         }
 
         public void OnUpdateCharacter(object packet)
@@ -362,6 +426,52 @@ namespace AsperetaClient
             {
                 GameClient.NetworkClient.Cast(slot.SlotNumber, this.player.LoginId);
             }
+        }
+
+        public void OnSpellCharacter(object packet)
+        {
+            var p = (SpellCharacterPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId);
+            character.SpellAnimation = animation;
+        }
+
+        public void OnSpellTile(object packet)
+        {
+            var p = (SpellTilePacket)packet;
+
+            if (!ValidTile(p.TileX, p.TileY))
+                return;
+
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId);
+            var spellTileAnimation = new SpellTileAnimation(p.TileX, p.TileY, animation);
+            SpellAnimations.Add(spellTileAnimation);
+            this[p.TileX, p.TileY].SpellAnimation = spellTileAnimation;
+        }
+
+        public void OnMapObject(object packet)
+        {
+            var p = (MapObjectPacket)packet;
+
+            var mapObject = new MapObject
+            {
+                Graphic = GameClient.ResourceManager.GetTexture(p.GraphicId),
+                Colour = new Colour(p.GraphicR, p.GraphicG, p.GraphicB, p.GraphicA),
+                Name = p.ItemName,
+                StackSize = p.StackSize
+            };
+
+            this[p.TileX, p.TileY].MapObject = mapObject;
+        }
+
+        public void OnEraseObject(object packet)
+        {
+            var p = (EraseObjectPacket)packet;
+
+            this[p.TileX, p.TileY].MapObject = null;
         }
     }
 }

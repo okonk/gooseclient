@@ -73,7 +73,7 @@ namespace AsperetaClient
             var animationData = this.AdfManager.Animations[animationId];
             var animation = new Animation();
             animation.Frames = animationData.Frames.Select(f => GetTexture(f)).ToArray();
-            animation.Interval = 1.0d / animationData.Interval;
+            animation.Interval = 1.0d / animationData.Interval / 2;
 
             return animation;
         }
