@@ -107,14 +107,14 @@ namespace AsperetaClient
 
                         while (SDL.SDL_PollEvent(out ev) != 0)
                         {
+                            StateManager.HandleEvent(ev);
+
                             switch (ev.type)
                             {
                                 case SDL.SDL_EventType.SDL_QUIT:
                                     Running = false;
                                     break;
                             }
-
-                            StateManager.HandleEvent(ev);
                         }
 
                         SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 0, 0, 0);

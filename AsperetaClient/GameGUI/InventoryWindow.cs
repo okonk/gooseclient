@@ -7,7 +7,8 @@ namespace AsperetaClient
 {
     class InventoryWindow : BaseWindow
     {
-        private ItemSlot[] slots;
+        public ItemSlot[] slots;
+
         private int rows;
         private int columns;
 

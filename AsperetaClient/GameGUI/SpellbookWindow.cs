@@ -7,7 +7,8 @@ namespace AsperetaClient
 {
     class SpellbookWindow : BaseWindow
     {
-        private SpellSlot[] slots;
+        public SpellSlot[] slots;
+        
         private int rows;
         private int columns;
 

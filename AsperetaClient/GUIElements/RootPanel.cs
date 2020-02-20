@@ -20,9 +20,11 @@ namespace AsperetaClient
         // Kind of ugly, but don't know what else to do, some parts of the UI need to know the player character
         public Character Player { get; set; }
 
+        public TextBox FocusedTextBox { get; set; }
+
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
-
+            SDL.SDL_StopTextInput();
         }
 
         public RootPanel(int x, int y, int w, int h) : base(x, y, w, h)
@@ -82,6 +84,21 @@ namespace AsperetaClient
 
             if (DragDropImage != null)
                 DragDropImage.Render(DragDropX, DragDropY);
+        }
+
+        public override void Update(double dt)
+        {
+            foreach (var gui in Children.ToArray())
+            {
+                gui.Update(dt);
+
+                if (gui is BaseWindow && (gui.HasFocus || (gui is ChatWindow && ((ChatWindow)gui).Typing)))
+                {
+                    // Bump window to be rendered on top
+                    Children.Remove(gui);
+                    Children.Add(gui);
+                }
+            }
         }
 
         public void StartDragDrop(int x, int y, Texture image, object data)

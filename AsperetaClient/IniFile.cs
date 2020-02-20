@@ -7,14 +7,17 @@ namespace AsperetaClient
 {
     class IniFile
     {
+        private string filePath;
+
         public Dictionary<string, Dictionary<string, string>> Sections { get; private set; }
 
         public IniFile(string filePath)
         {
-            ReadFile(filePath);
+            this.filePath = filePath;
+            ReadFile();
         }
 
-        private void ReadFile(string filePath)
+        private void ReadFile()
         {
             Sections = new Dictionary<string, Dictionary<string, string>>();
 
@@ -38,6 +41,24 @@ namespace AsperetaClient
                 Sections[currentSection][key] = value;
 
                 //Console.WriteLine($"{currentSection} {key} = {value}");
+            }
+        }
+
+        public void SaveFile()
+        {
+            using (var writer = new StreamWriter(filePath))
+            {
+                foreach (var section in Sections)
+                {
+                    writer.WriteLine($"[{section.Key}]");
+
+                    foreach (var setting in section.Value)
+                    {
+                        writer.WriteLine($"{setting.Key}={setting.Value}");
+                    }
+
+                    writer.WriteLine();
+                }
             }
         }
 

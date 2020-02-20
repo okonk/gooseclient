@@ -8,7 +8,7 @@ namespace AsperetaClient
     class CharacterWindow : BaseWindow
     {
         private int windowId;
-        private ItemSlot[] slots;
+        public ItemSlot[] slots;
         private int rows;
         private int columns;
         private int inventorySlots;

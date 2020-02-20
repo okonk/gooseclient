@@ -59,7 +59,6 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new ChatWindow());
             this.uiRoot.AddChild(new FpsWindow());
             this.uiRoot.AddChild(new BuffBarWindow());
-            this.uiRoot.AddChild(new HotkeyBarWindow());
             this.uiRoot.AddChild(new HPBarWindow());
             this.uiRoot.AddChild(new MPBarWindow());
             this.uiRoot.AddChild(new XPBarWindow());
@@ -71,6 +70,9 @@ namespace AsperetaClient
             this.uiRoot.AddChild(spellbookWindow);
 
             this.uiRoot.AddChild(new InventoryWindow());
+
+            // This needs to be added last since it has to take the slots from character/spellbook/inventory
+            this.uiRoot.AddChild(new HotkeyBarWindow());
         }
         
         public override void Render(double dt)
@@ -132,6 +134,24 @@ namespace AsperetaClient
                 return;
 
             this.uiRoot.HandleEvent(ev, 0, 0);
+
+            switch (ev.type)
+            {
+                case SDL.SDL_EventType.SDL_QUIT:
+                    SaveUserSettings();
+                    break;
+            }
+        }
+
+        public void SaveUserSettings()
+        {
+            foreach (var window in uiRoot.Children.Where(g => g is BaseWindow).Cast<BaseWindow>())
+            {
+                window.SaveState();
+            }
+
+            GameClient.GameSettings.SaveFile();
+            GameClient.UserSettings.SaveFile();
         }
 
         public void MoveKeyPressed(Direction direction)

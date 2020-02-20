@@ -104,7 +104,7 @@ namespace AsperetaClient
                 for (int x = 0; x < this.Width; x++)
                 {
                     var tileData = MapFile[x, y];
-                    var tile = new Tile(tileData.Blocked, tileData.Layers.Select(l => l > 0 ? GameClient.ResourceManager.GetTexture(l) : null).ToArray());
+                    var tile = new Tile(tileData.Blocked, tileData.Layers.Select(l => l > 0 ? GameClient.ResourceManager.GetTexture(l, usedInMap: true) : null).ToArray());
 
                     this[x, y] = tile;
                 }
@@ -277,10 +277,9 @@ namespace AsperetaClient
 
             foreach (var character in Characters)
             {
-                if (character == spellCastTarget) continue;
-
-                // Filter out things off screen
-                if (Math.Abs(character.TileX - player.TileX) > RangeX || 
+                // Filter out things off screen and current target
+                if (character == spellCastTarget || 
+                    Math.Abs(character.TileX - player.TileX) > RangeX || 
                     Math.Abs(character.TileY - player.TileY) > RangeY)
                 {
                     continue;
@@ -290,14 +289,11 @@ namespace AsperetaClient
 
                 if (characterPosition < lowestPosition)
                     lowestPosition = characterPosition;
-                if (characterPosition > highestPosition)
+                else if (characterPosition > highestPosition)
                     highestPosition = characterPosition;
 
-                if (searchDown && characterPosition > currentPosition && (closestPosition == currentPosition || currentPosition - closestPosition < currentPosition - characterPosition))
-                {
-                    closestPosition = characterPosition;
-                }
-                else if (!searchDown && characterPosition < currentPosition && (closestPosition == currentPosition || closestPosition - currentPosition < characterPosition - currentPosition))
+                if ((searchDown && characterPosition > currentPosition && (closestPosition == currentPosition || currentPosition - closestPosition < currentPosition - characterPosition))
+                    || (!searchDown && characterPosition < currentPosition && (closestPosition == currentPosition || closestPosition - currentPosition < characterPosition - currentPosition)))
                 {
                     closestPosition = characterPosition;
                 }
@@ -416,6 +412,8 @@ namespace AsperetaClient
 
         public void OnCastSpell(SpellSlot slot)
         {
+            if (Targeting) return;
+
             if (slot.Targetable)
             {
                 Targeting = true;
@@ -435,7 +433,7 @@ namespace AsperetaClient
             var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
             if (character == null) return;
 
-            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId);
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, spellAnimation: true);
             character.SpellAnimation = animation;
         }
 
@@ -446,7 +444,7 @@ namespace AsperetaClient
             if (!ValidTile(p.TileX, p.TileY))
                 return;
 
-            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId);
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, spellAnimation: true);
             var spellTileAnimation = new SpellTileAnimation(p.TileX, p.TileY, animation);
             SpellAnimations.Add(spellTileAnimation);
             this[p.TileX, p.TileY].SpellAnimation = spellTileAnimation;

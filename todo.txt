@@ -2,17 +2,6 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Show items on the ground
-Erase items on ground
-Pickup items on ground
-
-Fix typing in chat from opening windows
-Chat hotkey buttons
-Command aliases
-/quit
-
-Hotkey bar
-
 Buff bar
 
 Battletext
@@ -22,9 +11,27 @@ Option for fixed 2x scaling
 Option for fullscreen (with alt enter too)
 Option for borderless window
 
+Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
+
+Drop items from inventory
+Tab support for login screen
+
+Fix:
+Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at AsperetaClient.ResourceManager.GetAnimation(Int32 animationId) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 73
+   at AsperetaClient.Character.UpdateAnimation(Int32 id, DrawAnimations slot, AnimationType type, Colour colour) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 139
+   at AsperetaClient.Character.UpdateAnimations() in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 149
+   at AsperetaClient.Character.set_Facing(Direction value) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 47
+   at AsperetaClient.Map.OnChangeHeading(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 365
+   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
+   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
+   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 121
+
 ----------------------------------------------
 Future to complete client compatibility:
 
+Chat bubbles
 Tooltip for items on ground? Or should I do that with the other "item on ground" stuff?
 Fix tint colour rendering
 Fix textboxes to scroll properly
@@ -34,12 +41,29 @@ Vendor windows
 Combine bag window
 Button bar window
 Melee
-Fix window draw order so active window draws on top
-Remember window positions
-AD4 Warr sword renders too high. Spells render too high. Wonder if both of these problems are related
+
 
 ----------------------------------------------
 Future future extended things:
 
 Patcher
 Server browser (or at least a server selection screen from saved servers)
+
+
+----------------------------------------------
+Done:
+
+2020-02-19
+Show items on the ground
+Erase items on ground
+Pickup items on ground
+
+2020-02-20
+Fix typing in chat from opening windows
+AD4 Warr sword renders too high. Spells render too high. Wonder if both of these problems are related
+Fix window draw order so active window draws on top
+Chat hotkey buttons
+Command aliases
+/quit
+Hotkey bar
+Remember window positions

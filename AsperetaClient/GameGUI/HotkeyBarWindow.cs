@@ -7,10 +7,82 @@ namespace AsperetaClient
 {
     class HotkeyBarWindow : BaseWindow
     {
+        private HotkeySlot[] slots;
+        private int rows;
+        private int columns;
 
         public HotkeyBarWindow() : base("HotButtons")
         {
+            var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
+            rows = windim.ElementAt(0);
+            columns = windim.ElementAt(1);
 
+            var objoff = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
+
+            int offsetX = objoff.ElementAt(0);
+            int offsetY = objoff.ElementAt(1);
+
+            var objdim = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
+            int slotW = objdim.ElementAt(0);
+            int slotH = objdim.ElementAt(1);
+            
+            slots = new HotkeySlot[rows * columns];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < columns; c++)
+                {
+                    int x = offsetX + c * slotW;
+                    int y = offsetY + r * slotH;
+
+                    var slot = new HotkeySlot(x, y, slotW, slotH);
+                    this.AddChild(slot);
+
+                    slots[r * columns + c] = slot;
+                }
+            }
+
+            var inventoryWindow = UiRoot.Children.FirstOrDefault(c => c is InventoryWindow) as InventoryWindow;
+            var characterWindow = UiRoot.Children.FirstOrDefault(c => c is CharacterWindow) as CharacterWindow;
+            var spellbookWindow = UiRoot.Children.FirstOrDefault(c => c is SpellbookWindow) as SpellbookWindow;
+
+            var hotButtons = GameClient.UserSettings["HotButtonLocations"];
+            for (int i = 0; i <= 9; i++)
+            {
+                if (hotButtons.TryGetValue(i.ToString(), out string value))
+                {
+                    if (!int.TryParse(value, out int targetSlotNumber) || targetSlotNumber == 0)
+                        continue;
+
+                    int hotkeySlotNumber = (i + 9) % 10;
+                    targetSlotNumber--; // Saved data is 1-indexed, client is 0-indexed
+                    if (targetSlotNumber < inventoryWindow.slots.Length)
+                        this.slots[hotkeySlotNumber].SetSlot(inventoryWindow.slots[targetSlotNumber]);
+                    else if (targetSlotNumber < inventoryWindow.slots.Length + characterWindow.slots.Length + 1)
+                        this.slots[hotkeySlotNumber].SetSlot(characterWindow.slots[targetSlotNumber - inventoryWindow.slots.Length - 1]);
+                    else if (targetSlotNumber >= 100 && targetSlotNumber - 100 < spellbookWindow.slots.Length)
+                        this.slots[hotkeySlotNumber].SetSlot(spellbookWindow.slots[targetSlotNumber - 100]);
+                }
+            }
+        }
+
+        public override void SaveState()
+        {
+            base.SaveState();
+
+            var inventoryWindow = UiRoot.Children.FirstOrDefault(c => c is InventoryWindow) as InventoryWindow;
+
+            var hotButtons = GameClient.UserSettings["HotButtonLocations"];
+            for (int i = 0; i <= 9; i++)
+            {
+                int hotkeySlotNumber = (i + 9) % 10;
+                var slot = this.slots[hotkeySlotNumber].LinkedSlot;
+                if (slot == null)
+                    hotButtons[i.ToString()] = "0";
+                else if (slot is ItemSlot)
+                    hotButtons[i.ToString()] = (slot.SlotNumber + 1).ToString();
+                else if (slot is SpellSlot)
+                    hotButtons[i.ToString()] = (slot.SlotNumber + 101).ToString();
+            }
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
@@ -21,6 +93,20 @@ namespace AsperetaClient
                     if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F2)
                     {
                         this.Hidden = !this.Hidden;
+                        return true;
+                    }
+
+                    if ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE)
+                        return false;
+
+                    if (ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_0 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_9)
+                    {
+                        this.slots[(ev.key.keysym.sym - SDL.SDL_Keycode.SDLK_0 + 9) % 10].Use();
+                        return true;
+                    }
+                    else if (ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_KP_1 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_KP_0)
+                    {
+                        this.slots[ev.key.keysym.sym - SDL.SDL_Keycode.SDLK_KP_1].Use();
                         return true;
                     }
                     break;

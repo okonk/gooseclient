@@ -89,13 +89,11 @@ namespace AsperetaClient
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
                     if (Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {
-                        this.SetFocussed();
-                        SDL.SDL_StartTextInput();
+                        this.SetFocused();
                     }
-                    else
+                    else if (this.HasFocus)
                     {
-                        this.HasFocus = false;
-                        // TODO: Would be nice to be able to end text input if no other textboxes have focus
+                        this.RemoveFocused();
                     }
                     break;
                 case SDL.SDL_EventType.SDL_KEYDOWN:
@@ -172,11 +170,24 @@ namespace AsperetaClient
             this.CursorPosition = value.Length;
         }
 
-        public void SetFocussed()
+        public void SetFocused()
         {
+            UiRoot.FocusedTextBox = this;
+            SDL.SDL_StartTextInput();
+
             this.HasFocus = true;
             cursorFlashTime = 1; // Make cursor appear immediately
             cursorVisible = false;
+        }
+
+        public void RemoveFocused()
+        {
+            this.HasFocus = false;
+            if (UiRoot.FocusedTextBox == this)
+            {
+                SDL.SDL_StopTextInput();
+                UiRoot.FocusedTextBox = null;
+            }
         }
     }
 }

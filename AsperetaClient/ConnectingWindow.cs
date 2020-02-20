@@ -135,6 +135,8 @@ namespace AsperetaClient
             }
 
             GameClient.UserSettings = new IniFile(userSettingsPath);
+
+            GameClient.GameSettings["INIT"]["Name"] = username;
         }
     }
 }

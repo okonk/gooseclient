@@ -93,12 +93,18 @@ namespace AsperetaClient
                         lastMouseDragY = ev.motion.y;
                     }
 
-                    // TODO: Window with focus also becomes on top of other windows
                     this.HasFocus = Contains(xOffset, yOffset, ev.motion.x, ev.motion.y);
+                    if (this.HasFocus) return true;
                     break;
             }
 
             return false;
+        }
+
+        public virtual void SaveState()
+        {
+            GameClient.UserSettings[this.Name]["winloc"] = $"{X},{Y}";
+            GameClient.UserSettings[this.Name]["startup"] = Hidden ? "0" : "1";
         }
     }
 }

@@ -51,7 +51,7 @@ namespace AsperetaClient
             return texture;
         }
 
-        public Texture GetTexture(int frameId)
+        public Texture GetTexture(int frameId, bool usedInMap = false, bool usedInSpell = false)
         {
             var adfFile = this.AdfManager.FrameToFile[frameId];
 
@@ -62,17 +62,17 @@ namespace AsperetaClient
             var texture = GetSDLTexture(adfFile);
 
             var frame = adfFile.Frames[frameId];
-            frameTexture = new Texture(texture, frame.X, frame.Y, frame.W, frame.H);
+            frameTexture = new Texture(texture, frame.X, frame.Y, frame.W, frame.H, mapOffset: usedInMap, spellOffset: usedInSpell);
 
             this.FrameIdToTexture[frameId] = frameTexture;
             return frameTexture;
         }
 
-        public Animation GetAnimation(int animationId)
+        public Animation GetAnimation(int animationId, bool spellAnimation = false)
         {
             var animationData = this.AdfManager.Animations[animationId];
             var animation = new Animation();
-            animation.Frames = animationData.Frames.Select(f => GetTexture(f)).ToArray();
+            animation.Frames = animationData.Frames.Select(f => GetTexture(f, usedInSpell: spellAnimation)).ToArray();
             animation.Interval = 1.0d / animationData.Interval / 2;
 
             return animation;

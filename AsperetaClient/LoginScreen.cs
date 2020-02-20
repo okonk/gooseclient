@@ -12,7 +12,7 @@ namespace AsperetaClient
         private TextBox usernameTextbox;
         private TextBox passwordTextbox;
 
-        private BaseContainer guiContainer = new BaseContainer();
+        private RootPanel guiContainer = new RootPanel();
 
         // login box: 464, 328
         // login button: 544, 472

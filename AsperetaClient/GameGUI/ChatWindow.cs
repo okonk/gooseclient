@@ -15,6 +15,12 @@ namespace AsperetaClient
 
         private TextBox inputBox;
 
+        public bool Typing { get { return inputBox.HasFocus; } }
+
+        private string replyToName = null;
+
+        private Dictionary<string, string> commandAliases = new Dictionary<string, string>();
+
         public ChatWindow() : base("Chat")
         {
             var chatXY = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
@@ -39,6 +45,22 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<ServerMessagePacket>(OnServerMessage);
             GameClient.NetworkClient.PacketManager.Listen<ChatPacket>(OnChat);
             GameClient.NetworkClient.PacketManager.Listen<HashMessagePacket>(OnHashMessage);
+
+            LoadAliases();
+        }
+
+        private void LoadAliases()
+        {
+            var aliases = GameClient.UserSettings.Sections["Alias"];
+            foreach (var value in aliases.Values)
+            {
+                int comma = value.IndexOf(',');
+
+                string alias = value.Substring(0, comma);
+                string replacement = value.Substring(comma + 1);
+
+                commandAliases[alias.ToLowerInvariant()] = replacement;
+            }
         }
 
         public void OnServerMessage(object packet)
@@ -46,6 +68,11 @@ namespace AsperetaClient
             var p = (ServerMessagePacket)packet;
 
             chatListBox.AddLine(p.Colour, p.Message);
+
+            if (p.Colour == 6 && p.Message.StartsWith("[tell from] "))
+            {
+                replyToName = p.Message.Substring(12, p.Message.IndexOf(':') - 12);
+            }
         }
 
         public void OnChat(object packet)
@@ -69,8 +96,7 @@ namespace AsperetaClient
             {
                 if (message[0] == '/')
                 {
-                    // TODO: map aliases
-                    GameClient.NetworkClient.Command(message);
+                    HandleCommand(message);
                 }
                 else
                 {
@@ -79,13 +105,49 @@ namespace AsperetaClient
             }
 
             inputBox.SetValue("");
-            inputBox.HasFocus = false;
+            inputBox.RemoveFocused();
         }
 
         public void ChatEscapePressed()
         {
             inputBox.SetValue("");
-            inputBox.HasFocus = false;
+            inputBox.RemoveFocused();
+        }
+
+        public void HandleCommand(string commandText)
+        {
+            int space = commandText.IndexOf(' ');
+
+            string command = commandText;
+            if (space != -1)
+            {
+                command = commandText.Substring(0, space);
+            }
+
+            string replacedCommand = null;
+            if (commandAliases.TryGetValue(command.ToLowerInvariant(), out replacedCommand))
+            {
+                replacedCommand = replacedCommand + commandText.Substring(command.Length);
+            }
+            else
+            {
+                replacedCommand = commandText;
+            }
+
+            if (replacedCommand.ToLowerInvariant() == "/quit")
+            {
+                var quitEvent = new SDL.SDL_Event();
+                quitEvent.type = SDL.SDL_EventType.SDL_QUIT;
+                
+                SDL.SDL_PushEvent(ref quitEvent);
+            }
+            else
+            {
+                if (replacedCommand[0] == '/')
+                    GameClient.NetworkClient.Command(replacedCommand);
+                else
+                    GameClient.NetworkClient.ChatMessage(replacedCommand);
+            }
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
@@ -94,11 +156,34 @@ namespace AsperetaClient
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     if (!inputBox.HasFocus && 
-                            (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_SLASH || 
-                             ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || 
+                            (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || 
                              ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER))
                     {
-                        inputBox.SetFocussed();
+                        inputBox.SetFocused();
+                        return true;
+                    }
+                    else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_SLASH)
+                    {
+                        inputBox.SetValue("/");
+                        inputBox.SetFocused();
+                        return true;
+                    }
+                    else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_g)
+                    {
+                        inputBox.SetValue("/guild ");
+                        inputBox.SetFocused();
+                        return true;
+                    }
+                    else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_t)
+                    {
+                        inputBox.SetValue("/tell ");
+                        inputBox.SetFocused();
+                        return true;
+                    }
+                    else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_r)
+                    {
+                        inputBox.SetValue("/tell " + (replyToName == null ? "" : replyToName + " "));
+                        inputBox.SetFocused();
                         return true;
                     }
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F4)
