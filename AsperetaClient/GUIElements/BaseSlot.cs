@@ -17,6 +17,7 @@ namespace AsperetaClient
         protected Tooltip tooltip;
 
         public event Action<GuiElement> DoubleClicked;
+        public event Action<GuiElement> RightClicked;
 
         public BaseSlot(int slotNumber, int x, int y, int w, int h) : base(x, y, w, h)
         {
@@ -64,6 +65,10 @@ namespace AsperetaClient
                     if (ev.button.button == SDL.SDL_BUTTON_LEFT && ev.button.clicks == 2)
                     {
                         DoubleClicked?.Invoke(this);
+                    }
+                    else if (ev.button.button == SDL.SDL_BUTTON_RIGHT)
+                    {
+                        RightClicked?.Invoke(this);
                     }
 
                     break;

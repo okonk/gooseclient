@@ -89,6 +89,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<SpellTilePacket>(OnSpellTile);
             GameClient.NetworkClient.PacketManager.Listen<MapObjectPacket>(OnMapObject);
             GameClient.NetworkClient.PacketManager.Listen<EraseObjectPacket>(OnEraseObject);
+            GameClient.NetworkClient.PacketManager.Listen<BattleTextPacket>(OnBattleText);
         }
 
         public Tile this[int x, int y]
@@ -185,6 +186,7 @@ namespace AsperetaClient
 
                 character.RenderName(start_x, start_y);
                 character.RenderHPMPBars(start_x, start_y);
+                character.RenderBattleText(start_x, start_y);
             }
         }
 
@@ -470,6 +472,16 @@ namespace AsperetaClient
             var p = (EraseObjectPacket)packet;
 
             this[p.TileX, p.TileY].MapObject = null;
+        }
+
+        public void OnBattleText(object packet)
+        {
+            var p = (BattleTextPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.AddBattleText(p.BattleTextType, p.Text);
         }
     }
 }

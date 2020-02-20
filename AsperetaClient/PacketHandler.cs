@@ -74,6 +74,11 @@ namespace AsperetaClient
             this.index = prefix.Length;
         }
 
+        public string GetWholePacket()
+        {
+            return packet;
+        }
+
         public string GetRemaining()
         {
             if (index >= packet.Length)

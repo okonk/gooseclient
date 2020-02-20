@@ -1,20 +1,24 @@
+Battletext: 
+* White/probably other colours starts from about halfway up player and scroll until top of health bar
+* Red starts just below mana bar and slightly to the right. The more spam there is the lower down it starts. Zig zags left/right
+* Green is similar to red
+
 TODO list
 ----------------------------------------------
 Next release:
 
-Buff bar
-
-Battletext
+Melee
 
 Option for vsync
 Option for fixed 2x scaling
 Option for fullscreen (with alt enter too)
 Option for borderless window
 
-Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
-
 Drop items from inventory
 Tab support for login screen
+
+Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
+
 
 Fix:
 Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
@@ -31,6 +35,7 @@ Socket error receiving data: System.Collections.Generic.KeyNotFoundException: Th
 ----------------------------------------------
 Future to complete client compatibility:
 
+Script to build/package release
 Chat bubbles
 Tooltip for items on ground? Or should I do that with the other "item on ground" stuff?
 Fix tint colour rendering
@@ -41,6 +46,7 @@ Vendor windows
 Combine bag window
 Button bar window
 Melee
+GM name colours
 
 
 ----------------------------------------------
@@ -67,3 +73,5 @@ Command aliases
 /quit
 Hotkey bar
 Remember window positions
+Buff bar
+Battletext

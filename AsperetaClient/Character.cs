@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SDL2;
 
@@ -10,6 +11,29 @@ namespace AsperetaClient
         Right,
         Down,
         Left
+    }
+
+    class BattleTextLine
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public string Text { get; set; }
+        public Colour Colour { get; set; }
+        public double AliveTime { get; set; }
+
+        public void Update(double dt)
+        {
+            const int SPEED = 32; // pixels per second
+
+            AliveTime += dt;
+            Y -= SPEED * dt;
+        }
+
+        public void Render(int xOffset, int yOffset)
+        {
+            GameClient.FontRenderer.RenderText(Text, (int)X + xOffset + 1, (int)Y + yOffset + 1, Colour.Black);
+            GameClient.FontRenderer.RenderText(Text, (int)X + xOffset, (int)Y + yOffset, Colour);
+        }
     }
 
     class Character
@@ -75,6 +99,9 @@ namespace AsperetaClient
         public double MoveSpeedX { get; set; }
 
         public double MoveSpeedY { get; set; }
+
+        public List<BattleTextLine> BattleText { get; set; } = new List<BattleTextLine>();
+        private int battleTextPosition = 0;
 
         public Character(MakeCharacterPacket p)
         {
@@ -207,6 +234,8 @@ namespace AsperetaClient
                 if (RenderHPMPBarsTime >= 2)
                     ShouldRenderHPMPBars = false;
             }
+
+            UpdateBattleText(dt);
         }
 
         public void Render(int x_offset, int y_offset)
@@ -237,7 +266,7 @@ namespace AsperetaClient
         public void RenderName(int x_offset, int y_offset)
         {
             string name = (string.IsNullOrWhiteSpace(Title) ? "" : Title + " ") + Name + (string.IsNullOrWhiteSpace(Surname) ? "" : " " + Surname);
-            int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
+            int x = (this.PixelXi - x_offset) + this.GetXOffset() + this.GetWidth() / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
             int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 7;
 
             GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
@@ -248,11 +277,11 @@ namespace AsperetaClient
         {
             if (!ShouldRenderHPMPBars) return;
 
-            const int BAR_LENGTH = 24;
+            int BAR_LENGTH = this.GetWidth();
             const int HP_BAR_HEIGHT = 3;
             const int MP_BAR_HEIGHT = 2;
 
-            int x = (this.PixelXi - x_offset) + Constants.TileSize / 2 - BAR_LENGTH / 2;
+            int x = (this.PixelXi - x_offset) + this.GetXOffset() + this.GetWidth() / 2 - BAR_LENGTH / 2;
             int y = this.PixelYi - y_offset + this.GetYOffset() - 8;
 
             SDL.SDL_Rect rect;
@@ -276,6 +305,106 @@ namespace AsperetaClient
             rect.h = MP_BAR_HEIGHT;
             SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 0, 0, 248, 255);
             SDL.SDL_RenderFillRect(GameClient.Renderer, ref rect);
+        }
+
+        public void RenderBattleText(int xOffset, int yOffset)
+        {
+            foreach (var bt in BattleText)
+            {
+                bt.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
+            }
+        }
+
+        public void AddBattleText(BattleTextType type, string text)
+        {
+            if (BattleText.Count == 18) return;
+
+            var colour = Colour.White;
+            bool spread = false;
+
+            switch (type)
+            {
+                case BattleTextType.Red1:
+                case BattleTextType.Red2:
+                case BattleTextType.Red4:
+                case BattleTextType.Red5:
+                    colour = Colour.Red;
+                    spread = true;
+                    break;
+                case BattleTextType.Green7:
+                case BattleTextType.Green8:
+                    colour = Colour.Green;
+                    spread = true;
+                    break;
+                case BattleTextType.Stunned10:
+                case BattleTextType.Stunned50:
+                    text = "STUNNED";
+                    break;
+                case BattleTextType.Rooted11:
+                case BattleTextType.Rooted51:
+                    text = "ROOTED";
+                    break;
+                case BattleTextType.Dodge20:
+                    text = "DODGE";
+                    break;
+                case BattleTextType.Miss21:
+                    text = "MISS";
+                    break;
+                case BattleTextType.Yellow60:
+                    colour = Colour.Yellow;
+                    break;
+                case BattleTextType.Red61:
+                    colour = Colour.Red;
+                    break;
+            }
+
+            int x = this.GetXOffset() + 2; 
+            int y = this.GetYOffset();
+            if (!spread)
+            {
+                x += this.GetWidth() / 2 - (text.Length * GameClient.FontRenderer.CharWidth) / 2;
+                y += this.GetHeight() / 2;
+            }
+            else
+            {
+                if (BattleText.Count != 0)
+                {
+                    this.battleTextPosition = (this.battleTextPosition + 1) % 9;
+                }
+                else
+                {
+                    this.battleTextPosition = 0;
+                }
+
+                y += Math.Min(BattleText.Count / 3, 2) * 8;
+
+                if (this.battleTextPosition % 3 != 0)
+                {
+                    x += (this.battleTextPosition % 3 != 1 ? 12 : -4);
+                }
+                else
+                {
+                    x += 4;
+                }
+            }
+
+            BattleText.Add(new BattleTextLine() { X = x, Y = y, Colour = colour, Text = text });
+        }
+
+        public void UpdateBattleText(double dt)
+        {
+            for (int i = 0; i < BattleText.Count; i++)
+            {
+                var bt = BattleText[i];
+
+                bt.Update(dt);
+
+                if (bt.AliveTime >= 1)
+                {
+                    BattleText.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         public int GetWidth()

@@ -45,6 +45,8 @@ namespace AsperetaClient
             PacketManager.Register<SpellTilePacket>();
             PacketManager.Register<MapObjectPacket>();
             PacketManager.Register<EraseObjectPacket>();
+            PacketManager.Register<BuffBarPacket>();
+            PacketManager.Register<BattleTextPacket>();
         }
 
         public void Connect()
@@ -197,6 +199,11 @@ namespace AsperetaClient
         public void Get()
         {
             Send($"GET");
+        }
+
+        public void KillBuff(int slot)
+        {
+            Send($"KBUF{slot + 1}");
         }
     }
 }
