@@ -60,6 +60,7 @@ namespace AsperetaClient
         public void CreateGui()
         {
             this.uiRoot = new RootPanel();
+            this.uiRoot.DropWasUnhandled += OnDropWasUnhandled;
 
             this.uiRoot.AddChild(new ChatWindow());
             this.uiRoot.AddChild(new FpsWindow());
@@ -275,6 +276,23 @@ namespace AsperetaClient
             var p = (WeaponSpeedPacket)packet;
 
             weaponSpeed = p.Speed / 1000d;
+        }
+
+        public void OnDropWasUnhandled(object dropData)
+        {
+            if (dropData is ItemSlot)
+            {
+                var fromSlot = dropData as ItemSlot;
+
+                if (fromSlot.Parent is CharacterWindow)
+                {
+                    fromSlot.Use();
+                }
+                else if (fromSlot.Parent is InventoryWindow)
+                {
+                    GameClient.NetworkClient.DropItem(fromSlot.SlotNumber, fromSlot.StackSize);
+                }
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ namespace AsperetaClient
                         if (Contains(xOffset, yOffset, x, y))
                         {
                             object data = UiRoot.GetDragDropEventData(ev);
+                            UiRoot.SetDragDropHandled();
 
                             HandleDrop(data);
 

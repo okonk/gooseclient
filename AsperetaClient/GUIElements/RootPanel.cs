@@ -14,13 +14,15 @@ namespace AsperetaClient
         public int StartDragDropY { get; set; }
         public int DragDropX { get; set; }
         public int DragDropY { get; set; }
-
+        public bool DropWasHandled { get; set; } = false;
         public Dictionary<int, object> DragDropEventData { get; set; } = new Dictionary<int, object>();
 
         // Kind of ugly, but don't know what else to do, some parts of the UI need to know the player character
         public Character Player { get; set; }
 
         public TextBox FocusedTextBox { get; set; }
+
+        public event Action<object> DropWasUnhandled;
 
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
@@ -75,6 +77,9 @@ namespace AsperetaClient
             if (dragDropDataToRemove != null)
                 DragDropEventData.Remove(dragDropDataToRemove.GetHashCode());
 
+            if (!DropWasHandled)
+                this.DropWasUnhandled?.Invoke(dragDropDataToRemove);
+
             return returnVal;
         }
 
@@ -110,6 +115,7 @@ namespace AsperetaClient
             DragDropY = y;
             DragDropImage = image;
             DragDropData = data;
+            DropWasHandled = false;
         }
 
         private void AddDragDropEvent(int x, int y, object data)
@@ -132,6 +138,11 @@ namespace AsperetaClient
                 return data;
 
             return null;
+        }
+
+        public void SetDragDropHandled()
+        {
+            DropWasHandled = true;
         }
     }
 }

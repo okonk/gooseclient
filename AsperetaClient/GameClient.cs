@@ -61,13 +61,40 @@ namespace AsperetaClient
             }
             else
             {
+                GameSettings = new IniFile("Game.ini");
+                int windowWidth = ScreenWidth;
+                int windowHeight = ScreenHeight;
+                SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
+                SDL.SDL_RendererFlags renderFlags = SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
+
+                if (GameSettings.GetBool("INIT", "2xScale"))
+                {
+                    windowWidth = 640 * 2;
+                    windowHeight = 480 * 2;
+                }
+
+                if (GameSettings.GetBool("INIT", "VSync"))
+                {
+                    renderFlags |= SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
+                }
+
+                if (GameSettings.GetBool("INIT", "Fullscreen"))
+                {
+                    flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
+                }
+
+                if (GameSettings.GetBool("INIT", "BorderlessWindow"))
+                {
+                    flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+                }
+
                 Window = IntPtr.Zero;
                 Window = SDL.SDL_CreateWindow("Goose Client",
                     SDL.SDL_WINDOWPOS_CENTERED,
                     SDL.SDL_WINDOWPOS_CENTERED,
-                    ScreenWidth,
-                    ScreenHeight,
-                    SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE
+                    windowWidth,
+                    windowHeight,
+                    flags
                 );
 
                 if (Window == IntPtr.Zero)
@@ -76,11 +103,10 @@ namespace AsperetaClient
                 }
                 else
                 {
-                    Renderer = SDL.SDL_CreateRenderer(Window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+                    Renderer = SDL.SDL_CreateRenderer(Window, -1, renderFlags);
 
                     SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-                    GameSettings = new IniFile("Game.ini");
                     ServerInfoSettings = new IniFile("serverinfo.ini");
                     WindowSettings = new IniFile($"skins/{GameSettings["INIT"]["Skin"]}/Window.ini");
                     ButtonSettings = new IniFile($"skins/{GameSettings["INIT"]["Skin"]}/Button.ini");

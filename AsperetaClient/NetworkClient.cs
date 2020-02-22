@@ -212,5 +212,10 @@ namespace AsperetaClient
         {
             Send($"ATT");
         }
+
+        public void DropItem(int slot, int stackSize)
+        {
+            Send($"DRP{slot + 1},{stackSize}");
+        }
     }
 }

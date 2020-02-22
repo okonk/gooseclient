@@ -28,6 +28,7 @@ namespace AsperetaClient
 
         public event Action EnterPressed;
         public event Action EscapePressed;
+        public event Action TabPressed;
 
         public TextBox(int x, int y, int w, int h, Colour backgroundColour, Colour foregroundColour) : base(x, y, w, h, backgroundColour, foregroundColour)
         {
@@ -135,6 +136,10 @@ namespace AsperetaClient
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
                     {
                         EscapePressed?.Invoke();
+                    }
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+                    {
+                        TabPressed?.Invoke();
                     }
 
                     // To stop opening of inventory/etc windows while typing

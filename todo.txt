@@ -2,26 +2,11 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Fix chat opening windows...
-
-Option for vsync
-Option for fixed 2x scaling
-Option for fullscreen (with alt enter too)
-Option for borderless window
-
-Drop items from inventory
-Tab support for login screen
-
-Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
-
-chatbox TODO: Remove older lines when > some number of lines
-
-
-
 
 ----------------------------------------------
 Future to complete client compatibility:
 
+Loading screen on client launch (for loading datafiles)
 Script to build/package release
 Chat bubbles
 Tooltip for items on ground? Or should I do that with the other "item on ground" stuff?
@@ -39,6 +24,8 @@ Destroy button
 Reorder spellbook
 Split inventory items
 Emoticons
+Load login screen info from skin .ini files
+Support names/vita/etc commands and config settings
 
 
 ----------------------------------------------
@@ -69,16 +56,12 @@ Buff bar
 Battletext
 
 Melee
-
-
-Fix:
-Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
-   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at AsperetaClient.ResourceManager.GetAnimation(Int32 animationId) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 73
-   at AsperetaClient.Character.UpdateAnimation(Int32 id, DrawAnimations slot, AnimationType type, Colour colour) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 139
-   at AsperetaClient.Character.UpdateAnimations() in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 149
-   at AsperetaClient.Character.set_Facing(Direction value) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 47
-   at AsperetaClient.Map.OnChangeHeading(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 365
-   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
-   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
-   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 121
+Tab support for login screen -- plus focus tweaks to make nicer
+chatbox TODO: Remove older lines when > some number of lines
+Fixed illusions/errors when having stuff equipped that is either invalid or has no animation
+Drop items from inventory
+Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
+Option for vsync
+Option for fixed 2x scaling
+Option for fullscreen (with alt enter too)
+Option for borderless window

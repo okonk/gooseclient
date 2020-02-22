@@ -111,7 +111,8 @@ namespace AsperetaClient
                     this[x, y] = tile;
                 }
 
-                yield return (int)((y / (double)this.Height) * 100);
+                if (y % 10 == 0)
+                    yield return (int)((y / (double)this.Height) * 100);
             }
 
             Loaded = true;

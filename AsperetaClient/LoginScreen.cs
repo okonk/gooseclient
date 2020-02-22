@@ -38,13 +38,20 @@ namespace AsperetaClient
             background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/backdrop.bmp");
             loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/login_box.bmp");
 
-            usernameTextbox = new TextBox(608, 366, 125, 31, new Colour(192, 255, 192), Colour.Black) { HasFocus = true };
+            usernameTextbox = new TextBox(608, 366, 125, 31, new Colour(192, 255, 192), Colour.Black);
+            usernameTextbox.TabPressed += UsernameTabbed;
+
             passwordTextbox = new TextBox(608, 408, 125, 31, new Colour(192, 255, 192), Colour.Black) { PasswordMask = '*' };
             passwordTextbox.EnterPressed += Connect;
 
             usernameTextbox.SetValue(GameClient.GameSettings["INIT"]["Name"]);
             if (GameClient.GameSettings["INIT"].ContainsKey("Password"))
                 passwordTextbox.SetValue(GameClient.GameSettings["INIT"]["Password"]);
+
+            if (string.IsNullOrEmpty(usernameTextbox.Value))
+                usernameTextbox.SetFocused();
+            else
+                passwordTextbox.SetFocused();
 
             guiContainer.AddChild(usernameTextbox);
             guiContainer.AddChild(passwordTextbox);
@@ -104,6 +111,12 @@ namespace AsperetaClient
         {
             Console.WriteLine($"Socket error receiving data: {e}");
             GameClient.StateManager.RemoveState();
+        }
+
+        public void UsernameTabbed()
+        {
+            usernameTextbox.RemoveFocused();
+            passwordTextbox.SetFocused();
         }
     }
 }

@@ -67,6 +67,11 @@ namespace AsperetaClient
             return Convert.ToInt32(Sections[section][key]);
         }
 
+        public bool GetBool(string section, string key)
+        {
+            return Sections[section][key].ToLowerInvariant() == "true" || Sections[section][key] == "1";
+        }
+
         public IEnumerable<int> GetCoords(string section, string key)
         {
             return Sections[section][key].Split(',').Select(o => Convert.ToInt32(o));
