@@ -20,6 +20,8 @@ namespace AsperetaClient
 
         public Colour Colour { get; set; }
 
+        public event Action<Animation> AnimationFinished;
+
         public Animation()
         {
             this.Animating = true;
@@ -46,6 +48,9 @@ namespace AsperetaClient
             {
                 this.CurrentFrame = 0;
                 this.Finished = !this.Loop;
+
+                if (Finished)
+                    this.AnimationFinished?.Invoke(this);
             }
         }
 

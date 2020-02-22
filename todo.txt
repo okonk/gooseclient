@@ -7,8 +7,6 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Melee
-
 Option for vsync
 Option for fixed 2x scaling
 Option for fullscreen (with alt enter too)
@@ -19,18 +17,10 @@ Tab support for login screen
 
 Maybe decouple loading from framerate somehow? Or at least maybe load more per frame
 
+chatbox TODO: Remove older lines when > some number of lines
 
-Fix:
-Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
-   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at AsperetaClient.ResourceManager.GetAnimation(Int32 animationId) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 73
-   at AsperetaClient.Character.UpdateAnimation(Int32 id, DrawAnimations slot, AnimationType type, Colour colour) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 139
-   at AsperetaClient.Character.UpdateAnimations() in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 149
-   at AsperetaClient.Character.set_Facing(Direction value) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 47
-   at AsperetaClient.Map.OnChangeHeading(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 365
-   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
-   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
-   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 121
+
+
 
 ----------------------------------------------
 Future to complete client compatibility:
@@ -47,6 +37,11 @@ Combine bag window
 Button bar window
 Melee
 GM name colours
+Party window
+Destroy button
+Reorder spellbook
+Split inventory items
+Emoticons
 
 
 ----------------------------------------------
@@ -75,3 +70,18 @@ Hotkey bar
 Remember window positions
 Buff bar
 Battletext
+
+Melee
+
+
+Fix:
+Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at AsperetaClient.ResourceManager.GetAnimation(Int32 animationId) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 73
+   at AsperetaClient.Character.UpdateAnimation(Int32 id, DrawAnimations slot, AnimationType type, Colour colour) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 139
+   at AsperetaClient.Character.UpdateAnimations() in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 149
+   at AsperetaClient.Character.set_Facing(Direction value) in /home/hayden/code/GooseClient/AsperetaClient/Character.cs:line 47
+   at AsperetaClient.Map.OnChangeHeading(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 365
+   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
+   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
+   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 121

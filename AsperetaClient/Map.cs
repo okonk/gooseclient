@@ -68,7 +68,7 @@ namespace AsperetaClient
 
         public bool Loaded { get; private set; } = false;
 
-        public bool Targeting { get; private set; }= false;
+        public bool Targeting { get; private set; } = false;
         private Character spellCastTarget;
         private int spellCastSlotNumber;
         private Character player;
@@ -90,6 +90,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<MapObjectPacket>(OnMapObject);
             GameClient.NetworkClient.PacketManager.Listen<EraseObjectPacket>(OnEraseObject);
             GameClient.NetworkClient.PacketManager.Listen<BattleTextPacket>(OnBattleText);
+            GameClient.NetworkClient.PacketManager.Listen<AttackPacket>(OnAttack);
         }
 
         public Tile this[int x, int y]
@@ -315,7 +316,7 @@ namespace AsperetaClient
 
         public bool ValidTile(int x, int y)
         {
-            return x > 0 && y > 0 && x < Width && y < Height;
+            return x >= 0 && y >= 0 && x < Width && y < Height;
         }
 
         public bool CanMoveTo(int x, int y)
@@ -482,6 +483,16 @@ namespace AsperetaClient
             if (character == null) return;
 
             character.AddBattleText(p.BattleTextType, p.Text);
+        }
+
+        public void OnAttack(object packet)
+        {
+            var p = (AttackPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.Attack();
         }
     }
 }

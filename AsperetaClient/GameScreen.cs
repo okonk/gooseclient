@@ -17,6 +17,10 @@ namespace AsperetaClient
         private Direction moveKeyDirection = Direction.Down;
         private double moveKeyPressedTime = 0;
 
+        private double attackElapsedTime = 0;
+        private bool attacking = false;
+        private double weaponSpeed = 1;
+
         private RootPanel uiRoot;
 
         public GameScreen(int mapNumber, string mapName)
@@ -29,6 +33,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
             GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
+            GameClient.NetworkClient.PacketManager.Listen<WeaponSpeedPacket>(OnWeaponSpeed);
         }
 
         public override void Resuming()
@@ -92,7 +97,7 @@ namespace AsperetaClient
             byte[] keys = new byte[keysLength];
             Marshal.Copy(keysPtr, keys, 0, keysLength);
 
-            if (!Map.Targeting)
+            if (!Map.Targeting && uiRoot.FocusedTextBox == null)
             {
                 if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
                 {
@@ -115,6 +120,11 @@ namespace AsperetaClient
                     moveKeyDown = false;
                     moveKeyPressedTime = 0;
                 }
+
+                if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
+                {
+                    AttackKeyPressed();
+                }
             }
 
             this.Map.Update(dt);
@@ -122,6 +132,17 @@ namespace AsperetaClient
             if (moveKeyDown)
             {
                 moveKeyPressedTime += dt;
+            }
+
+            if (attacking)
+            {
+                attackElapsedTime += dt;
+
+                if (attackElapsedTime >= weaponSpeed)
+                {
+                    attackElapsedTime = 0;
+                    attacking = false;
+                }
             }
 
             this.uiRoot.Update(dt);
@@ -152,6 +173,17 @@ namespace AsperetaClient
 
             GameClient.GameSettings.SaveFile();
             GameClient.UserSettings.SaveFile();
+        }
+
+        public void AttackKeyPressed()
+        {
+            if (attacking) return;
+
+            attacking = true;
+            attackElapsedTime = 0;
+
+            player.Attack();
+            GameClient.NetworkClient.Attack();
         }
 
         public void MoveKeyPressed(Direction direction)
@@ -236,6 +268,13 @@ namespace AsperetaClient
 
             player.SetPosition(p.MapX, p.MapY);
             Map[player.TileX, player.TileY].Character = player;
+        }
+
+        public void OnWeaponSpeed(object packet)
+        {
+            var p = (WeaponSpeedPacket)packet;
+
+            weaponSpeed = p.Speed / 1000d;
         }
     }
 }

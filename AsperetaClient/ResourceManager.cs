@@ -70,7 +70,9 @@ namespace AsperetaClient
 
         public Animation GetAnimation(int animationId, bool spellAnimation = false)
         {
-            var animationData = this.AdfManager.Animations[animationId];
+            if (!this.AdfManager.Animations.TryGetValue(animationId, out AnimationData animationData))
+                return null;
+
             var animation = new Animation();
             animation.Frames = animationData.Frames.Select(f => GetTexture(f, usedInSpell: spellAnimation)).ToArray();
             animation.Interval = 1.0d / animationData.Interval / 2;

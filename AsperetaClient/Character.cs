@@ -78,6 +78,7 @@ namespace AsperetaClient
         public Animation SpellAnimation { get; set; }
 
         public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
+
         
         public int FaceId { get; set; }
 
@@ -149,6 +150,12 @@ namespace AsperetaClient
 
         public void UpdateAnimation(int id, DrawAnimations slot, AnimationType type, Colour colour = null)
         {
+            if (this.BodyId >= 100 && slot != DrawAnimations.Body)
+            {
+                this.EquippedAnimations[(int)slot] = null;
+                return;
+            }
+
             if (id == 0)
             {
                 this.EquippedAnimations[(int)slot] = null;
@@ -163,10 +170,22 @@ namespace AsperetaClient
                 return;
             }
 
-            var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[(this.BodyState - 1) + ((int)this.Facing) * 4]);
-            //animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
+            int attackOffset = (Attacking ? 16 : 0);
+            var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[attackOffset + (this.BodyState - 1) + ((int)this.Facing) * 4]);
+            if (animation == null)
+            {
+                this.EquippedAnimations[(int)slot] = null;
+                return;
+            }
+
+            // animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
             animation.SetAnimating(Moving | Attacking);
             animation.Colour = colour;
+            if (Attacking)
+            {
+                animation.AnimationFinished += OnAttackAnimationFinished;
+                // animation.Interval = (AttackSpeed / 1000d) / (animation.Frames.Length + 1);
+            }
 
             this.EquippedAnimations[(int)slot] = animation;
         }
@@ -182,6 +201,12 @@ namespace AsperetaClient
             UpdateAnimation(this.DisplayedEquipment[3][0], DrawAnimations.Feet, AnimationType.Feet, EquipmentColour(3));
             UpdateAnimation(this.DisplayedEquipment[4][0], DrawAnimations.Shield, AnimationType.Hand, EquipmentColour(4));
             UpdateAnimation(this.DisplayedEquipment[5][0], DrawAnimations.Weapon, AnimationType.Hand, EquipmentColour(5));
+        }
+
+        public void OnAttackAnimationFinished(Animation animation)
+        {
+            Attacking = false;
+            this.UpdateAnimations();
         }
 
         public Colour EquipmentColour(int i)
@@ -243,6 +268,14 @@ namespace AsperetaClient
             switch (Facing)
             {
                 case Direction.Right:
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    for (int i = 0; i < EquippedAnimations.Length - 2; i++)
+                    {
+                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    }
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    break;
+
                 case Direction.Up:
                     EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
@@ -251,6 +284,7 @@ namespace AsperetaClient
                         EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     }
                     break;
+                    
                 case Direction.Down:
                 case Direction.Left:
                     foreach (var animation in this.EquippedAnimations)
@@ -432,6 +466,7 @@ namespace AsperetaClient
             Moving = true;
             MoveSpeedX = 0;
             MoveSpeedY = 0;
+            Attacking = false;
 
             if (destY < TileY)
             {
@@ -480,6 +515,13 @@ namespace AsperetaClient
             this.HairColour = new Colour(p.HairR, p.HairG, p.HairB, p.HairA);
 
             this.DisplayedEquipment = p.DisplayedEquipment;
+
+            this.UpdateAnimations();
+        }
+
+        public void Attack()
+        {
+            Attacking = true;
 
             this.UpdateAnimations();
         }

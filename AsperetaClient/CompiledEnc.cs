@@ -85,7 +85,7 @@ namespace AsperetaClient
             {
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    AnimationType type = (AnimationType)Convert.ToInt32(reader.ReadInt16()) - 1;
+                    AnimationType type = (AnimationType)reader.ReadInt16() - 1;
                     int id = reader.ReadInt32();
 
                     var animation = new CompiledAnimation(type, id);
