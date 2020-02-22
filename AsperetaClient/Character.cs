@@ -393,7 +393,7 @@ namespace AsperetaClient
                     break;
             }
 
-            int x = this.GetXOffset() + 2; 
+            int x = this.GetXOffset(); 
             int y = this.GetYOffset();
             if (!spread)
             {

@@ -13,6 +13,8 @@ namespace AsperetaClient
 
         public HotkeyBarWindow() : base("HotButtons")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_F2;
+
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
             rows = windim.ElementAt(0);
             columns = windim.ElementAt(1);
@@ -90,12 +92,6 @@ namespace AsperetaClient
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F2)
-                    {
-                        this.Hidden = !this.Hidden;
-                        return true;
-                    }
-
                     if ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE)
                         return false;
 

@@ -14,6 +14,8 @@ namespace AsperetaClient
 
         public InventoryWindow() : base("Inventory")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_i;
+
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
             rows = windim.ElementAt(0);
             columns = windim.ElementAt(1);
@@ -44,22 +46,6 @@ namespace AsperetaClient
             }
 
             GameClient.NetworkClient.PacketManager.Listen<InventorySlotPacket>(OnInventorySlot);
-        }
-
-        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
-        {
-            switch (ev.type)
-            {
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_i)
-                    {
-                        this.Hidden = !this.Hidden;
-                        return true;
-                    }
-                    break;
-            }
-
-            return base.HandleEvent(ev, xOffset, yOffset);
         }
 
         public void OnInventorySlot(object packet)

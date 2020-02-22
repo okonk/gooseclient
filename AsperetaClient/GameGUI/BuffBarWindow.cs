@@ -14,6 +14,8 @@ namespace AsperetaClient
 
         public BuffBarWindow() : base("SpellEffects")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_F3;
+
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
             rows = windim.ElementAt(0);
             columns = windim.ElementAt(1);
@@ -44,22 +46,6 @@ namespace AsperetaClient
             }
 
             GameClient.NetworkClient.PacketManager.Listen<BuffBarPacket>(OnBuffBar);
-        }
-
-        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
-        {
-            switch (ev.type)
-            {
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F3)
-                    {
-                        this.Hidden = !this.Hidden;
-                        return true;
-                    }
-                    break;
-            }
-
-            return base.HandleEvent(ev, xOffset, yOffset);
         }
 
         public void OnBuffBar(object packet)

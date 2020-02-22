@@ -101,8 +101,12 @@ namespace AsperetaClient
                 lines.Add(new ChatLine(colour, line));
             }
 
-            // TODO: Remove older lines when > some number of lines
- 
+            if (lines.Count > 500)
+            {
+                int toRemove = lines.Count - 500;
+                lines.RemoveRange(0, toRemove);
+                lastViewIndex = Math.Max(0, lastViewIndex - toRemove);
+            }
         }
 
         private IEnumerable<string> WordWrap(string input)

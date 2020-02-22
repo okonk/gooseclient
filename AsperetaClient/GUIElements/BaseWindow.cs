@@ -20,6 +20,8 @@ namespace AsperetaClient
         private int lastMouseDragX = 0;
         private int lastMouseDragY = 0;
 
+        protected SDL.SDL_Keycode hideShortcutKey;
+
         public BaseWindow(string windowName)
         {
             this.Name = windowName;
@@ -56,7 +58,15 @@ namespace AsperetaClient
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
-            if (Hidden) return false;
+            if (Hidden)
+            {
+                if (ev.type == SDL.SDL_EventType.SDL_KEYDOWN && UiRoot.FocusedTextBox == null && ev.key.keysym.sym == hideShortcutKey)
+                {
+                    Hidden = false;
+                }
+
+                return false;
+            }
 
             bool preventFurtherEvents = base.HandleEvent(ev, xOffset, yOffset);
             if (preventFurtherEvents)
@@ -64,6 +74,13 @@ namespace AsperetaClient
 
             switch (ev.type)
             {
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (UiRoot.FocusedTextBox == null && ev.key.keysym.sym == hideShortcutKey)
+                    {
+                        this.Hidden = !this.Hidden;
+                        return true;
+                    }
+                    break;
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     if (ev.button.button == SDL.SDL_BUTTON_LEFT && Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {

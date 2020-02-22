@@ -16,6 +16,8 @@ namespace AsperetaClient
 
         public SpellbookWindow() : base("SpellBook")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_s;
+
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
             rows = windim.ElementAt(0);
             columns = windim.ElementAt(1);
@@ -46,22 +48,6 @@ namespace AsperetaClient
             }
 
             GameClient.NetworkClient.PacketManager.Listen<SpellbookSlotPacket>(OnSpellbookSlot);
-        }
-
-        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
-        {
-            switch (ev.type)
-            {
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_s)
-                    {
-                        this.Hidden = !this.Hidden;
-                        return true;
-                    }
-                    break;
-            }
-
-            return base.HandleEvent(ev, xOffset, yOffset);
         }
 
         public void OnSpellbookSlot(object packet)

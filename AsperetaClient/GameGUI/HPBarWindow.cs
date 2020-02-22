@@ -9,6 +9,7 @@ namespace AsperetaClient
     {
         public HPBarWindow() : base("HPbar")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_F6;
             GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
         }
 
@@ -18,22 +19,6 @@ namespace AsperetaClient
 
             this.value = p.CurrentHP;
             this.maxValue = p.MaxHP;
-        }
-
-        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
-        {
-            switch (ev.type)
-            {
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F6)
-                    {
-                        this.Hidden = !this.Hidden;
-                        return true;
-                    }
-                    break;
-            }
-
-            return base.HandleEvent(ev, xOffset, yOffset);
         }
     }
 }

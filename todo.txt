@@ -1,11 +1,8 @@
-Battletext: 
-* White/probably other colours starts from about halfway up player and scroll until top of health bar
-* Red starts just below mana bar and slightly to the right. The more spam there is the lower down it starts. Zig zags left/right
-* Green is similar to red
-
 TODO list
 ----------------------------------------------
 Next release:
+
+Fix chat opening windows...
 
 Option for vsync
 Option for fixed 2x scaling

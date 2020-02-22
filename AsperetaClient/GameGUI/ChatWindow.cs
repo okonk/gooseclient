@@ -7,7 +7,6 @@ using SDL2;
 namespace AsperetaClient
 {
     // TODO: Handle input history (up/down to load previous messages)
-    // TODO: Handle shortcuts like g, t, r for /guild, /tell, reply /tell
 
     class ChatWindow : BaseWindow
     {
@@ -23,6 +22,8 @@ namespace AsperetaClient
 
         public ChatWindow() : base("Chat")
         {
+            hideShortcutKey = SDL.SDL_Keycode.SDLK_F4;
+
             var chatXY = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
             var chatWH = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
             var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
@@ -184,11 +185,6 @@ namespace AsperetaClient
                     {
                         inputBox.SetValue("/tell " + (replyToName == null ? "" : replyToName + " "));
                         inputBox.SetFocused();
-                        return true;
-                    }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_F4)
-                    {
-                        this.Hidden = !this.Hidden;
                         return true;
                     }
                     break;
