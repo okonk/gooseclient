@@ -82,9 +82,9 @@ namespace AsperetaClient
         
         public override void Render(double dt)
         {
-            int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize;
+            int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize / 2;
             int half_y = GameClient.ScreenHeight / 2 - Constants.TileSize;
-            int start_x = player != null ? player.PixelXi - half_x - (player.GetWidth() / 2) : 0;
+            int start_x = player != null ? player.PixelXi - half_x : 0;
             int start_y = player != null ? player.PixelYi - half_y : 0;
 
             Map.Render(start_x, start_y);
