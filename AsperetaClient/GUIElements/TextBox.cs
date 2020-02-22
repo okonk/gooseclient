@@ -178,7 +178,6 @@ namespace AsperetaClient
         public void SetFocused()
         {
             UiRoot.FocusedTextBox = this;
-            SDL.SDL_StartTextInput();
 
             this.HasFocus = true;
             cursorFlashTime = 1; // Make cursor appear immediately
@@ -190,7 +189,6 @@ namespace AsperetaClient
             this.HasFocus = false;
             if (UiRoot.FocusedTextBox == this)
             {
-                SDL.SDL_StopTextInput();
                 UiRoot.FocusedTextBox = null;
             }
         }

@@ -2,30 +2,27 @@ TODO list
 ----------------------------------------------
 Next release:
 
-
-----------------------------------------------
-Future to complete client compatibility:
-
-Loading screen on client launch (for loading datafiles)
-Script to build/package release
 Chat bubbles
 Tooltip for items on ground? Or should I do that with the other "item on ground" stuff?
 Fix tint colour rendering
 Fix textboxes to scroll properly
 Chat input history with up/down arrows in chatbox
+Emoticons
 Right click show item stats (this is a generic window, so things like ranks will auto work too)
 Vendor windows
 Combine bag window
 Button bar window
-Melee
 GM name colours
 Party window
 Destroy button
 Reorder spellbook
 Split inventory items
-Emoticons
+Loading screen on client launch (for loading datafiles)
+Script to build/package release
 Load login screen info from skin .ini files
 Support names/vita/etc commands and config settings
+Alt enter
+Hide console window
 
 
 ----------------------------------------------
@@ -65,3 +62,11 @@ Option for vsync
 Option for fixed 2x scaling
 Option for fullscreen (with alt enter too)
 Option for borderless window
+
+
+
+
+build script:
+dotnet publish -c Release -r win-x64 --self-contained false
+dotnet publish -c Release -r osx-x64 --self-contained false
+dotnet publish -c Release -r linux-x64 --self-contained false

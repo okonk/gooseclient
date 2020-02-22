@@ -20,6 +20,8 @@ namespace AsperetaClient
 
         private Dictionary<string, string> commandAliases = new Dictionary<string, string>();
 
+        private bool ignoreTextInput = false;
+
         public ChatWindow() : base("Chat")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F4;
@@ -155,6 +157,13 @@ namespace AsperetaClient
         {
             switch (ev.type)
             {
+                case SDL.SDL_EventType.SDL_TEXTINPUT:
+                    if (ignoreTextInput)
+                    {
+                        ignoreTextInput = false;
+                        return true;
+                    }
+                    break;
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     if (!inputBox.HasFocus && 
                             (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || 
@@ -167,24 +176,28 @@ namespace AsperetaClient
                     {
                         inputBox.SetValue("/");
                         inputBox.SetFocused();
+                        ignoreTextInput = true;
                         return true;
                     }
                     else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_g)
                     {
                         inputBox.SetValue("/guild ");
                         inputBox.SetFocused();
+                        ignoreTextInput = true;
                         return true;
                     }
                     else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_t)
                     {
                         inputBox.SetValue("/tell ");
                         inputBox.SetFocused();
+                        ignoreTextInput = true;
                         return true;
                     }
                     else if (!inputBox.HasFocus && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_r)
                     {
                         inputBox.SetValue("/tell " + (replyToName == null ? "" : replyToName + " "));
                         inputBox.SetFocused();
+                        ignoreTextInput = true;
                         return true;
                     }
                     break;

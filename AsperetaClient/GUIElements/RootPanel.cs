@@ -26,7 +26,7 @@ namespace AsperetaClient
 
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
-            SDL.SDL_StopTextInput();
+
         }
 
         public RootPanel(int x, int y, int w, int h) : base(x, y, w, h)

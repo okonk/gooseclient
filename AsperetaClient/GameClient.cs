@@ -83,9 +83,9 @@ namespace AsperetaClient
                     flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
                 }
 
-                if (GameSettings.GetBool("INIT", "BorderlessWindow"))
+                if (GameSettings.GetBool("INIT", "FullscreenBorderless"))
                 {
-                    flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+                    flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
                 }
 
                 Window = IntPtr.Zero;
@@ -117,6 +117,8 @@ namespace AsperetaClient
                     StateManager.AppendState(new LoginScreen());
 
                     RegisterCustomEvents();
+
+                    SDL.SDL_StartTextInput();
 
                     long lastUpdate = Stopwatch.GetTimestamp();
 
