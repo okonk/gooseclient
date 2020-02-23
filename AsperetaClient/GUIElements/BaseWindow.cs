@@ -169,6 +169,8 @@ namespace AsperetaClient
                         lastMouseDragX = ev.button.x;
                         lastMouseDragY = ev.button.y;
 
+                        UiRoot.BringToFront(this);
+
                         return true;
                     }
                     break;

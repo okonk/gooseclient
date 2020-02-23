@@ -244,5 +244,10 @@ namespace AsperetaClient
         {
             Send($"VSI{npcId},{slotId + 1},{stackSize}");
         }
+
+        public void GetItemDetails(int itemId)
+        {
+            Send($"GID{itemId}");
+        }
     }
 }

@@ -144,14 +144,14 @@ namespace AsperetaClient
             foreach (var gui in Children.ToArray())
             {
                 gui.Update(dt);
-
-                if (gui is BaseWindow && (gui.HasFocus || (gui is ChatWindow && ((ChatWindow)gui).Typing)))
-                {
-                    // Bump window to be rendered on top
-                    Children.Remove(gui);
-                    Children.Add(gui);
-                }
             }
+        }
+
+        public void BringToFront(GuiElement element)
+        {
+            // Bump window to be rendered on top
+            Children.Remove(element);
+            Children.Add(element);
         }
 
         public void StartDragDrop(int x, int y, Texture image, object data)

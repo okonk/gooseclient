@@ -349,6 +349,9 @@ namespace AsperetaClient
                 case WindowFrames.Vendor:
                     this.uiRoot.AddChild(new VendorWindow(p));
                     break;
+                case WindowFrames.GenericInfo:
+                    this.uiRoot.AddChild(new GenericInfoWindow(p));
+                    break;
             }
         }
 

@@ -21,6 +21,7 @@ namespace AsperetaClient
 
                     var slot = new VendorSlot(r * columns + c, x, y, objW, objH);
                     slot.DoubleClicked += OnSlotDoubleClicked;
+                    slot.RightClicked += OnSlotRightClicked;
                     this.AddChild(slot);
 
                     slots[r * columns + c] = slot;
@@ -31,6 +32,11 @@ namespace AsperetaClient
         public void OnSlotDoubleClicked(GuiElement element)
         {
             GameClient.NetworkClient.VendorPurchaseItem(this.NpcId, ((VendorSlot)element).SlotNumber);
+        }
+
+        public void OnSlotRightClicked(GuiElement element)
+        {
+            GameClient.NetworkClient.GetItemDetails(((VendorSlot)element).ItemId);
         }
 
         protected override void HandleWindowLine(WindowLinePacket p)
