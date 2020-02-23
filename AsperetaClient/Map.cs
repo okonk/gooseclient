@@ -495,5 +495,21 @@ namespace AsperetaClient
 
             character.Attack();
         }
+
+        public void OnRightClick(int offsetX, int offsetY, int clickX, int clickY)
+        {
+            foreach (var character in Characters)
+            {
+                int charX = character.PixelXi - offsetX + character.GetXOffset();
+                int charY = character.PixelYi - offsetY + character.GetYOffset();
+
+                if (clickX >= charX && clickX <= charX + character.GetWidth() && 
+                    clickY >= charY && clickY <= charY + character.GetHeight())
+                {
+                    GameClient.NetworkClient.RightClick(character.TileX, character.TileY);
+                    return;
+                }
+            }
+        }
     }
 }

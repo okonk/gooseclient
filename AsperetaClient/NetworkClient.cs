@@ -49,6 +49,8 @@ namespace AsperetaClient
             PacketManager.Register<BattleTextPacket>();
             PacketManager.Register<AttackPacket>();
             PacketManager.Register<WeaponSpeedPacket>();
+            PacketManager.Register<MakeWindowPacket>();
+            PacketManager.Register<EndWindowPacket>();
         }
 
         public void Connect()
@@ -216,6 +218,31 @@ namespace AsperetaClient
         public void DropItem(int slot, int stackSize)
         {
             Send($"DRP{slot + 1},{stackSize}");
+        }
+
+        public void LeftClick(int tileX, int tileY)
+        {
+            Send($"LC{tileX + 1},{tileY + 1}");
+        }
+
+        public void RightClick(int tileX, int tileY)
+        {
+            Send($"RC{tileX + 1},{tileY + 1}");
+        }
+
+        public void WindowButtonClick(int buttonId, int windowId, int npcId, int unknownId1 = 0, int unknownId2 = 0)
+        {
+            Send($"WBC{buttonId},{windowId},{npcId},{unknownId1},{unknownId2}");
+        }
+
+        public void VendorPurchaseItem(int npcId, int slotId)
+        {
+            Send($"VPI{npcId},{slotId + 1}");
+        }
+
+        public void VendorSellItem(int npcId, int slotId, int stackSize)
+        {
+            Send($"VSI{npcId},{slotId + 1},{stackSize}");
         }
     }
 }

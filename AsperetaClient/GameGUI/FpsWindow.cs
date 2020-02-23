@@ -16,8 +16,7 @@ namespace AsperetaClient
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F5;
 
-            var objoff = GameClient.WindowSettings.GetCoords("FPS", "objoff");
-            fpsLabel = new Label(objoff.ElementAt(0) + 2, objoff.ElementAt(1) + 1, Colour.White, "FPS 100");
+            fpsLabel = new Label(objoffX + 2, objoffY + 1, Colour.White, "FPS 100");
             this.AddChild(fpsLabel);
         }
 

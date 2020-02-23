@@ -505,6 +505,8 @@ namespace AsperetaClient
             PixelY = TileY * Constants.TileSize;
             MoveSpeedX = 0;
             MoveSpeedY = 0;
+
+            this.UpdateAnimations();
         }
 
         public void UpdateCharacter(UpdateCharacterPacket p)

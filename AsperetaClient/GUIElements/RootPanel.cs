@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using SDL2;
 
@@ -24,6 +25,10 @@ namespace AsperetaClient
 
         public event Action<object> DropWasUnhandled;
 
+        public event Action<int, int> LeftClickUnhandled;
+        public event Action<int, int> DoubleClickUnhandled;
+        public event Action<int, int> RightClickUnhandled;
+
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
 
@@ -42,7 +47,26 @@ namespace AsperetaClient
             {
                 case SDL.SDL_EventType.SDL_USEREVENT:
                     if (ev.user.type == GameClient.DRAG_DROP_EVENT_ID)
+                    {
                         dragDropDataToRemove = GetDragDropEventData(ev);
+                        int x = ev.user.code >> 16;
+                        int y = ev.user.code & 0xFFFF;
+
+                        bool droppedOnWindow = false;
+                        foreach (var element in Children.Where(c => c is BaseWindow).Cast<BaseWindow>())
+                        {
+                            if (!element.Hidden && element.Contains(xOffset, yOffset, x, y))
+                            {
+                                droppedOnWindow = true;
+                                break;
+                            }
+                        }
+
+                        if (!droppedOnWindow)
+                        {
+                            this.DropWasUnhandled?.Invoke(dragDropDataToRemove);
+                        }
+                    }
                     break;
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
                     if (IsDragging && ev.button.button == SDL.SDL_BUTTON_LEFT)
@@ -60,6 +84,33 @@ namespace AsperetaClient
                         DragDropImage = null;
                         DragDropData = null;
                     }
+                    else if (ev.button.button == SDL.SDL_BUTTON_LEFT || ev.button.button == SDL.SDL_BUTTON_RIGHT)
+                    {
+                        bool clickedWindow = false;
+                        foreach (var element in Children.Where(c => c is BaseWindow).Cast<BaseWindow>())
+                        {
+                            if (!element.Hidden && element.Contains(xOffset, yOffset, ev.button.x, ev.button.y))
+                            {
+                                clickedWindow = true;
+                                break;
+                            }
+                        }
+
+                        if (!clickedWindow)
+                        {
+                            if (ev.button.button == SDL.SDL_BUTTON_LEFT)
+                            {
+                                if (ev.button.clicks == 1)
+                                    LeftClickUnhandled?.Invoke(ev.button.x, ev.button.y);
+                                else
+                                    DoubleClickUnhandled?.Invoke(ev.button.x, ev.button.y);
+                            }
+                            else
+                            {
+                                RightClickUnhandled?.Invoke(ev.button.x, ev.button.y);
+                            }
+                        }
+                    }
 
                     break;
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
@@ -76,9 +127,6 @@ namespace AsperetaClient
 
             if (dragDropDataToRemove != null)
                 DragDropEventData.Remove(dragDropDataToRemove.GetHashCode());
-
-            if (!DropWasHandled)
-                this.DropWasUnhandled?.Invoke(dragDropDataToRemove);
 
             return returnVal;
         }

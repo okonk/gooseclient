@@ -8,35 +8,20 @@ namespace AsperetaClient
     class HotkeyBarWindow : BaseWindow
     {
         private HotkeySlot[] slots;
-        private int rows;
-        private int columns;
 
         public HotkeyBarWindow() : base("HotButtons")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F2;
-
-            var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
-            rows = windim.ElementAt(0);
-            columns = windim.ElementAt(1);
-
-            var objoff = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
-
-            int offsetX = objoff.ElementAt(0);
-            int offsetY = objoff.ElementAt(1);
-
-            var objdim = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
-            int slotW = objdim.ElementAt(0);
-            int slotH = objdim.ElementAt(1);
             
             slots = new HotkeySlot[rows * columns];
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < columns; c++)
                 {
-                    int x = offsetX + c * slotW;
-                    int y = offsetY + r * slotH;
+                    int x = objoffX + c * objW;
+                    int y = objoffY + r * objH;
 
-                    var slot = new HotkeySlot(x, y, slotW, slotH);
+                    var slot = new HotkeySlot(x, y, objW, objH);
                     this.AddChild(slot);
 
                     slots[r * columns + c] = slot;

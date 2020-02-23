@@ -7,7 +7,13 @@ namespace AsperetaClient
 {
     class BaseWindow : BaseContainer
     {
+        public int WindowId { get; set; }
+
         public string Name { get; private set; }
+
+        public string Title { get; set; }
+
+        public int NpcId { get; set; }
 
         public bool Hidden { get; set; } = false;
 
@@ -20,7 +26,21 @@ namespace AsperetaClient
         private int lastMouseDragX = 0;
         private int lastMouseDragY = 0;
 
-        protected SDL.SDL_Keycode hideShortcutKey;
+        protected int rows;
+        protected int columns;
+        protected int objoffX;
+        protected int objoffY;
+        protected int objW;
+        protected int objH;
+
+        protected bool createdByServer = false;
+
+        protected int unknownId1;
+        protected int unknownId2;
+
+        protected Label titleLabel;
+
+        protected SDL.SDL_Keycode hideShortcutKey = 0;
 
         public BaseWindow(string windowName)
         {
@@ -28,10 +48,24 @@ namespace AsperetaClient
 
             background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings[windowName]["image"]}");
 
-            var winloc = GameClient.UserSettings.GetCoords(windowName, "winloc");
+            int winX = 0;
+            int winY = 0;
+
+            if (GameClient.UserSettings.Sections.ContainsKey(windowName))
+            {
+                var winloc = GameClient.UserSettings.GetCoords(windowName, "winloc");
+                winX = winloc.ElementAt(0);
+                winY = winloc.ElementAt(1);
+            }
+            else
+            {
+                winX = -1;
+                winY = -1;
+            }
+
             SDL.SDL_Rect rect;
-            rect.x = winloc.ElementAt(0);
-            rect.y = winloc.ElementAt(1);
+            rect.x = winX;
+            rect.y = winY;
             rect.w = background.W;
             rect.h = background.H;
 
@@ -40,11 +74,58 @@ namespace AsperetaClient
             this.HasFocus = false;
             this.ZIndex = -1;
 
-            Hidden = GameClient.UserSettings[windowName]["startup"] == "0";
+            if (GameClient.UserSettings.Sections.ContainsKey(windowName))
+                Hidden = GameClient.UserSettings[windowName]["startup"] == "0";
+            else
+                Hidden = true;
 
             var alphas = GameClient.WindowSettings.GetCoords(windowName, "focus");
             unfocusAlpha = alphas.ElementAt(0);
             focusAlpha = alphas.ElementAt(1);
+
+            var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
+            rows = windim.ElementAt(0);
+            columns = windim.ElementAt(1);
+
+            var objoff = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
+
+            objoffX = objoff.ElementAt(0);
+            objoffY = objoff.ElementAt(1);
+
+            var objdim = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
+            objW = objdim.ElementAt(0);
+            objH = objdim.ElementAt(1);
+
+            if (GameClient.WindowSettings.Sections[this.Name].ContainsKey("cboff"))
+            {
+                var cboff = GameClient.WindowSettings.GetCoords(this.Name, "cboff");
+                var cbdim = GameClient.WindowSettings.GetCoords(this.Name, "cbdim");
+                var closeButton = new Button(cboff.ElementAt(0), cboff.ElementAt(1), cbdim.ElementAt(0), cbdim.ElementAt(1));
+                closeButton.Clicked += OnCloseButtonClicked;
+                this.AddChild(closeButton);
+            }
+
+            if (GameClient.WindowSettings.Sections[this.Name].ContainsKey("title"))
+            {
+                var titleCoord = GameClient.WindowSettings.GetCoords(this.Name, "title");
+                titleLabel = new Label(titleCoord.ElementAt(0) + 4, titleCoord.ElementAt(1), Colour.White, this.Title);
+                this.AddChild(titleLabel);
+            }
+
+            GameClient.NetworkClient.PacketManager.Listen<WindowLinePacket>(OnWindowLine);
+        }
+
+        public BaseWindow(MakeWindowPacket p, string windowName) : this(windowName)
+        {
+            this.WindowId = p.WindowId;
+            this.Title = p.Title;
+            this.NpcId = p.NpcId;
+            this.unknownId1 = p.Unknown1;
+            this.unknownId2 = p.Unknown2;
+            this.createdByServer = true;
+
+            if (titleLabel != null)
+                titleLabel.Value = this.Title;
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
@@ -75,7 +156,7 @@ namespace AsperetaClient
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (UiRoot.FocusedTextBox == null && ev.key.keysym.sym == hideShortcutKey)
+                    if (UiRoot.FocusedTextBox == null && hideShortcutKey != 0 && ev.key.keysym.sym == hideShortcutKey)
                     {
                         this.Hidden = !this.Hidden;
                         return true;
@@ -103,8 +184,8 @@ namespace AsperetaClient
                     if (mouseDown)
                     {
                         // Can't use the xrel since it's relative to desktop, not our window/scaling
-                        this.Rect.x += (ev.motion.x - lastMouseDragX);
-                        this.Rect.y += (ev.motion.y - lastMouseDragY);
+                        this.Rect.x = this.X + (ev.motion.x - lastMouseDragX);
+                        this.Rect.y = this.Y + (ev.motion.y - lastMouseDragY);
 
                         lastMouseDragX = ev.motion.x;
                         lastMouseDragY = ev.motion.y;
@@ -120,8 +201,34 @@ namespace AsperetaClient
 
         public virtual void SaveState()
         {
+            if (createdByServer) return;
+
             GameClient.UserSettings[this.Name]["winloc"] = $"{X},{Y}";
             GameClient.UserSettings[this.Name]["startup"] = Hidden ? "0" : "1";
+        }
+
+        public void OnWindowLine(object packet)
+        {
+            var p = (WindowLinePacket)packet;
+
+            if (p.WindowId != this.WindowId) return;
+
+            HandleWindowLine(p);
+        }
+
+        protected virtual void HandleWindowLine(WindowLinePacket p)
+        {
+            
+        }
+
+        public virtual void EndWindow()
+        {
+            Hidden = false;
+        }
+
+        public virtual void OnCloseButtonClicked(Button b)
+        {
+            this.Hidden = true;
         }
     }
 }

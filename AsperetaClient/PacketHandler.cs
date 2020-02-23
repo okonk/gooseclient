@@ -44,7 +44,7 @@ namespace AsperetaClient
 
         public void Handle(string packet)
         {
-            for (int i = 0; i < packet.Length; i++)
+            for (int i = 0; i < Math.Min(8, packet.Length); i++)
             {
                 if (handlers.TryGetValue(packet.Substring(0, i + 1), out PacketHandler handler))
                 {
@@ -124,6 +124,12 @@ namespace AsperetaClient
         {
             return Convert.ToInt64(GetNextToken());
         }
+
+        public bool GetBool()
+        {
+            return GetNextToken() != "0";
+        }
+
         public string GetString()
         {
             return GetNextToken();

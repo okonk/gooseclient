@@ -7,10 +7,7 @@ namespace AsperetaClient
 {
     class CharacterWindow : BaseWindow
     {
-        private int windowId;
         public ItemSlot[] slots;
-        private int rows;
-        private int columns;
         private int inventorySlots;
 
         private Label name;
@@ -36,20 +33,7 @@ namespace AsperetaClient
         public CharacterWindow() : base("Character")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_c;
-            this.windowId = 11;
-
-            var windim = GameClient.WindowSettings.GetCoords(this.Name, "windim");
-            rows = windim.ElementAt(0);
-            columns = windim.ElementAt(1);
-
-            var objoff = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
-
-            int offsetX = objoff.ElementAt(0);
-            int offsetY = objoff.ElementAt(1);
-
-            var objdim = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
-            int slotW = objdim.ElementAt(0);
-            int slotH = objdim.ElementAt(1);
+            this.WindowId = 11;
 
             var inventorywindim = GameClient.WindowSettings.GetCoords("Inventory", "windim");
             inventorySlots = inventorywindim.ElementAt(0) * inventorywindim.ElementAt(1);
@@ -61,10 +45,10 @@ namespace AsperetaClient
                 {
                     var equip = GameClient.WindowSettings.GetCoords(this.Name, $"equip{r * columns + c + 1}");
 
-                    int x = offsetX + equip.ElementAt(0);
-                    int y = offsetY + equip.ElementAt(1);
+                    int x = objoffX + equip.ElementAt(0);
+                    int y = objoffY + equip.ElementAt(1);
 
-                    var slot = new ItemSlot(inventorySlots + r * columns + c + 1, x, y, slotW, slotH);
+                    var slot = new ItemSlot(inventorySlots + r * columns + c + 1, x, y, objW, objH);
                     slot.DoubleClicked += OnSlotDoubleClicked;
                     this.AddChild(slot);
 
@@ -92,15 +76,8 @@ namespace AsperetaClient
             air = CreateLabel("air");
             spirit = CreateLabel("spirit");
 
-            var cboff = GameClient.WindowSettings.GetCoords(this.Name, "cboff");
-            var cbdim = GameClient.WindowSettings.GetCoords(this.Name, "cbdim");
-            var closeButton = new Button(cboff.ElementAt(0), cboff.ElementAt(1), cbdim.ElementAt(0), cbdim.ElementAt(1));
-            closeButton.Clicked += (b) => { this.Hidden = true; };
-            this.AddChild(closeButton);
-
             GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
             GameClient.NetworkClient.PacketManager.Listen<ExperienceBarPacket>(OnExperienceBar);
-            GameClient.NetworkClient.PacketManager.Listen<WindowLinePacket>(OnWindowLine);
         }
 
         private Label CreateLabel(string settingKey)
@@ -148,12 +125,8 @@ namespace AsperetaClient
             GameClient.NetworkClient.Use(((ItemSlot)element).SlotNumber);
         }
 
-        public void OnWindowLine(object packet)
+        protected override void HandleWindowLine(WindowLinePacket p)
         {
-            var p = (WindowLinePacket)packet;
-
-            if (p.WindowId != this.windowId) return;
-
             if (p.ItemId == 0)
             {
                 slots[p.LineNumber].Clear();

@@ -17,6 +17,8 @@ namespace AsperetaClient
         private Direction moveKeyDirection = Direction.Down;
         private double moveKeyPressedTime = 0;
 
+        private bool moveDelay = false;
+        private double moveDelayElapsedTime = 0;
         private double attackElapsedTime = 0;
         private bool attacking = false;
         private double weaponSpeed = 1;
@@ -34,6 +36,8 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
             GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
             GameClient.NetworkClient.PacketManager.Listen<WeaponSpeedPacket>(OnWeaponSpeed);
+            GameClient.NetworkClient.PacketManager.Listen<MakeWindowPacket>(OnMakeWindow);
+            GameClient.NetworkClient.PacketManager.Listen<EndWindowPacket>(OnEndWindow);
         }
 
         public override void Resuming()
@@ -61,6 +65,7 @@ namespace AsperetaClient
         {
             this.uiRoot = new RootPanel();
             this.uiRoot.DropWasUnhandled += OnDropWasUnhandled;
+            this.uiRoot.RightClickUnhandled += OnRightClick;
 
             this.uiRoot.AddChild(new ChatWindow());
             this.uiRoot.AddChild(new FpsWindow());
@@ -80,13 +85,27 @@ namespace AsperetaClient
             // This needs to be added last since it has to take the slots from character/spellbook/inventory
             this.uiRoot.AddChild(new HotkeyBarWindow());
         }
+
+        private int RenderOffsetX()
+        {
+            int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize / 2;
+            int start_x = player != null ? player.PixelXi - half_x : 0;
+
+            return start_x;
+        }
+
+        private int RenderOffsetY()
+        {
+            int half_y = GameClient.ScreenHeight / 2 - Constants.TileSize;
+            int start_y = player != null ? player.PixelYi - half_y : 0;
+
+            return start_y;
+        }
         
         public override void Render(double dt)
         {
-            int half_x = GameClient.ScreenWidth / 2 - Constants.TileSize / 2;
-            int half_y = GameClient.ScreenHeight / 2 - Constants.TileSize;
-            int start_x = player != null ? player.PixelXi - half_x : 0;
-            int start_y = player != null ? player.PixelYi - half_y : 0;
+            int start_x = RenderOffsetX();
+            int start_y = RenderOffsetY();
 
             Map.Render(start_x, start_y);
             this.uiRoot.Render(dt, 0, 0);
@@ -133,6 +152,17 @@ namespace AsperetaClient
             if (moveKeyDown)
             {
                 moveKeyPressedTime += dt;
+            }
+
+            if (moveDelay)
+            {
+                moveDelayElapsedTime += dt;
+
+                if (moveDelayElapsedTime >= 0.5)
+                {
+                    moveDelay = false;
+                    moveDelayElapsedTime = 0;
+                }
             }
 
             if (attacking)
@@ -187,9 +217,15 @@ namespace AsperetaClient
             GameClient.NetworkClient.Attack();
         }
 
+        public bool CanMove()
+        {
+            return !this.uiRoot.Children.Any(c => c is VendorWindow);
+        }
+
         public void MoveKeyPressed(Direction direction)
         {
-            if (player == null || player.Moving) return;
+            if (player == null || player.Moving || moveDelay) return;
+            if (!CanMove()) return;
 
             bool delay = true;
             if (!moveKeyDown || moveKeyDirection != direction)
@@ -269,6 +305,7 @@ namespace AsperetaClient
 
             player.SetPosition(p.MapX, p.MapY);
             Map[player.TileX, player.TileY].Character = player;
+            moveDelay = true;
         }
 
         public void OnWeaponSpeed(object packet)
@@ -293,6 +330,36 @@ namespace AsperetaClient
                     GameClient.NetworkClient.DropItem(fromSlot.SlotNumber, fromSlot.StackSize);
                 }
             }
+        }
+
+        public void OnRightClick(int x, int y)
+        {
+            int startX = RenderOffsetX();
+            int startY = RenderOffsetY();
+
+            Map.OnRightClick(startX, startY, x, y);
+        }
+
+        public void OnMakeWindow(object packet)
+        {
+            var p = (MakeWindowPacket)packet;
+
+            switch (p.WindowFrame)
+            {
+                case WindowFrames.Vendor:
+                    this.uiRoot.AddChild(new VendorWindow(p));
+                    break;
+            }
+        }
+
+        public void OnEndWindow(object packet)
+        {
+            var p = (EndWindowPacket)packet;
+
+            var window = this.uiRoot.Children.Where(w => w is BaseWindow).Cast<BaseWindow>()
+                .FirstOrDefault(w => w.WindowId == p.WindowId);
+
+            window?.EndWindow();
         }
     }
 }
