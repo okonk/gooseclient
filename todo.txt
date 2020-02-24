@@ -2,19 +2,18 @@ TODO list
 ----------------------------------------------
 Next release:
 
+Party window
+Combine bag window
+Destroy button
+Bug with dragging windows to edge of screen
+Tooltip for items on ground
 Chat bubbles
-Tooltip for items on ground? Or should I do that with the other "item on ground" stuff?
 Fix tint colour rendering
 Fix textboxes to scroll properly
 Chat input history with up/down arrows in chatbox
 Emoticons
-Right click show item stats (this is a generic window, so things like ranks will auto work too)
-Vendor windows
-Combine bag window
 Button bar window
 GM name colours
-Party window
-Destroy button
 Reorder spellbook
 Split inventory items
 Loading screen on client launch (for loading datafiles)
@@ -23,6 +22,7 @@ Load login screen info from skin .ini files
 Support names/vita/etc commands and config settings
 Alt enter
 Hide console window
+Rounded tooltips
 
 
 ----------------------------------------------
@@ -52,6 +52,7 @@ Remember window positions
 Buff bar
 Battletext
 
+2020-02-22
 Melee
 Tab support for login screen -- plus focus tweaks to make nicer
 chatbox TODO: Remove older lines when > some number of lines
@@ -64,9 +65,18 @@ Option for fullscreen (with alt enter too)
 Option for borderless window
 
 
-
-
 build script:
 dotnet publish -c Release -r win-x64 --self-contained false
 dotnet publish -c Release -r osx-x64 --self-contained false
 dotnet publish -c Release -r linux-x64 --self-contained false
+
+
+2020-02-23
+Vendor windows
+Ranks window
+Item description window
+
+
+2020-02-24
+when first loading in and trying to type with a number in the chat, it casts spell (need to test, may be fixed now)
+Support button_close for vendor windows in other skin

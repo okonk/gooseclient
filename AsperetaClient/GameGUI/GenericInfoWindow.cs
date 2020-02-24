@@ -19,7 +19,7 @@ namespace AsperetaClient
                     int x = objoffX + c * objW;
                     int y = objoffY + r * objH;
 
-                    var label = new Label(x + 4, y, Colour.White, "");
+                    var label = new Label(x + 5, y, Colour.White, "");
                     this.AddChild(label);
 
                     lines[r * columns + c] = label;

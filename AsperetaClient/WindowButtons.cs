@@ -2,11 +2,10 @@ namespace AsperetaClient
 {
     public enum WindowButtons
     {
-        Exit = 0,
-        Combine,
+        Combine = 0,
         Close,
         Back,
         Next,
-        ShowOk
+        OK
     }
 }

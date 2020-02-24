@@ -74,6 +74,8 @@ namespace AsperetaClient
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
+            if (UiRoot.FocusedTextBox != null) return false;
+
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:

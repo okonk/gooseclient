@@ -126,6 +126,28 @@ namespace AsperetaClient
 
             if (titleLabel != null)
                 titleLabel.Value = this.Title;
+
+            for (int i = 0; i < p.Buttons.Length; i++)
+            {
+                if (!p.Buttons[i]) continue;
+
+                string buttonKey = "button_" + ((WindowButtons)i).ToString().ToLowerInvariant();
+                if (GameClient.WindowSettings.Sections[this.Name].ContainsKey(buttonKey))
+                {
+                    var buttonSection = GameClient.ButtonSettings.Sections[((WindowButtons)i).ToString()];
+                    var buttonTextures = buttonSection["image"].Split(',');
+
+                    var upTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{buttonTextures[0]}");
+                    var downTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{buttonTextures[1]}");
+
+                    var buttonCoords = GameClient.WindowSettings.GetCoords(this.Name, buttonKey);
+                    var button = new Button(buttonCoords.ElementAt(0), buttonCoords.ElementAt(1), upTexture.W, upTexture.H);
+                    button.UpTexture = upTexture;
+                    button.DownTexture = downTexture;
+                    button.Clicked += CreateClickLambda((WindowButtons)i);
+                    this.AddChild(button);
+                }
+            }
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
@@ -231,6 +253,21 @@ namespace AsperetaClient
         public virtual void OnCloseButtonClicked(Button b)
         {
             this.Hidden = true;
+        }
+
+        public virtual void OnWindowButtonClicked(Button button, WindowButtons buttonType)
+        {
+            switch (buttonType)
+            {
+                case WindowButtons.Close:
+                    OnCloseButtonClicked(button);
+                    break;
+            }
+        }
+
+        public Action<Button> CreateClickLambda(WindowButtons buttonType)
+        {
+            return (e) => OnWindowButtonClicked(e, buttonType);
         }
     }
 }

@@ -232,7 +232,7 @@ namespace AsperetaClient
 
         public void WindowButtonClick(int buttonId, int windowId, int npcId, int unknownId1 = 0, int unknownId2 = 0)
         {
-            Send($"WBC{buttonId},{windowId},{npcId},{unknownId1},{unknownId2}");
+            Send($"WBC{buttonId + 1},{windowId},{npcId},{unknownId1},{unknownId2}");
         }
 
         public void VendorPurchaseItem(int npcId, int slotId)
