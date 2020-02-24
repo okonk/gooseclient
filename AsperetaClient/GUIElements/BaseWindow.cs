@@ -216,7 +216,6 @@ namespace AsperetaClient
                     }
 
                     this.HasFocus = Contains(xOffset, yOffset, ev.motion.x, ev.motion.y);
-                    if (this.HasFocus) return true;
                     break;
             }
 
@@ -268,6 +267,11 @@ namespace AsperetaClient
         public Action<Button> CreateClickLambda(WindowButtons buttonType)
         {
             return (e) => OnWindowButtonClicked(e, buttonType);
+        }
+
+        public void ToggleHidden()
+        {
+            Hidden = !Hidden;
         }
     }
 }

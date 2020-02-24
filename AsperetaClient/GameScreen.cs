@@ -73,6 +73,8 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new HPBarWindow());
             this.uiRoot.AddChild(new MPBarWindow());
             this.uiRoot.AddChild(new XPBarWindow());
+            this.uiRoot.AddChild(new PartyWindow());
+            this.uiRoot.AddChild(new ButtonBarWindow());
 
             this.uiRoot.AddChild(new CharacterWindow());
 

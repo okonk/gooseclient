@@ -12,6 +12,7 @@ namespace AsperetaClient
         public XPBarWindow() : base("XPbar")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F9;
+            tooltipText = "Experience Points";
 
             GameClient.NetworkClient.PacketManager.Listen<ExperienceBarPacket>(OnExperienceBar);
         }

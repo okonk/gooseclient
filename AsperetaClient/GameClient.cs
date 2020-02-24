@@ -170,5 +170,13 @@ namespace AsperetaClient
         {
             DRAG_DROP_EVENT_ID = SDL.SDL_RegisterEvents(1);
         }
+
+        public static void Quit()
+        {
+            var quitEvent = new SDL.SDL_Event();
+            quitEvent.type = SDL.SDL_EventType.SDL_QUIT;
+            
+            SDL.SDL_PushEvent(ref quitEvent);
+        }
     }
 }

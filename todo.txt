@@ -2,17 +2,26 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Party window
+Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at AsperetaClient.ResourceManager.GetTexture(Int32 frameId, Boolean usedInMap, Boolean usedInSpell) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 56
+   at AsperetaClient.BuffSlot.SetSlot(String name, Int32 graphicId) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BuffSlot.cs:line 18
+   at AsperetaClient.BuffBarWindow.OnBuffBar(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/BuffBarWindow.cs:line 45
+   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
+   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
+   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 127
+
+
+Tooltip for items on ground
 Combine bag window
+name colour when in party with someone
 Destroy button
 Bug with dragging windows to edge of screen
-Tooltip for items on ground
 Chat bubbles
 Fix tint colour rendering
 Fix textboxes to scroll properly
 Chat input history with up/down arrows in chatbox
 Emoticons
-Button bar window
 GM name colours
 Reorder spellbook
 Split inventory items
@@ -80,3 +89,6 @@ Item description window
 2020-02-24
 when first loading in and trying to type with a number in the chat, it casts spell (need to test, may be fixed now)
 Support button_close for vendor windows in other skin
+Party window
+Button bar window -- tooltips need to move to left if they go off screen
+tooltips on hp/mp/sp/xp bars

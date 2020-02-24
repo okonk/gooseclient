@@ -139,10 +139,7 @@ namespace AsperetaClient
 
             if (replacedCommand.ToLowerInvariant() == "/quit")
             {
-                var quitEvent = new SDL.SDL_Event();
-                quitEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                
-                SDL.SDL_PushEvent(ref quitEvent);
+                GameClient.Quit();
             }
             else
             {

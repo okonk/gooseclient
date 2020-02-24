@@ -13,23 +13,14 @@ namespace AsperetaClient
 
         private Texture barTexture;
 
-        private int barX;
-        private int barY;
-        private int barW;
-        private int barH;
+        protected string tooltipText = "";
+
+        protected Tooltip tooltip;
 
         public StatBarWindow(string windowName) : base(windowName)
         {
             var barImage = GameClient.WindowSettings[this.Name]["image2"];
             barTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{barImage}");
-
-            var barXY = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
-            var barWH = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
-
-            barX = barXY.ElementAt(0);
-            barY = barXY.ElementAt(1);
-            barW = barWH.ElementAt(0);
-            barH = barWH.ElementAt(1);
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
@@ -38,19 +29,56 @@ namespace AsperetaClient
 
             base.Render(dt, xOffset, yOffset);
 
-            int w = (int)(barW * GetPercentage());
+            int w = (int)(objW * GetPercentage());
 
-            barTexture.RenderClipped(X + barX + xOffset, barY + Y + yOffset, w, barH);
+            barTexture.RenderClipped(X + objoffX + xOffset, objoffY + Y + yOffset, w, objH);
 
             var label = value.ToString();
-            int labelX = barX + barW - (label.Length * GameClient.FontRenderer.CharWidth);
+            int labelX = objoffX + objW - (label.Length * GameClient.FontRenderer.CharWidth);
 
-            GameClient.FontRenderer.RenderText(label, labelX + X + xOffset, barY + Y + yOffset + (barH / 2) - GameClient.FontRenderer.CharHeight / 2, Colour.White);
+            GameClient.FontRenderer.RenderText(label, labelX + X + xOffset, objoffY + Y + yOffset + (objH / 2) - GameClient.FontRenderer.CharHeight / 2, Colour.White);
+
+            // TODO: HACK FOR NOW
+            tooltip?.Render(dt, xOffset, yOffset);
         }
 
         protected virtual double GetPercentage()
         {
             return ((double)value / maxValue);
+        }
+
+        public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
+        {
+            switch (ev.type)
+            {
+                case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                    bool contains = Contains(X + objoffX + xOffset, objoffY + Y + yOffset, objW, objH, ev.motion.x, ev.motion.y);
+                    
+                    if (contains)
+                    {
+                        int x = ev.motion.x;
+                        int y = ev.motion.y - GameClient.FontRenderer.CharHeight - 10;
+
+                        if (tooltip == null)
+                        {
+                            tooltip = new Tooltip(x, y, Colour.Black, Colour.White, tooltipText);
+                            this.AddChild(tooltip);
+                        }
+                        else
+                        {
+                            tooltip.SetPosition(x, y);
+                        }
+                    }
+                    else if (tooltip != null)
+                    {
+                        this.RemoveChild(tooltip);
+                        tooltip = null;
+                    }
+
+                    break;
+            }
+
+            return base.HandleEvent(ev, xOffset, yOffset);
         }
     }
 }

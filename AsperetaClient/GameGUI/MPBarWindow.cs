@@ -10,6 +10,7 @@ namespace AsperetaClient
         public MPBarWindow() : base("MPbar")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F7;
+            tooltipText = "Mana Points";
 
             GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
         }

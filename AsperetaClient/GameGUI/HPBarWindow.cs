@@ -10,6 +10,8 @@ namespace AsperetaClient
         public HPBarWindow() : base("HPbar")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F6;
+            tooltipText = "Hit Points";
+
             GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
         }
 

@@ -16,6 +16,9 @@ namespace AsperetaClient
         {
             this.Padding = 6;
             this.Value = value;
+
+            if (x + W > GameClient.ScreenWidth)
+                Rect.x = GameClient.ScreenWidth - W;
         }
 
         public override void Render(double dt, int xOffset, int yOffset)
@@ -34,6 +37,15 @@ namespace AsperetaClient
             SDL.SDL_RenderDrawRect(GameClient.Renderer, ref dRect);
 
             GameClient.FontRenderer.RenderText(Value, x + Padding, y + 3, ForegroundColour);
+        }
+
+        public override void SetPosition(int x, int y)
+        {
+            if (x + W > GameClient.ScreenWidth)
+                Rect.x = GameClient.ScreenWidth - W;
+            else
+                Rect.x = x;
+            Rect.y = y;
         }
     }
 }

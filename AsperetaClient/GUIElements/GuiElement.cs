@@ -99,7 +99,13 @@ namespace AsperetaClient
                     check_y >= this.Y + yOffset && check_y <= this.Y + yOffset + this.H);
         }
 
-        public void SetPosition(int x, int y)
+        public bool Contains(int x, int y, int w, int h, int check_x, int check_y)
+        {
+            return (check_x >= x && check_x <= x + w &&
+                    check_y >= y && check_y <= y + h);
+        }
+
+        public virtual void SetPosition(int x, int y)
         {
             Rect.x = x;
             Rect.y = y;

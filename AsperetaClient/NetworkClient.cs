@@ -51,6 +51,7 @@ namespace AsperetaClient
             PacketManager.Register<WeaponSpeedPacket>();
             PacketManager.Register<MakeWindowPacket>();
             PacketManager.Register<EndWindowPacket>();
+            PacketManager.Register<GroupUpdatePacket>();
         }
 
         public void Connect()
@@ -248,6 +249,11 @@ namespace AsperetaClient
         public void GetItemDetails(int itemId)
         {
             Send($"GID{itemId}");
+        }
+
+        public void OpenCombineBag()
+        {
+            Send($"OCB");
         }
     }
 }
