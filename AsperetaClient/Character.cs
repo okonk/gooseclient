@@ -287,11 +287,18 @@ namespace AsperetaClient
                     break;
                     
                 case Direction.Down:
-                case Direction.Left:
                     foreach (var animation in this.EquippedAnimations)
                     {
                         animation?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     }
+                    break;
+                case Direction.Left:
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    for (int i = 0; i < EquippedAnimations.Length - 2; i++)
+                    {
+                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    }
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
                     break;
             }
 

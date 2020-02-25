@@ -261,6 +261,10 @@ namespace AsperetaClient
                 case WindowButtons.Close:
                     OnCloseButtonClicked(button);
                     break;
+                default:
+                    GameClient.NetworkClient.WindowButtonClick((int)buttonType, this.WindowId, this.NpcId, unknownId1, unknownId2);
+                    break;
+                
             }
         }
 

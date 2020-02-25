@@ -11,9 +11,16 @@ Socket error receiving data: System.Collections.Generic.KeyNotFoundException: Th
    at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
    at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 127
 
+Unhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at AsperetaClient.ButtonBarWindow.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/ButtonBarWindow.cs:line 80
+   at AsperetaClient.BaseContainer.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 40
+   at AsperetaClient.RootPanel.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/RootPanel.cs:line 126
+   at AsperetaClient.GameScreen.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/GameScreen.cs:line 190
+   at AsperetaClient.StateManager.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 106
+   at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 138
+   at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11
 
 Tooltip for items on ground
-Combine bag window
 name colour when in party with someone
 Destroy button
 Bug with dragging windows to edge of screen
@@ -92,3 +99,7 @@ Support button_close for vendor windows in other skin
 Party window
 Button bar window -- tooltips need to move to left if they go off screen
 tooltips on hp/mp/sp/xp bars
+
+2020-02-25
+facing left, weapon needs to draw below body
+Combine bag window

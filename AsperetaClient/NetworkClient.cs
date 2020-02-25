@@ -192,9 +192,21 @@ namespace AsperetaClient
         }
 
         // SPLITslotid1,slotid2
-        // ITWinvslot,windowid,windowslot
-        // WTIwindowid,windowslot,invslot
-        // WTWfromWindowId,fromWindowSlot,toWindowId,toWindowSlot
+
+        public void InventoryToWindow(int fromSlot, int windowId, int toSlot)
+        {
+            Send($"ITW{fromSlot + 1},{windowId},{toSlot + 1}");
+        }
+
+        public void WindowToInventory(int windowId, int fromSlot, int toSlot)
+        {
+            Send($"WTI{windowId},{fromSlot + 1},{toSlot + 1}");
+        }
+
+        public void WindowToWindow(int fromWindowId, int fromSlot, int toWindowId, int toSlot)
+        {
+            Send($"WTW{fromWindowId},{fromSlot + 1},{toWindowId},{toSlot + 1}");
+        }
 
         public void Cast(int slot, int targetId)
         {

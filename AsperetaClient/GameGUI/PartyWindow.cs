@@ -86,7 +86,8 @@ namespace AsperetaClient
 
                 if (oldLine != null)
                 {
-                    loginIdToLine[oldLine.LoginId] = null;
+                    if (loginIdToLine.ContainsKey(oldLine.LoginId)) 
+                        loginIdToLine.Remove(oldLine.LoginId);
                     lines[p.LineNumber] = null;
                 }
             }

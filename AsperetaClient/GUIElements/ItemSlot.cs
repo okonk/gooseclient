@@ -46,7 +46,22 @@ namespace AsperetaClient
                 }
                 else
                 {
-                    GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
+                    if (this.Parent is InventoryWindow && fromSlot.Parent is InventoryWindow)
+                    {
+                        GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
+                    }
+                    else if (fromSlot.Parent is InventoryWindow && this.Parent is ContainerWindow)
+                    {
+                        GameClient.NetworkClient.InventoryToWindow(fromSlot.SlotNumber, ((BaseWindow)this.Parent).WindowId, this.SlotNumber);
+                    }
+                    else if (fromSlot.Parent is ContainerWindow && this.Parent is InventoryWindow)
+                    {
+                        GameClient.NetworkClient.WindowToInventory(((BaseWindow)fromSlot.Parent).WindowId, fromSlot.SlotNumber, this.SlotNumber);
+                    }
+                    else if (fromSlot.Parent is ContainerWindow && this.Parent is ContainerWindow)
+                    {
+                        GameClient.NetworkClient.WindowToWindow(((BaseWindow)fromSlot.Parent).WindowId, fromSlot.SlotNumber, ((BaseWindow)this.Parent).WindowId, this.SlotNumber);
+                    }
                 }
             }
         }

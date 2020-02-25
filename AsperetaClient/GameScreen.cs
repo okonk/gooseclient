@@ -345,7 +345,7 @@ namespace AsperetaClient
         public void OnMakeWindow(object packet)
         {
             var p = (MakeWindowPacket)packet;
-
+            
             switch (p.WindowFrame)
             {
                 case WindowFrames.Vendor:
@@ -353,6 +353,21 @@ namespace AsperetaClient
                     break;
                 case WindowFrames.GenericInfo:
                     this.uiRoot.AddChild(new GenericInfoWindow(p));
+                    break;
+                case WindowFrames.TwoSlot:
+                    this.uiRoot.AddChild(new ContainerWindow(p, "Container2"));
+                    break;
+                case WindowFrames.FourSlot:
+                    this.uiRoot.AddChild(new ContainerWindow(p, "Container4"));
+                    break;
+                case WindowFrames.SixSlot:
+                    this.uiRoot.AddChild(new ContainerWindow(p, "Container6"));
+                    break;
+                case WindowFrames.EightSlot:
+                    this.uiRoot.AddChild(new ContainerWindow(p, "Container8"));
+                    break;
+                case WindowFrames.TenSlot:
+                    this.uiRoot.AddChild(new ContainerWindow(p, "Container10"));
                     break;
             }
         }

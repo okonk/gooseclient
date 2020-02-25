@@ -50,6 +50,7 @@ namespace AsperetaClient
 
                     var slot = new ItemSlot(inventorySlots + r * columns + c + 1, x, y, objW, objH);
                     slot.DoubleClicked += OnSlotDoubleClicked;
+                    slot.RightClicked += OnSlotRightClicked;
                     this.AddChild(slot);
 
                     slots[r * columns + c] = slot;
@@ -123,6 +124,11 @@ namespace AsperetaClient
         public void OnSlotDoubleClicked(GuiElement element)
         {
             GameClient.NetworkClient.Use(((ItemSlot)element).SlotNumber);
+        }
+
+        public void OnSlotRightClicked(GuiElement element)
+        {
+            GameClient.NetworkClient.GetItemDetails(((ItemSlot)element).ItemId);
         }
 
         protected override void HandleWindowLine(WindowLinePacket p)
