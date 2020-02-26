@@ -77,6 +77,9 @@ namespace AsperetaClient
                     int index = (ev.motion.x - X - xOffset - objoffX) / objW;
 
                     var tooltips = new[] { "Pickup Item", "Chat Text", "Help", "Combine Bag", "Inventory", "Toggle Trade", "Spellbook", "Exit" };
+                    if (index >= tooltips.Length) 
+                        return false;
+
                     string tooltipText = tooltips[index];
                     
                     int x = ev.motion.x;

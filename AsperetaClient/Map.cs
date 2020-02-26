@@ -73,6 +73,8 @@ namespace AsperetaClient
         private int spellCastSlotNumber;
         private Character player;
 
+        private Tooltip tooltip;
+
         public Map(MapFile fileData)
         {
             this.MapFile = fileData;
@@ -190,6 +192,8 @@ namespace AsperetaClient
                 character.RenderHPMPBars(start_x, start_y);
                 character.RenderBattleText(start_x, start_y);
             }
+
+            tooltip?.Render(0, 0, 0);
         }
 
         public void RenderSpellTargetBox(int start_x, int start_y)
@@ -509,6 +513,34 @@ namespace AsperetaClient
                     GameClient.NetworkClient.RightClick(character.TileX, character.TileY);
                     return;
                 }
+            }
+        }
+
+        public void OnMouseOverMap(int offsetX, int offsetY, int mouseX, int mouseY)
+        {
+            int tileX = (offsetX + mouseX) / Constants.TileSize;
+            int tileY = (offsetY + mouseY) / Constants.TileSize;
+
+            var mapObject = this[tileX, tileY].MapObject;
+            if (mapObject != null)
+            {
+                string value = mapObject.Name + (mapObject.StackSize > 1 ? $" ({mapObject.StackSize})" : "");
+                int x = mouseX;
+                int y = mouseY + 5;
+                if (tooltip != null)
+                {
+                    tooltip.Value = value;
+                }
+                else
+                {
+                    tooltip = new Tooltip(x, y, new Colour(0, 4, 120), Colour.White, value);
+                }
+
+                tooltip.SetPosition(x - tooltip.W / 2, y);
+            }
+            else
+            {
+                tooltip = null;
             }
         }
     }

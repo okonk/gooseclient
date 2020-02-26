@@ -66,6 +66,7 @@ namespace AsperetaClient
             this.uiRoot = new RootPanel();
             this.uiRoot.DropWasUnhandled += OnDropWasUnhandled;
             this.uiRoot.RightClickUnhandled += OnRightClick;
+            this.uiRoot.MouseOverMap += OnMouseOverMap;
 
             this.uiRoot.AddChild(new ChatWindow());
             this.uiRoot.AddChild(new FpsWindow());
@@ -340,6 +341,14 @@ namespace AsperetaClient
             int startY = RenderOffsetY();
 
             Map.OnRightClick(startX, startY, x, y);
+        }
+
+        public void OnMouseOverMap(int x, int y)
+        {
+            int startX = RenderOffsetX();
+            int startY = RenderOffsetY();
+
+            Map.OnMouseOverMap(startX, startY, x, y);
         }
 
         public void OnMakeWindow(object packet)

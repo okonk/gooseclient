@@ -53,7 +53,8 @@ namespace AsperetaClient
 
         public Texture GetTexture(int frameId, bool usedInMap = false, bool usedInSpell = false)
         {
-            var adfFile = this.AdfManager.FrameToFile[frameId];
+            if (!this.AdfManager.FrameToFile.TryGetValue(frameId, out AdfFile adfFile))
+                return null;
 
             Texture frameTexture;
             if (this.FrameIdToTexture.TryGetValue(frameId, out frameTexture))

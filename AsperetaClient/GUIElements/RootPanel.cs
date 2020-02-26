@@ -28,6 +28,7 @@ namespace AsperetaClient
         public event Action<int, int> LeftClickUnhandled;
         public event Action<int, int> DoubleClickUnhandled;
         public event Action<int, int> RightClickUnhandled;
+        public event Action<int, int> MouseOverMap;
 
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {
@@ -118,6 +119,21 @@ namespace AsperetaClient
                     {
                         DragDropX = ev.motion.x;
                         DragDropY = ev.motion.y;
+                    }
+
+                    bool mouseOverWindow = false;
+                    foreach (var element in Children.Where(c => c is BaseWindow).Cast<BaseWindow>())
+                    {
+                        if (!element.Hidden && element.Contains(xOffset, yOffset, ev.button.x, ev.button.y))
+                        {
+                            mouseOverWindow = true;
+                            break;
+                        }
+                    }
+
+                    if (!mouseOverWindow)
+                    {
+                        MouseOverMap?.Invoke(ev.button.x, ev.button.y);
                     }
 
                     break;
