@@ -3,7 +3,6 @@ TODO list
 Next release:
 
 windows need to check if they're focused before events
-Emoticons
 Fix textboxes to scroll properly
 Chat input history with up/down arrows in chatbox
 Can't handle packet: 3,100,11,4,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,47,0,0,0,0,0,0,0,0,0,71
@@ -97,3 +96,8 @@ name colour when in party with someone
 GM name colours
 Chatbox wordwrap sometimes wraps words at the wrong point (splits middle of word)
 Chat bubbles
+Emoticons
+
+
+2020-03-03
+bug with mouseover tiles when screen is resized to super small

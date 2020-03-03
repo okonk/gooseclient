@@ -535,6 +535,8 @@ namespace AsperetaClient
             int tileX = (offsetX + mouseX) / Constants.TileSize;
             int tileY = (offsetY + mouseY) / Constants.TileSize;
 
+            if (!ValidTile(tileX, tileY)) return;
+
             var mapObject = this[tileX, tileY].MapObject;
             if (mapObject != null)
             {

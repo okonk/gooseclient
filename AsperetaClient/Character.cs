@@ -334,7 +334,7 @@ namespace AsperetaClient
             if (EmoteAnimation == null) return;
 
             int x = (this.PixelXi - xOffset) + this.GetXOffset() + this.GetWidth() - EmoteAnimation.GetWidth() / 2;
-            int y = this.PixelYi - yOffset + this.GetYOffset() - EmoteAnimation.GetHeight() / 2;
+            int y = this.PixelYi - yOffset + this.GetYOffset() - EmoteAnimation.GetHeight() / 2 - 4;
 
             EmoteAnimation.Render(x, y);
         }
