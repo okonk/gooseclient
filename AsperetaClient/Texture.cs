@@ -45,12 +45,6 @@ namespace AsperetaClient
             if (needsOffset)
             {
                 // offset to center the sprite on the tile
-                // first part is a hack to get trees to render correctly, not sure if this will break other things later
-                // if (Rect.h > Constants.TileSize * 2)
-                //      YOffset = -Rect.h + Constants.TileSize;
-                // else if (Rect.h > Constants.TileSize)
-                //     YOffset = (-Rect.h + Constants.TileSize / 2) / 2;
-
                 XOffset = (Constants.TileSize / 2) - Rect.w / 2;
 
                 if (mapOffset)// && Rect.h > Constants.TileSize * 2)
@@ -59,8 +53,6 @@ namespace AsperetaClient
                     YOffset = -Math.Max((Rect.h - 48) / 2, 0) - 8;
                 else if (Rect.h > Constants.TileSize)
                     YOffset = -Math.Max((Rect.h - 48) / 2, 0) - 16;
-                    
-                //vector3.y = -Mathf.Max((spriteHeight - 1.5f) / 2f, 0f);
             }
         }
 

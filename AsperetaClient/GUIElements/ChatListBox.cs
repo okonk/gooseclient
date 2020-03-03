@@ -91,7 +91,7 @@ namespace AsperetaClient
 
         public void AddLine(int colour, string text)
         {
-            foreach (var line in WordWrap(text))
+            foreach (var line in GameClient.FontRenderer.WordWrap(text, this.W, "  "))
             {
                 if (lastViewIndex == lines.Count - 1)
                 {
@@ -106,83 +106,6 @@ namespace AsperetaClient
                 int toRemove = lines.Count - 500;
                 lines.RemoveRange(0, toRemove);
                 lastViewIndex = Math.Max(0, lastViewIndex - toRemove);
-            }
-        }
-
-        private IEnumerable<string> WordWrap(string input)
-        {
-            const int INDENT_CHARS = 2;
-
-            int availableSpace = this.W;
-            int availableCharacters = (availableSpace / GameClient.FontRenderer.CharWidth) - 1;
-            int neededSpace = input.Length * GameClient.FontRenderer.CharWidth;
-            int currentIndex = 0;
-
-            bool indent = false;
-
-            while (currentIndex < input.Length)
-            {
-                int x = X + Padding;
-
-                if (neededSpace < availableSpace)
-                {
-                    yield return (indent ? "  " : "") + input.Substring(currentIndex);
-                    yield break;
-                }
-
-                bool failedToSplit = true;
-                for (int i = availableCharacters; i > 0; i--)
-                {
-                    if (input[currentIndex + i] == ' ')
-                    {
-                        if (indent)
-                        {
-                            if (i > availableCharacters - 2)
-                            {
-                                yield return "  " + input.Substring(currentIndex, i - 2);
-                                currentIndex += i - 2;
-                            }
-                            else
-                            {
-                                yield return "  " + input.Substring(currentIndex, i);
-                                currentIndex += i + 1;
-                            }
-                        }
-                        else
-                        {
-                            yield return input.Substring(currentIndex, i);
-                            currentIndex += i + 1;
-
-                            indent = true;
-                        }
-
-                        neededSpace = (input.Length - currentIndex + INDENT_CHARS) * GameClient.FontRenderer.CharWidth;
-
-                        failedToSplit = false;
-
-                        break;
-                    }
-                }
-
-                if (failedToSplit)
-                {
-                    int splitPoint = availableCharacters;
-
-                    if (indent)
-                    {
-                        yield return (indent ? "  " : "") + input.Substring(currentIndex, splitPoint - 2);
-                        currentIndex += splitPoint - 2;
-                    }
-                    else
-                    {
-                        yield return (indent ? "  " : "") + input.Substring(currentIndex, splitPoint);
-                        currentIndex += splitPoint;
-
-                        indent = true;
-                    }
-                    
-                    neededSpace = (input.Length - currentIndex + INDENT_CHARS) * GameClient.FontRenderer.CharWidth;
-                }
             }
         }
     }

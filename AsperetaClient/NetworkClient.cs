@@ -52,6 +52,8 @@ namespace AsperetaClient
             PacketManager.Register<MakeWindowPacket>();
             PacketManager.Register<EndWindowPacket>();
             PacketManager.Register<GroupUpdatePacket>();
+            PacketManager.Register<AdminModeActivatePacket>();
+            PacketManager.Register<EmotePacket>();
         }
 
         public void Connect()
@@ -106,7 +108,10 @@ namespace AsperetaClient
                     var buffer = new byte[4196];
 
                     int received = socket.Receive(buffer);
-                    packetBuffer += System.Text.Encoding.ASCII.GetString(buffer, 0, received);
+                    string receivedString = System.Text.Encoding.ASCII.GetString(buffer, 0, received);
+                    packetBuffer += receivedString;
+
+                    //Console.WriteLine($"Received: {receivedString}");
 
                     if (packetBuffer.Length == 0) continue;
 
@@ -115,7 +120,7 @@ namespace AsperetaClient
 
                     if (!packetBuffer.EndsWith("\x1"))
                     {
-                        packetBuffer = packetBuffer.Substring(packetBuffer.Length - packets[limit - 1].Length - 1);
+                        packetBuffer = packets[packets.Length - 1];// packetBuffer.Substring(packetBuffer.Length - packets[limit - 1].Length - 1);
                         limit--;
                     }
                     else
@@ -266,6 +271,26 @@ namespace AsperetaClient
         public void OpenCombineBag()
         {
             Send($"OCB");
+        }
+
+        public void DestroyItem(int slotId)
+        {
+            Send($"DITM{slotId + 1}");
+        }
+
+        public void DestroySpell(int slotId)
+        {
+            Send($"DSPL{slotId + 1}");
+        }
+
+        public void SwapSpellSlot(int fromSlotId, int toSlotId)
+        {
+            Send($"SWAP{fromSlotId + 1},{toSlotId + 1}");
+        }
+
+        public void Emote(int emoteId)
+        {
+            Send($"EMOT{emoteId}");
         }
     }
 }

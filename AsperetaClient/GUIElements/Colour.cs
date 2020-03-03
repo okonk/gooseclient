@@ -12,6 +12,9 @@ namespace AsperetaClient
         public static Colour Blue = new Colour(0, 146, 255, 255);
         public static Colour Purple = new Colour(135, 138, 255, 255);
 
+        public static Colour ChatBackground = new Colour(1, 1, 1, 255);
+        public static Colour ChatForeground = new Colour(255, 255, 255, 255);
+
 
         public byte R { get; set; }
 

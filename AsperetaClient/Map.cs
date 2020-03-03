@@ -75,6 +75,8 @@ namespace AsperetaClient
 
         private Tooltip tooltip;
 
+        private int[] groupMembers = new int[50];
+
         public Map(MapFile fileData)
         {
             this.MapFile = fileData;
@@ -93,6 +95,10 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<EraseObjectPacket>(OnEraseObject);
             GameClient.NetworkClient.PacketManager.Listen<BattleTextPacket>(OnBattleText);
             GameClient.NetworkClient.PacketManager.Listen<AttackPacket>(OnAttack);
+            GameClient.NetworkClient.PacketManager.Listen<GroupUpdatePacket>(OnGroupUpdate);
+            GameClient.NetworkClient.PacketManager.Listen<AdminModeActivatePacket>(OnAdminModeActivate);
+            GameClient.NetworkClient.PacketManager.Listen<ChatPacket>(OnChat);
+            GameClient.NetworkClient.PacketManager.Listen<EmotePacket>(OnEmote);
         }
 
         public Tile this[int x, int y]
@@ -191,6 +197,11 @@ namespace AsperetaClient
                 character.RenderName(start_x, start_y);
                 character.RenderHPMPBars(start_x, start_y);
                 character.RenderBattleText(start_x, start_y);
+            }
+
+            foreach (var character in Characters)
+            {
+                character.RenderChat(start_x, start_y);
             }
 
             tooltip?.Render(0, 0, 0);
@@ -351,6 +362,9 @@ namespace AsperetaClient
             var p = (MakeCharacterPacket)packet;
 
             var character = new Character(p);
+            if (groupMembers.Contains(p.LoginId))
+                character.NameColour = Colour.Yellow;
+
             AddCharacter(character);
         }
 
@@ -542,6 +556,65 @@ namespace AsperetaClient
             {
                 tooltip = null;
             }
+        }
+
+        public void OnGroupUpdate(object packet)
+        {
+            var p = (GroupUpdatePacket)packet;
+
+            int oldId = groupMembers[p.LineNumber];
+            if (oldId != 0)
+            {
+                var oldCharacter = this.Characters.FirstOrDefault(c => c.LoginId == oldId);
+                if (oldCharacter != null && !groupMembers.Take(p.LineNumber).Contains(oldId))
+                    oldCharacter.NameColour = Colour.White;
+            }
+
+            groupMembers[p.LineNumber] = p.LoginId;
+            if (p.LoginId == 0) return;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.NameColour = Colour.Yellow;
+        }
+
+        public void OnAdminModeActivate(object packet)
+        {
+            var p = (AdminModeActivatePacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            var colour = Colour.Blue;
+            if (p.Enabled == 0)
+            {
+                colour = (groupMembers.Contains(p.LoginId) ? Colour.Yellow : Colour.White);
+            }
+
+            character.NameColour = colour;
+        }
+
+        public void OnChat(object packet)
+        {
+            var p = (ChatPacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            character.SetChat(p.Message);
+        }
+
+        public void OnEmote(object packet)
+        {
+            var p = (EmotePacket)packet;
+
+            var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (character == null) return;
+
+            var animation = GameClient.ResourceManager.GetAnimation(179 + p.AnimationId);
+            animation.Interval = 0.5;
+            character.EmoteAnimation = animation;
         }
     }
 }

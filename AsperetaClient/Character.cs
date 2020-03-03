@@ -77,6 +77,8 @@ namespace AsperetaClient
 
         public Animation SpellAnimation { get; set; }
 
+        public Animation EmoteAnimation { get; set; }
+
         public int MoveSpeed { get; set; } = 400; // This is an illutia move speed value. I think this is milliseconds per tile? Default illutia is 320.
 
         
@@ -89,6 +91,8 @@ namespace AsperetaClient
         public int MPPercentage { get; set; }
         public bool ShouldRenderHPMPBars { get; set; }
         public double RenderHPMPBarsTime { get; set; }
+
+        public Colour NameColour { get; set; }
 
 
 
@@ -103,6 +107,9 @@ namespace AsperetaClient
 
         public List<BattleTextLine> BattleText { get; set; } = new List<BattleTextLine>();
         private int battleTextPosition = 0;
+
+        private string chatMessage = null;
+        private double chatDisplayedTime = 0;
 
         public Character(MakeCharacterPacket p)
         {
@@ -125,6 +132,7 @@ namespace AsperetaClient
             this.HairColour = new Colour(p.HairR, p.HairG, p.HairB, p.HairA);
             this.HPPercentage = p.HPPercent;
             this.MPPercentage = 0;
+            this.NameColour = Colour.White;
 
             this.ShouldRenderHPMPBars = true;
             this.RenderHPMPBarsTime = 0;
@@ -165,7 +173,7 @@ namespace AsperetaClient
             var compiledAnimation = GameClient.ResourceManager.AdfManager.CompiledEnc.CompiledAnimations.FirstOrDefault(a => a.Id == id && a.Type == type);
             if (compiledAnimation == null)
             {
-                Console.WriteLine($"Couldn't find animation id {id} of type {type} for slot {slot}");
+                //Console.WriteLine($"Couldn't find animation id {id} of type {type} for slot {slot}");
                 this.EquippedAnimations[(int)slot] = null;
                 return;
             }
@@ -179,13 +187,11 @@ namespace AsperetaClient
                 return;
             }
 
-            // animation.Interval *= (MoveSpeed / 1000d); // Needed to display the full animation when moving 1 tile
             animation.SetAnimating(Moving | Attacking);
             animation.Colour = colour;
             if (Attacking)
             {
                 animation.AnimationFinished += OnAttackAnimationFinished;
-                // animation.Interval = (AttackSpeed / 1000d) / (animation.Frames.Length + 1);
             }
 
             this.EquippedAnimations[(int)slot] = animation;
@@ -253,6 +259,13 @@ namespace AsperetaClient
                     SpellAnimation = null;
             }
 
+            if (EmoteAnimation != null)
+            {
+                EmoteAnimation.Update(dt);
+                if (EmoteAnimation.Finished)
+                    EmoteAnimation = null;
+            }
+
             if (ShouldRenderHPMPBars)
             {
                 RenderHPMPBarsTime += dt;
@@ -261,48 +274,69 @@ namespace AsperetaClient
                     ShouldRenderHPMPBars = false;
             }
 
+            if (chatMessage != null)
+            {
+                chatDisplayedTime += dt;
+
+                if (chatDisplayedTime >= 3)
+                {
+                    SetChat(null);
+                }
+            }
+
             UpdateBattleText(dt);
         }
 
-        public void Render(int x_offset, int y_offset)
+        public void Render(int xOffset, int yOffset)
         {
             switch (Facing)
             {
                 case Direction.Right:
-                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     for (int i = 0; i < EquippedAnimations.Length - 2; i++)
                     {
-                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        EquippedAnimations[i]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     }
-                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     break;
 
                 case Direction.Up:
-                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
-                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     for (int i = 0; i < EquippedAnimations.Length - 2; i++)
                     {
-                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        EquippedAnimations[i]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     }
                     break;
                     
                 case Direction.Down:
                     foreach (var animation in this.EquippedAnimations)
                     {
-                        animation?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        animation?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     }
                     break;
                 case Direction.Left:
-                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Weapon]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     for (int i = 0; i < EquippedAnimations.Length - 2; i++)
                     {
-                        EquippedAnimations[i]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                        EquippedAnimations[i]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     }
-                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+                    EquippedAnimations[(int)DrawAnimations.Shield]?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
                     break;
             }
 
-            SpellAnimation?.Render(this.PixelXi - x_offset, this.PixelYi - y_offset);
+            SpellAnimation?.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
+            RenderEmote(xOffset, yOffset);
+        }
+
+        public void RenderEmote(int xOffset, int yOffset)
+        {
+            if (EmoteAnimation == null) return;
+
+            int x = (this.PixelXi - xOffset) + this.GetXOffset() + this.GetWidth() - EmoteAnimation.GetWidth() / 2;
+            int y = this.PixelYi - yOffset + this.GetYOffset() - EmoteAnimation.GetHeight() / 2;
+
+            EmoteAnimation.Render(x, y);
         }
 
         public void RenderName(int x_offset, int y_offset)
@@ -312,7 +346,7 @@ namespace AsperetaClient
             int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 7;
 
             GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
-            GameClient.FontRenderer.RenderText(this.Name, x, y, Colour.White);
+            GameClient.FontRenderer.RenderText(this.Name, x, y, this.NameColour);
         }
 
         public void RenderHPMPBars(int x_offset, int y_offset)
@@ -354,6 +388,40 @@ namespace AsperetaClient
             foreach (var bt in BattleText)
             {
                 bt.Render(this.PixelXi - xOffset, this.PixelYi - yOffset);
+            }
+        }
+
+        public void RenderChat(int xOffset, int yOffset)
+        {
+            if (chatMessage == null) return;
+
+            int maxW = 184;
+            int padding = 5;
+
+            var wrappedLines = GameClient.FontRenderer.WordWrap(chatMessage, maxW - padding * 2, "").ToArray();
+
+            int messageWidth = chatMessage.Length * GameClient.FontRenderer.CharWidth;
+            int bubbleWidth = Math.Min(maxW, messageWidth + padding * 2);
+            int bubbleHeight = wrappedLines.Length * GameClient.FontRenderer.CharHeight + 5;
+
+            int x = (this.PixelXi - xOffset) + this.GetXOffset() + this.GetWidth() / 2 - bubbleWidth / 2;
+            int y = this.PixelYi - yOffset + this.GetYOffset() - bubbleHeight - 7;
+
+            SDL.SDL_Rect rect;
+            rect.x = x;
+            rect.y = y;
+            rect.w = bubbleWidth;
+            rect.h = bubbleHeight;
+
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, Colour.ChatBackground.R, Colour.ChatBackground.G, Colour.ChatBackground.B, Colour.ChatBackground.A);
+            SDL.SDL_RenderFillRect(GameClient.Renderer, ref rect);
+
+            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, Colour.ChatForeground.R, Colour.ChatForeground.G, Colour.ChatForeground.B, Colour.ChatForeground.A);
+            SDL.SDL_RenderDrawRect(GameClient.Renderer, ref rect);
+
+            for (int i = 0; i < wrappedLines.Length; i++)
+            {
+                GameClient.FontRenderer.RenderText(wrappedLines[i], x + padding, y + (i * GameClient.FontRenderer.CharHeight) + 3, Colour.White);
             }
         }
 
@@ -400,11 +468,10 @@ namespace AsperetaClient
                     break;
             }
 
-            int x = this.GetXOffset(); 
+            int x = this.GetXOffset() + this.GetWidth() / 2 - (text.Length * GameClient.FontRenderer.CharWidth) / 2;
             int y = this.GetYOffset();
             if (!spread)
             {
-                x += this.GetWidth() / 2 - (text.Length * GameClient.FontRenderer.CharWidth) / 2;
                 y += this.GetHeight() / 2;
             }
             else
@@ -534,6 +601,12 @@ namespace AsperetaClient
             Attacking = true;
 
             this.UpdateAnimations();
+        }
+
+        public void SetChat(string message)
+        {
+            chatMessage = message;
+            chatDisplayedTime = 0;
         }
     }
 }

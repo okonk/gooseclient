@@ -54,7 +54,7 @@ namespace AsperetaClient
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     if (Graphic != null && ev.button.button == SDL.SDL_BUTTON_LEFT && Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                     {
-                        UiRoot.StartDragDrop(ev.button.x, ev.button.y, Graphic, this);
+                        UiRoot.StartDragDrop(ev.button.x, ev.button.y, Graphic, Colour, this);
 
                         return true;
                     }
@@ -63,7 +63,7 @@ namespace AsperetaClient
                     if (!Contains(xOffset, yOffset, ev.button.x, ev.button.y))
                         return false;
 
-                    if (ev.button.button == SDL.SDL_BUTTON_LEFT && ev.button.clicks == 2)
+                    if (ev.button.button == SDL.SDL_BUTTON_LEFT && ev.button.clicks >= 2)
                     {
                         DoubleClicked?.Invoke(this);
                     }

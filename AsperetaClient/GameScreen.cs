@@ -30,6 +30,7 @@ namespace AsperetaClient
             this.mapNumber = mapNumber;
             this.mapName = mapName;
 
+            SetChatBubbleColours();
             
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
             GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
@@ -76,6 +77,7 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new XPBarWindow());
             this.uiRoot.AddChild(new PartyWindow());
             this.uiRoot.AddChild(new ButtonBarWindow());
+            this.uiRoot.AddChild(new DestroyButtonWindow());
 
             this.uiRoot.AddChild(new CharacterWindow());
 
@@ -87,6 +89,18 @@ namespace AsperetaClient
 
             // This needs to be added last since it has to take the slots from character/spellbook/inventory
             this.uiRoot.AddChild(new HotkeyBarWindow());
+        }
+
+        private void SetChatBubbleColours()
+        {
+            if (GameClient.UserSettings.Sections.ContainsKey("Bubble"))
+            {
+                var backgroundRGB = GameClient.UserSettings.GetCoords("Bubble", "Background");
+                Colour.ChatBackground = new Colour(backgroundRGB.ElementAt(0), backgroundRGB.ElementAt(1), backgroundRGB.ElementAt(2));
+
+                var foregroundRGB = GameClient.UserSettings.GetCoords("Bubble", "Foreground");
+                Colour.ChatForeground = new Colour(foregroundRGB.ElementAt(0), foregroundRGB.ElementAt(1), foregroundRGB.ElementAt(2));
+            }
         }
 
         private int RenderOffsetX()
@@ -161,7 +175,7 @@ namespace AsperetaClient
             {
                 moveDelayElapsedTime += dt;
 
-                if (moveDelayElapsedTime >= 0.5)
+                if (moveDelayElapsedTime >= 0.2)
                 {
                     moveDelay = false;
                     moveDelayElapsedTime = 0;
@@ -194,6 +208,33 @@ namespace AsperetaClient
             {
                 case SDL.SDL_EventType.SDL_QUIT:
                     SaveUserSettings();
+                    break;
+
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (Map.Targeting || uiRoot.FocusedTextBox != null) return;
+                    if ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) == SDL.SDL_Keymod.KMOD_NONE) return;
+
+                    if (ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_0 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_9)
+                    {
+                        int emoteId = 0;
+
+                        switch (ev.key.keysym.sym)
+                        {
+                            case SDL.SDL_Keycode.SDLK_1: emoteId = 1; break;
+                            case SDL.SDL_Keycode.SDLK_2: emoteId = 2; break;
+                            case SDL.SDL_Keycode.SDLK_3: emoteId = 4; break;
+                            case SDL.SDL_Keycode.SDLK_4: emoteId = 5; break;
+                            case SDL.SDL_Keycode.SDLK_5: emoteId = 6; break;
+                            case SDL.SDL_Keycode.SDLK_6: emoteId = 7; break;
+                            case SDL.SDL_Keycode.SDLK_7: emoteId = 8; break;
+                            case SDL.SDL_Keycode.SDLK_8: emoteId = 9; break;
+                            case SDL.SDL_Keycode.SDLK_9: emoteId = 10; break;
+                            case SDL.SDL_Keycode.SDLK_0: emoteId = 12; break;
+                        }
+
+                        GameClient.NetworkClient.Emote(emoteId);
+                        return;
+                    }
                     break;
             }
         }

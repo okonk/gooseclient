@@ -26,7 +26,7 @@ namespace AsperetaClient
         {
             if (WordWrap)
             {
-                RenderWrapped(xOffset, yOffset);
+                GameClient.FontRenderer.RenderWrapped(Value, X, Y, xOffset, yOffset, (this.Parent == null ? GameClient.ScreenWidth : this.Parent.W - this.Parent.Padding), ForegroundColour);
             }
             else
             {
@@ -40,53 +40,6 @@ namespace AsperetaClient
                 }
 
                 GameClient.FontRenderer.RenderText(Value, x, y, ForegroundColour);
-            }
-        }
-
-        public void RenderWrapped(int xOffset, int yOffset)
-        {
-            int availableSpace = (this.Parent == null ? GameClient.ScreenWidth : this.Parent.W - this.Parent.Padding) - this.X;
-            int neededSpace = Value.Length * GameClient.FontRenderer.CharWidth;
-            int currentIndex = 0;
-
-            int y = yOffset + Y;
-
-            while (currentIndex < Value.Length)
-            {
-                int x = xOffset + X;
-
-                if (neededSpace < availableSpace)
-                {
-                    GameClient.FontRenderer.RenderText(Value.Substring(currentIndex), x, y, ForegroundColour);
-                    return;
-                }
-
-                bool failedToSplit = true;
-                for (int i = (availableSpace / GameClient.FontRenderer.CharWidth) - 1; i > 0; i--)
-                {
-                    if (Value[currentIndex + i] == ' ')
-                    {
-                        GameClient.FontRenderer.RenderText(Value.Substring(currentIndex, i), x, y, ForegroundColour);
-
-                        currentIndex += i + 1;
-                        neededSpace = (Value.Length - currentIndex) * GameClient.FontRenderer.CharWidth;
-
-                        failedToSplit = false;
-
-                        break;
-                    }
-                }
-
-                if (failedToSplit)
-                {
-                    int splitPoint = (availableSpace / GameClient.FontRenderer.CharWidth) - 1;
-                    GameClient.FontRenderer.RenderText(Value.Substring(currentIndex, splitPoint), x, y, ForegroundColour);
-
-                    currentIndex += splitPoint;
-                    neededSpace = (Value.Length - currentIndex) * GameClient.FontRenderer.CharWidth;
-                }
-
-                y += GameClient.FontRenderer.CharHeight;
             }
         }
     }

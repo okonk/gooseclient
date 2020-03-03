@@ -11,6 +11,7 @@ namespace AsperetaClient
         public bool IsDragging { get; set; } = false;
         public object DragDropData { get; set; }
         public Texture DragDropImage { get; set; }
+        public Colour DragDropImageColour { get; set; }
         public int StartDragDropX { get; set; }
         public int StartDragDropY { get; set; }
         public int DragDropX { get; set; }
@@ -170,7 +171,7 @@ namespace AsperetaClient
             Children.Add(element);
         }
 
-        public void StartDragDrop(int x, int y, Texture image, object data)
+        public void StartDragDrop(int x, int y, Texture image, Colour colour, object data)
         {
             IsDragging = true;
             StartDragDropX = x;
@@ -178,6 +179,7 @@ namespace AsperetaClient
             DragDropX = x;
             DragDropY = y;
             DragDropImage = image;
+            DragDropImageColour = colour;
             DragDropData = data;
             DropWasHandled = false;
         }

@@ -44,6 +44,8 @@ namespace AsperetaClient
 
         public void Handle(string packet)
         {
+            if (packet.Length == 0) return;
+
             for (int i = 0; i < Math.Min(8, packet.Length); i++)
             {
                 if (handlers.TryGetValue(packet.Substring(0, i + 1), out PacketHandler handler))

@@ -2,35 +2,15 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Socket error receiving data: System.Collections.Generic.KeyNotFoundException: The given key '0' was not present in the dictionary.
-   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
-   at AsperetaClient.ResourceManager.GetTexture(Int32 frameId, Boolean usedInMap, Boolean usedInSpell) in /home/hayden/code/GooseClient/AsperetaClient/ResourceManager.cs:line 56
-   at AsperetaClient.BuffSlot.SetSlot(String name, Int32 graphicId) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BuffSlot.cs:line 18
-   at AsperetaClient.BuffBarWindow.OnBuffBar(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/BuffBarWindow.cs:line 45
-   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
-   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 52
-   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 127
-
-Unhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.
-   at AsperetaClient.ButtonBarWindow.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/ButtonBarWindow.cs:line 80
-   at AsperetaClient.BaseContainer.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 40
-   at AsperetaClient.RootPanel.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/RootPanel.cs:line 126
-   at AsperetaClient.GameScreen.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/GameScreen.cs:line 190
-   at AsperetaClient.StateManager.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 106
-   at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 138
-   at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11
-
-Tooltip for items on ground
-name colour when in party with someone
-Destroy button
-Bug with dragging windows to edge of screen
-Chat bubbles
-Fix tint colour rendering
+windows need to check if they're focused before events
+Emoticons
 Fix textboxes to scroll properly
 Chat input history with up/down arrows in chatbox
-Emoticons
-GM name colours
-Reorder spellbook
+Can't handle packet: 3,100,11,4,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,47,0,0,0,0,0,0,0,0,0,71
+spread battletext offset with large bodies (bear)
+
+
+Fix tint colour rendering
 Split inventory items
 Loading screen on client launch (for loading datafiles)
 Script to build/package release
@@ -39,7 +19,7 @@ Support names/vita/etc commands and config settings
 Alt enter
 Hide console window
 Rounded tooltips
-
+cursor image
 
 ----------------------------------------------
 Future future extended things:
@@ -103,3 +83,17 @@ tooltips on hp/mp/sp/xp bars
 2020-02-25
 facing left, weapon needs to draw below body
 Combine bag window
+
+2020-02-26
+Tooltip for items on ground
+
+2020-02-29
+fix double click speed
+colour for dragged items
+Destroy button
+Reorder spellbook
+Bug with dragging windows to edge of screen
+name colour when in party with someone
+GM name colours
+Chatbox wordwrap sometimes wraps words at the wrong point (splits middle of word)
+Chat bubbles

@@ -8,9 +8,9 @@ namespace AsperetaClient
     {
         public SDL.SDL_Rect Rect;
 
-        public virtual int X { get { return Rect.x == -1 ? CenterH(W) : Rect.x; } }
+        public virtual int X { get { return centerX ? CenterH(W) : Rect.x; } }
 
-        public virtual int Y { get { return Rect.y == -1 ? CenterV(H) : Rect.y; } }
+        public virtual int Y { get { return centerY ? CenterV(H) : Rect.y; } }
 
         public virtual int W { get { return Rect.w; } }
 
@@ -32,8 +32,22 @@ namespace AsperetaClient
 
         public static RootPanel UiRoot { get; set; }
 
+        protected bool centerX = false;
+        protected bool centerY = false;
+
         public GuiElement(int x, int y, int w, int h)
         {
+            if (x == -1)
+            {
+                x = 0;
+                centerX = true;
+            }
+            if (y == -1)
+            {
+                y = 0;
+                centerY = true;
+            }
+
             SDL.SDL_Rect rect;
             rect.x = x;
             rect.y = y;

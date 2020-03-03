@@ -25,7 +25,11 @@ namespace AsperetaClient
 
         public override void HandleDrop(object data)
         {
-
+            if (data is SpellSlot)
+            {
+                var fromSlot = data as SpellSlot;
+                GameClient.NetworkClient.SwapSpellSlot(fromSlot.SlotNumber, this.SlotNumber);
+            }
         }
     }
 }

@@ -50,6 +50,7 @@ namespace AsperetaClient
 
             int winX = 0;
             int winY = 0;
+            bool centered = false;
 
             if (GameClient.UserSettings.Sections.ContainsKey(windowName))
             {
@@ -59,8 +60,7 @@ namespace AsperetaClient
             }
             else
             {
-                winX = -1;
-                winY = -1;
+                centered = true;
             }
 
             SDL.SDL_Rect rect;
@@ -70,6 +70,12 @@ namespace AsperetaClient
             rect.h = background.H;
 
             this.Rect = rect;
+
+            if (centered)
+            {
+                this.Rect.x = CenterH(this.Rect.w);
+                this.Rect.y = CenterV(this.Rect.h);
+            }
 
             this.HasFocus = false;
             this.ZIndex = -1;
