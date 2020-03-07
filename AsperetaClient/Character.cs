@@ -111,6 +111,8 @@ namespace AsperetaClient
         private string chatMessage = null;
         private double chatDisplayedTime = 0;
 
+        public event Action<Character> MovementFinished;
+
         public Character(MakeCharacterPacket p)
         {
             this.Moving = false;
@@ -244,6 +246,8 @@ namespace AsperetaClient
                     MoveSpeedY = 0;
 
                     this.UpdateAnimations();
+
+                    MovementFinished?.Invoke(this);
                 }
             }
 

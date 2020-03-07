@@ -71,7 +71,7 @@ namespace AsperetaClient
         {
             if (Sections.TryGetValue(section, out Dictionary<string, string> sectionDict) && sectionDict.TryGetValue(key, out string value))
             {
-                return value == "true" || value == "1";
+                return value.ToLowerInvariant() == "true" || value == "1";
             }
 
             return defaultValue;

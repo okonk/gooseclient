@@ -74,7 +74,8 @@ namespace AsperetaClient
                 // https://github.com/dgoodlad/vbdabl -- look at this for how asp's is done.. still need to figure out how to do this in SDL
                 // https://discourse.libsdl.org/t/sdl2-renderer-sdl-blendmode-mod-with-alpha/26947/4
                 SDL.SDL_SetTextureBlendMode(SDLTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-                SDL.SDL_SetTextureColorMod(SDLTexture, (byte)(colour.R * (400d / colour.A)), (byte)(colour.G * (400d / colour.A)), (byte)(colour.B * (400d / colour.A)));
+                //SDL.SDL_SetTextureColorMod(SDLTexture, (byte)(colour.R * (400d / colour.A)), (byte)(colour.G * (400d / colour.A)), (byte)(colour.B * (400d / colour.A)));
+                SDL.SDL_SetTextureColorMod(SDLTexture, colour.R, colour.G, colour.B);
                 //SDL.SDL_SetTextureAlphaMod(SDLTexture, colour.A);
             }
 

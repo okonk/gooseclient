@@ -17,6 +17,7 @@ namespace AsperetaClient
         private string replyToName = null;
 
         private Dictionary<string, string> commandAliases = new Dictionary<string, string>();
+        public Dictionary<string, Action<string, string>> CommandHandlers { get; set; }= new Dictionary<string, Action<string, string>>();
 
         private bool ignoreTextInput = false;
 
@@ -26,6 +27,9 @@ namespace AsperetaClient
         public ChatWindow() : base("Chat")
         {
             hideShortcutKey = SDL.SDL_Keycode.SDLK_F4;
+
+            CommandHandlers["/quit"] = OnQuitCommand;
+            CommandHandlers["/filter"] = OnFilterCommand;
 
             var chatXY = GameClient.WindowSettings.GetCoords(this.Name, "objoff");
             var chatWH = GameClient.WindowSettings.GetCoords(this.Name, "objdim");
@@ -137,43 +141,48 @@ namespace AsperetaClient
             int space = commandText.IndexOf(' ');
 
             string command = commandText;
+            string arguments = null;
             if (space != -1)
             {
                 command = commandText.Substring(0, space);
+                arguments = commandText.Substring(space + 1);
             }
 
-            string replacedCommand = null;
-            if (commandAliases.TryGetValue(command.ToLowerInvariant(), out replacedCommand))
+            if (commandAliases.TryGetValue(command.ToLowerInvariant(), out string replacedCommand))
             {
-                replacedCommand = replacedCommand + commandText.Substring(command.Length);
+                command = replacedCommand;
+            }
+
+            if (command[0] == '/' && CommandHandlers.TryGetValue(command.ToLowerInvariant(), out Action<string, string> action))
+            {
+                action(command, arguments);
             }
             else
             {
-                replacedCommand = commandText;
-            }
-
-            if (replacedCommand.ToLowerInvariant() == "/quit")
-            {
-                GameClient.Quit();
-            }
-            if (replacedCommand.ToLowerInvariant() == "/filter pickup")
-            {
-                ToggleFilterPickup();
-            }
-            else
-            {
-                if (replacedCommand[0] == '/')
-                    GameClient.NetworkClient.Command(replacedCommand);
+                if (command[0] == '/')
+                    GameClient.NetworkClient.Command($"{command} {arguments}".TrimEnd());
                 else
-                    GameClient.NetworkClient.ChatMessage(replacedCommand);
+                    GameClient.NetworkClient.ChatMessage(commandText);
             }
         }
 
-        private void ToggleFilterPickup()
+        private void OnQuitCommand(string command, string arguments)
         {
-            chatListBox.FilterPickupMessages = !chatListBox.FilterPickupMessages;
+            GameClient.Quit();
+        }
 
-            chatListBox.AddText(8, $"Group item pick up messages are now {(chatListBox.FilterPickupMessages ? "hidden" : "visible")}.");
+        private void OnFilterCommand(string command, string arguments)
+        {
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                chatListBox.AddText(8, $"/filter [pickup]");
+            }
+            else if (arguments == "pickup")
+            {
+                chatListBox.FilterPickupMessages = !chatListBox.FilterPickupMessages;
+
+                AddText(8, $"Group item pick up messages are now {(chatListBox.FilterPickupMessages ? "hidden" : "visible")}.");
+            }
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
@@ -248,6 +257,11 @@ namespace AsperetaClient
                 inputBox.SetValue("");
                 inputHistoryIndex = inputHistory.Count;
             }
+        }
+
+        public void AddText(int colour, string text)
+        {
+            chatListBox.AddText(colour, text);
         }
     }
 }

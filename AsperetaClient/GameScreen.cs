@@ -25,12 +25,17 @@ namespace AsperetaClient
 
         private RootPanel uiRoot;
 
+        private bool AutoPickup { get; set; } = false;
+
+        private ChatWindow chatWindow;
+
         public GameScreen(int mapNumber, string mapName)
         {
             this.mapNumber = mapNumber;
             this.mapName = mapName;
 
             SetChatBubbleColours();
+            SetGooseSettings();
             
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
             GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
@@ -69,7 +74,9 @@ namespace AsperetaClient
             this.uiRoot.RightClickUnhandled += OnRightClick;
             this.uiRoot.MouseOverMap += OnMouseOverMap;
 
-            this.uiRoot.AddChild(new ChatWindow());
+            chatWindow = new ChatWindow();
+            chatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
+            this.uiRoot.AddChild(chatWindow);
             this.uiRoot.AddChild(new FpsWindow());
             this.uiRoot.AddChild(new BuffBarWindow());
             this.uiRoot.AddChild(new HPBarWindow());
@@ -101,6 +108,24 @@ namespace AsperetaClient
                 var foregroundRGB = GameClient.UserSettings.GetCoords("Bubble", "Foreground");
                 Colour.ChatForeground = new Colour(foregroundRGB.ElementAt(0), foregroundRGB.ElementAt(1), foregroundRGB.ElementAt(2));
             }
+        }
+
+        private void SetGooseSettings()
+        {
+            this.AutoPickup = GameClient.UserSettings.GetBool("GooseSettings", "AutoPickup", false);
+        }
+
+        private void OnAutoPickupCommand(string command, string arguments)
+        {
+            if (this.AutoPickup)
+                this.player.MovementFinished -= this.OnOurCharacterMoved;
+                
+            this.AutoPickup = !this.AutoPickup;
+
+            if (this.AutoPickup)
+                this.player.MovementFinished += this.OnOurCharacterMoved;
+
+            chatWindow.AddText(8, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
         }
 
         private int RenderOffsetX()
@@ -241,6 +266,8 @@ namespace AsperetaClient
 
         public void SaveUserSettings()
         {
+            GameClient.UserSettings.SetValue<bool>("GooseSettings", "AutoPickup", this.AutoPickup);
+
             foreach (var window in uiRoot.Children.Where(g => g is BaseWindow).Cast<BaseWindow>())
             {
                 window.SaveState();
@@ -322,7 +349,15 @@ namespace AsperetaClient
         {
             var p = (SetYourCharacterPacket)packet;
 
+            if (this.player != null && this.AutoPickup)
+            {
+                this.player.MovementFinished -= this.OnOurCharacterMoved;
+            }
+
             this.player = this.Map.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+
+            if (this.AutoPickup)
+                this.player.MovementFinished += this.OnOurCharacterMoved;
 
             this.uiRoot.Player = this.player;
         }
@@ -430,6 +465,11 @@ namespace AsperetaClient
                 .FirstOrDefault(w => w.WindowId == p.WindowId);
 
             window?.EndWindow();
+        }
+
+        public void OnOurCharacterMoved(Character c)
+        {
+            GameClient.NetworkClient.Get();
         }
     }
 }
