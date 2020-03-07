@@ -153,7 +153,7 @@ namespace AsperetaClient
             base.Render(dt, xOffset, yOffset);
 
             if (DragDropImage != null)
-                DragDropImage.Render(DragDropX, DragDropY);
+                DragDropImage.Render(DragDropX, DragDropY, DragDropImageColour);
         }
 
         public override void Update(double dt)

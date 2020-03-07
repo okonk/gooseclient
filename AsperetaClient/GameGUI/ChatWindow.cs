@@ -6,8 +6,6 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    // TODO: Handle input history (up/down to load previous messages)
-
     class ChatWindow : BaseWindow
     {
         private ChatListBox chatListBox;
@@ -21,6 +19,9 @@ namespace AsperetaClient
         private Dictionary<string, string> commandAliases = new Dictionary<string, string>();
 
         private bool ignoreTextInput = false;
+
+        private List<string> inputHistory = new List<string>();
+        private int inputHistoryIndex = 0;
 
         public ChatWindow() : base("Chat")
         {
@@ -42,6 +43,8 @@ namespace AsperetaClient
             inputBox.MaxLength = 200;
             inputBox.EnterPressed += ChatEnterPressed;
             inputBox.EscapePressed += ChatEscapePressed;
+            inputBox.UpPressed += ChatUpPressed;
+            inputBox.DownPressed += ChatDownPressed;
             inputBox.PreventFurtherEventsOnInput = true;
             AddChild(inputBox);
 
@@ -50,8 +53,16 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<HashMessagePacket>(OnHashMessage);
 
             LoadAliases();
+
+            chatListBox.FilterPickupMessages = GameClient.UserSettings.GetBool("GooseSettings", "FilterPickupMessages", false);
         }
 
+        public override void SaveState()
+        {
+            base.SaveState();
+
+            GameClient.UserSettings.SetValue<bool>("GooseSettings", "FilterPickupMessages", chatListBox.FilterPickupMessages);
+        }
         private void LoadAliases()
         {
             var aliases = GameClient.UserSettings.Sections["Alias"];
@@ -70,7 +81,7 @@ namespace AsperetaClient
         {
             var p = (ServerMessagePacket)packet;
 
-            chatListBox.AddLine(p.Colour, p.Message);
+            chatListBox.AddText(p.Colour, p.Message);
 
             if (p.Colour == 6 && p.Message.StartsWith("[tell from] "))
             {
@@ -82,14 +93,14 @@ namespace AsperetaClient
         {
             var p = (ChatPacket)packet;
 
-            chatListBox.AddLine(1, p.Message);
+            chatListBox.AddText(1, p.Message);
         }
 
         public void OnHashMessage(object packet)
         {
             var p = (HashMessagePacket)packet;
 
-            chatListBox.AddLine(1, p.Message);
+            chatListBox.AddText(1, p.Message);
         }
 
         public void ChatEnterPressed()
@@ -105,6 +116,9 @@ namespace AsperetaClient
                 {
                     GameClient.NetworkClient.ChatMessage(message);
                 }
+
+                inputHistory.Add(message);
+                inputHistoryIndex = inputHistory.Count;
             }
 
             inputBox.SetValue("");
@@ -115,6 +129,7 @@ namespace AsperetaClient
         {
             inputBox.SetValue("");
             inputBox.RemoveFocused();
+            inputHistoryIndex = inputHistory.Count;
         }
 
         public void HandleCommand(string commandText)
@@ -141,6 +156,10 @@ namespace AsperetaClient
             {
                 GameClient.Quit();
             }
+            if (replacedCommand.ToLowerInvariant() == "/filter pickup")
+            {
+                ToggleFilterPickup();
+            }
             else
             {
                 if (replacedCommand[0] == '/')
@@ -148,6 +167,13 @@ namespace AsperetaClient
                 else
                     GameClient.NetworkClient.ChatMessage(replacedCommand);
             }
+        }
+
+        private void ToggleFilterPickup()
+        {
+            chatListBox.FilterPickupMessages = !chatListBox.FilterPickupMessages;
+
+            chatListBox.AddText(8, $"Group item pick up messages are now {(chatListBox.FilterPickupMessages ? "hidden" : "visible")}.");
         }
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
@@ -201,6 +227,27 @@ namespace AsperetaClient
             }
 
             return base.HandleEvent(ev, xOffset, yOffset);
+        }
+
+        public void ChatUpPressed()
+        {
+            inputHistoryIndex = Math.Max(0, inputHistoryIndex - 1);
+            inputBox.SetValue(inputHistory[inputHistoryIndex]);
+        }
+
+        public void ChatDownPressed()
+        {
+            inputHistoryIndex = inputHistoryIndex + 1;
+
+            if (inputHistoryIndex < inputHistory.Count)
+            {
+                inputBox.SetValue(inputHistory[inputHistoryIndex]);
+            }
+            else
+            {
+                inputBox.SetValue("");
+                inputHistoryIndex = inputHistory.Count;
+            }
         }
     }
 }

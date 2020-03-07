@@ -28,6 +28,8 @@ namespace AsperetaClient
                     return Colour.Yellow;
                 case 7: // server
                     return Colour.Green;
+                case 8: // Dunno what this actually is, using it for my client messages now...
+                    return Colour.Blue;
             }
 
             return Colour.White;
@@ -39,12 +41,16 @@ namespace AsperetaClient
         private int displayedLines;
         private int lastViewIndex = -1;
 
+        public bool FilterPickupMessages { get; set; } = false;
+
         private List<ChatLine> lines = new List<ChatLine>();
 
         public ChatListBox(int x, int y, int w, int h, int numLines) : base(x, y, w, h)
         {
             this.displayedLines = numLines;
             this.Padding = 6;
+
+
         }
 
         public override void Update(double dt)
@@ -89,8 +95,10 @@ namespace AsperetaClient
             return false;
         }
 
-        public void AddLine(int colour, string text)
+        public void AddText(int colour, string text)
         {
+            if (FilterPickupMessages && colour == 3 && text.Contains("picked up") && !text.StartsWith("[group]")) return;
+
             foreach (var line in GameClient.FontRenderer.WordWrap(text, this.W, "  "))
             {
                 if (lastViewIndex == lines.Count - 1)

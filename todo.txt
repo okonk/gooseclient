@@ -3,10 +3,6 @@ TODO list
 Next release:
 
 windows need to check if they're focused before events
-Fix textboxes to scroll properly
-Chat input history with up/down arrows in chatbox
-Can't handle packet: 3,100,11,4,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,47,0,0,0,0,0,0,0,0,0,71
-spread battletext offset with large bodies (bear)
 
 
 Fix tint colour rendering
@@ -101,3 +97,8 @@ Emoticons
 
 2020-03-03
 bug with mouseover tiles when screen is resized to super small
+
+2020-03-06
+Fix textboxes to scroll properly
+/filter pickup command
+Chat input history with up/down arrows in chatbox

@@ -67,9 +67,30 @@ namespace AsperetaClient
             return Convert.ToInt32(Sections[section][key]);
         }
 
-        public bool GetBool(string section, string key)
+        public bool GetBool(string section, string key, bool defaultValue = false)
         {
-            return Sections[section][key].ToLowerInvariant() == "true" || Sections[section][key] == "1";
+            if (Sections.TryGetValue(section, out Dictionary<string, string> sectionDict) && sectionDict.TryGetValue(key, out string value))
+            {
+                return value == "true" || value == "1";
+            }
+
+            return defaultValue;
+        }
+
+        public void SetValue<T>(string section, string key, T value)
+        {
+            SetValue(section, key, value.ToString());
+        }
+
+        public void SetValue(string section, string key, string value)
+        {
+            if (!Sections.TryGetValue(section, out Dictionary<string, string> sectionDict))
+            {
+                sectionDict = new Dictionary<string, string>();
+                Sections[section] = sectionDict;
+            }
+
+            sectionDict[key] = value;
         }
 
         public IEnumerable<int> GetCoords(string section, string key)
