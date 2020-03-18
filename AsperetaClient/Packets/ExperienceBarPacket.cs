@@ -15,12 +15,20 @@ namespace AsperetaClient
 
         public override object Parse(PacketParser p)
         {
-            return new ExperienceBarPacket()
-            {  
+            var packet = new ExperienceBarPacket()
+            {
                 Percentage = p.GetInt32(),
                 Experience = p.GetInt64(),
                 ExperienceToNextLevel = p.GetInt64()
             };
+
+            // My extension to display uncapped experience value on newer clients
+            if (p.LengthRemaining() > 0)
+            {
+                packet.ExperienceToNextLevel = p.GetInt64();
+            }
+
+            return packet;
         }
     }
 }

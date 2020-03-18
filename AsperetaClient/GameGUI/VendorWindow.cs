@@ -41,6 +41,10 @@ namespace AsperetaClient
 
         protected override void HandleWindowLine(WindowLinePacket p)
         {
+            // This is to fix bug on Josh's server where right clicking a vendor twice sends an invalid slot
+            if (p.LineNumber < 0 || p.LineNumber >= slots.Length)
+                return;
+
             if (p.GraphicId == 0)
                 slots[p.LineNumber].Clear();
             else

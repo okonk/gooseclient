@@ -349,8 +349,8 @@ namespace AsperetaClient
             int x = (this.PixelXi - x_offset) + this.GetXOffset() + this.GetWidth() / 2 - (name.Length * GameClient.FontRenderer.CharWidth) / 2;
             int y = this.PixelYi - y_offset + this.GetYOffset() - GameClient.FontRenderer.CharHeight - 7;
 
-            GameClient.FontRenderer.RenderText(this.Name, x + 1, y + 1, Colour.Black);
-            GameClient.FontRenderer.RenderText(this.Name, x, y, this.NameColour);
+            GameClient.FontRenderer.RenderText(name, x + 1, y + 1, Colour.Black);
+            GameClient.FontRenderer.RenderText(name, x, y, this.NameColour);
         }
 
         public void RenderHPMPBars(int x_offset, int y_offset)

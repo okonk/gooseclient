@@ -2,6 +2,16 @@ TODO list
 ----------------------------------------------
 Next release:
 
+Socket error receiving data: System.InvalidOperationException: Substring is out of bounds for packet $
+   at AsperetaClient.PacketParser.GetSubstring(Int32 length) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 145
+   at AsperetaClient.ServerMessagePacket.Parse(PacketParser p) in /home/hayden/code/GooseClient/AsperetaClient/Packets/ServerMessagePacket.cs:line 16
+   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 53
+   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 133
+
+bug with /h
+bug managed to get chatbox stuck hidden. could be cause of typing then hit f4?
+fix teleporting npcs going weird
+
 Fix tint colour rendering
 windows need to check if they're focused before events
 Split inventory items
@@ -13,6 +23,21 @@ Alt enter
 Hide console window
 Rounded tooltips
 cursor image
+
+crash arrowing/editing text
+Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be less than zero. (Parameter 'startIndex')
+   at System.String.Substring(Int32 startIndex, Int32 length)
+   at AsperetaClient.TextBox.RenderText(String text, Int32 xOffset, Int32 yOffset, Int32 centeredY) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/TextBox.cs:line 95
+   at AsperetaClient.TextBox.Render(Double dt, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/TextBox.cs:line 78
+   at AsperetaClient.BaseContainer.Render(Double dt, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 32
+   at AsperetaClient.BaseWindow.Render(Double dt, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseWindow.cs:line 165
+   at AsperetaClient.BaseContainer.Render(Double dt, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 32
+   at AsperetaClient.RootPanel.Render(Double dt, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/RootPanel.cs:line 153
+   at AsperetaClient.GameScreen.Render(Double dt) in /home/hayden/code/GooseClient/AsperetaClient/GameScreen.cs:line 153
+   at AsperetaClient.StateManager.Render(Double dt) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 98
+   at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 151
+   at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11
+
 
 ----------------------------------------------
 Future future extended things:
@@ -104,3 +129,9 @@ Chat input history with up/down arrows in chatbox
 2020-03-07
 combine bag window offsets are wrong
 /autopickup command
+
+
+2020-03-18
+Fixed crash when right clicking vendor twice
+Fixed crash when receiving too many buffs to display
+Added protocol extension (for my server) to display full uncapped xp banked value on my client

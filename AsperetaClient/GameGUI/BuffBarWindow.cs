@@ -36,6 +36,8 @@ namespace AsperetaClient
         {
             var p = (BuffBarPacket)packet;
 
+            if (p.SlotNumber < 0 || p.SlotNumber >= slots.Length) return;
+
             if (p.GraphicId == 0 && p.Name == null)
             {
                 slots[p.SlotNumber].Clear();
