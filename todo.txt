@@ -2,15 +2,7 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Socket error receiving data: System.InvalidOperationException: Substring is out of bounds for packet $
-   at AsperetaClient.PacketParser.GetSubstring(Int32 length) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 145
-   at AsperetaClient.ServerMessagePacket.Parse(PacketParser p) in /home/hayden/code/GooseClient/AsperetaClient/Packets/ServerMessagePacket.cs:line 16
-   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 53
-   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 133
-
-bug with /h
-bug managed to get chatbox stuck hidden. could be cause of typing then hit f4?
-fix teleporting npcs going weird
+tooltips remain even when the object is moved
 
 Fix tint colour rendering
 windows need to check if they're focused before events
@@ -23,6 +15,7 @@ Alt enter
 Hide console window
 Rounded tooltips
 cursor image
+fix autopickup to only pick up if item is under you
 
 crash arrowing/editing text
 Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be less than zero. (Parameter 'startIndex')
@@ -134,4 +127,10 @@ combine bag window offsets are wrong
 2020-03-18
 Fixed crash when right clicking vendor twice
 Fixed crash when receiving too many buffs to display
-Added protocol extension (for my server) to display full uncapped xp banked value on my client
+Added protocol extension (for my server, hopefully Josh's soon) to display full uncapped xp banked value on my client
+Fix crash when server sends a valid packet prefix but invalid data (not sure what happened, but happened with $ packet before)
+Fix teleporting npcs slowly moving to spot
+Fixed command aliases (/h) not working
+fix targetting being able to keep target off screen
+Fixed bug where able to get chat box stuck hidden
+large resolution mode (800x600 -- same as Illutia)

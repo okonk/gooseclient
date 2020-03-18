@@ -50,7 +50,17 @@ namespace AsperetaClient
             {
                 if (handlers.TryGetValue(packet.Substring(0, i + 1), out PacketHandler handler))
                 {
-                    var obj = handler.Parse(new PacketParser(packet, handler.Prefix));
+                    object obj;
+                    try
+                    {
+                        obj = handler.Parse(new PacketParser(packet, handler.Prefix));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Exception handling packet '{packet}': {e}");
+                        return;
+                    }
+
                     handler.CallObservers(obj);
 
                     return;

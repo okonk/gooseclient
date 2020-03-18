@@ -46,6 +46,12 @@ namespace AsperetaClient
 
         public static uint DRAG_DROP_EVENT_ID;
 
+        public static int ViewRangeX { get; set; } = 10;
+        public static int ViewRangeY { get; set; } = 8;
+
+        public static int GameScreenWidth { get; set; } = 640;
+        public static int GameScreenHeight { get; set; } = 480;
+
         public GameClient()
         {
             Running = true;
@@ -67,10 +73,16 @@ namespace AsperetaClient
                 SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
                 SDL.SDL_RendererFlags renderFlags = SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
 
+                if (GameSettings.GetBool("INIT", "800x600"))
+                {
+                    GameScreenWidth = 800;
+                    GameScreenHeight = 600;
+                }
+
                 if (GameSettings.GetBool("INIT", "2xScale"))
                 {
-                    windowWidth = 640 * 2;
-                    windowHeight = 480 * 2;
+                    windowWidth = GameScreenWidth * 2;
+                    windowHeight = GameScreenHeight * 2;
                 }
 
                 if (GameSettings.GetBool("INIT", "VSync"))

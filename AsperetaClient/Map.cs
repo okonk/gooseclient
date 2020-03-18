@@ -286,9 +286,6 @@ namespace AsperetaClient
         // Esssentially what the Asp client does is searches up or down going row by row with a wrap around to opposite end of screen
         private void SetNextSpellCastTarget(bool searchDown)
         {
-            const int RangeX = 10;
-            const int RangeY = 8;
-
             int currentPosition = spellCastTarget.TileY * this.Width + spellCastTarget.TileX;
             int lowestPosition = currentPosition;
             int highestPosition = currentPosition;
@@ -298,8 +295,8 @@ namespace AsperetaClient
             {
                 // Filter out things off screen and current target
                 if (character == spellCastTarget || 
-                    Math.Abs(character.TileX - player.TileX) > RangeX || 
-                    Math.Abs(character.TileY - player.TileY) > RangeY)
+                    Math.Abs(character.TileX - player.TileX) > GameClient.ViewRangeX || 
+                    Math.Abs(character.TileY - player.TileY) > GameClient.ViewRangeY)
                 {
                     continue;
                 }
@@ -348,7 +345,10 @@ namespace AsperetaClient
             this[character.TileX, character.TileY].Character = null;
             this[destX, destY].Character = character;
 
-            character.MoveTo(destX, destY);
+            if (Math.Abs(character.TileX - destX) > 1 || Math.Abs(character.TileY - destY) > 1)
+                character.SetPosition(destX, destY);
+            else
+                character.MoveTo(destX, destY);
         }
 
         public void AddCharacter(Character character)
@@ -432,6 +432,20 @@ namespace AsperetaClient
             this.player = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
         }
 
+        private Character CheckSpellCastTarget()
+        {
+            var target = spellCastTarget;
+            
+            if (target == null || 
+                Math.Abs(spellCastTarget.TileX - player.TileX) > GameClient.ViewRangeX || 
+                Math.Abs(spellCastTarget.TileY - player.TileY) > GameClient.ViewRangeY)
+            {
+                target = this.player;
+            }
+
+            return target;
+        }
+
         public void OnCastSpell(SpellSlot slot)
         {
             if (Targeting) return;
@@ -439,7 +453,7 @@ namespace AsperetaClient
             if (slot.Targetable)
             {
                 Targeting = true;
-                spellCastTarget = spellCastTarget ?? this.player;
+                spellCastTarget = CheckSpellCastTarget();
                 spellCastSlotNumber = slot.SlotNumber;
             }
             else

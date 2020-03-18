@@ -167,15 +167,8 @@ namespace AsperetaClient
 
         public override bool HandleEvent(SDL.SDL_Event ev, int xOffset, int yOffset)
         {
-            if (Hidden)
-            {
-                if (ev.type == SDL.SDL_EventType.SDL_KEYDOWN && UiRoot.FocusedTextBox == null && ev.key.keysym.sym == hideShortcutKey)
-                {
-                    Hidden = false;
-                }
-
+            if (Hidden && ev.type != SDL.SDL_EventType.SDL_KEYDOWN && ev.type != SDL.SDL_EventType.SDL_TEXTINPUT)
                 return false;
-            }
 
             bool preventFurtherEvents = base.HandleEvent(ev, xOffset, yOffset);
             if (preventFurtherEvents)

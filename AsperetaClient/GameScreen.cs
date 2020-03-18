@@ -48,9 +48,12 @@ namespace AsperetaClient
 
         public override void Resuming()
         {
-            GameClient.ScreenWidth = 640;
-            GameClient.ScreenHeight = 480;
+            GameClient.ScreenWidth = GameClient.GameScreenWidth;
+            GameClient.ScreenHeight = GameClient.GameScreenHeight;
             SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
+
+            GameClient.ViewRangeX = GameClient.ScreenWidth / Constants.TileSize / 2;
+            GameClient.ViewRangeY = GameClient.ScreenHeight / Constants.TileSize / 2;
         }
 
         public override void Starting()

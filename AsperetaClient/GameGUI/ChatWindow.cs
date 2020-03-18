@@ -121,8 +121,11 @@ namespace AsperetaClient
                     GameClient.NetworkClient.ChatMessage(message);
                 }
 
-                inputHistory.Add(message);
-                inputHistoryIndex = inputHistory.Count;
+                if (inputHistory.LastOrDefault() != message)
+                {
+                    inputHistory.Add(message);
+                    inputHistoryIndex = inputHistory.Count;
+                }
             }
 
             inputBox.SetValue("");
@@ -159,10 +162,11 @@ namespace AsperetaClient
             }
             else
             {
-                if (command[0] == '/')
-                    GameClient.NetworkClient.Command($"{command} {arguments}".TrimEnd());
+                string fullCommand = $"{command} {arguments}".TrimEnd();
+                if (fullCommand[0] == '/')
+                    GameClient.NetworkClient.Command(fullCommand);
                 else
-                    GameClient.NetworkClient.ChatMessage(commandText);
+                    GameClient.NetworkClient.ChatMessage(fullCommand);
             }
         }
 
