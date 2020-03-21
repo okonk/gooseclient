@@ -40,7 +40,9 @@ namespace AsperetaClient
                 handle.Free();
 
                 var surface = SDL_image.IMG_Load_RW(sdlRWops, 1);
-                SDL.SDL_SetColorKey(surface, 1, 0);
+                if (adfFile.FileNumber == 10056)
+                    TintSurface(surface, 90, 200, 40, 150);
+                SDL.SDL_SetColorKey(surface, 1, 0); // TODO: This isn't the best way, this is setting top left pixel as transparent. Which works for sprites but not for tiles
                 texture = SDL.SDL_CreateTextureFromSurface(this.Renderer, surface);
 
                 SDL.SDL_FreeSurface(surface);
@@ -49,6 +51,52 @@ namespace AsperetaClient
             }
 
             return texture;
+        }
+
+        private void TintSurface(IntPtr surface, byte tr, byte tg, byte tb, byte ta)
+        {
+            unsafe
+            {
+                SDL.SDL_Surface* surfacePtr = (SDL.SDL_Surface*)surface;
+
+                if (SDL.SDL_MUSTLOCK(surface))
+                    SDL.SDL_LockSurface(surface);
+
+                var fmt = (SDL.SDL_PixelFormat*)surfacePtr->format;
+                byte* p = (byte*)surfacePtr->pixels.ToPointer();
+
+                if (fmt->BitsPerPixel == 8)
+                {
+                    // TODO: Modify palette
+                    return;
+                }
+
+                Console.WriteLine($"Format: {SDL.SDL_GetPixelFormatName(fmt->format)}");
+
+                for (int y = 0; y < surfacePtr->h; y++)
+                {
+                    for (int x = 0; x < surfacePtr->w; x++)
+                    {
+                        byte* s = (p + y * surfacePtr->pitch + x * 3);
+                        byte b = *(s + 0);
+                        byte g = *(s + 1);
+                        byte r = *(s + 2);
+
+                        if (r == 0 && g == 0 && b == 0) continue;
+
+                        r = (byte)((ta * ((tr + 256) - r)) / 256 + r - ta);
+                        g = (byte)((ta * ((tg + 256) - g)) / 256 + g - ta);
+                        b = (byte)((ta * ((tb + 256) - b)) / 256 + b - ta);
+
+                        *(s + 0) = b;
+                        *(s + 1) = g;
+                        *(s + 2) = r;
+                    }
+                }
+
+                if (SDL.SDL_MUSTLOCK(surface))
+                    SDL.SDL_UnlockSurface(surface);
+            }
         }
 
         public Texture GetTexture(int frameId, bool usedInMap = false, bool usedInSpell = false)

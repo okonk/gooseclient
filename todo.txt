@@ -3,8 +3,8 @@ TODO list
 Next release:
 
 tooltips remain even when the object is moved
-
 Fix tint colour rendering
+
 windows need to check if they're focused before events
 Split inventory items
 Loading screen on client launch (for loading datafiles)
@@ -15,7 +15,6 @@ Alt enter
 Hide console window
 Rounded tooltips
 cursor image
-fix autopickup to only pick up if item is under you
 
 crash arrowing/editing text
 Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be less than zero. (Parameter 'startIndex')
@@ -134,3 +133,9 @@ Fixed command aliases (/h) not working
 fix targetting being able to keep target off screen
 Fixed bug where able to get chat box stuck hidden
 large resolution mode (800x600 -- same as Illutia)
+
+2020-03-22
+pressing comma in chat picks up items
+bug in packet receiving
+add sp window
+fix autopickup to only pick up if item is under you

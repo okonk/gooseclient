@@ -84,6 +84,7 @@ namespace AsperetaClient
             this.uiRoot.AddChild(new BuffBarWindow());
             this.uiRoot.AddChild(new HPBarWindow());
             this.uiRoot.AddChild(new MPBarWindow());
+            this.uiRoot.AddChild(new SPBarWindow());
             this.uiRoot.AddChild(new XPBarWindow());
             this.uiRoot.AddChild(new PartyWindow());
             this.uiRoot.AddChild(new ButtonBarWindow());
@@ -472,7 +473,8 @@ namespace AsperetaClient
 
         public void OnOurCharacterMoved(Character c)
         {
-            GameClient.NetworkClient.Get();
+            if (this.Map[c.TileX, c.TileY].MapObject != null)
+                GameClient.NetworkClient.Get();
         }
     }
 }

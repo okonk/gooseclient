@@ -232,7 +232,7 @@ namespace AsperetaClient
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_KEYDOWN:
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_COMMA)
+                    if (GuiElement.UiRoot.FocusedTextBox == null && ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_COMMA && ev.key.repeat == 0)
                     {
                         GameClient.NetworkClient.Get();
                         return true;

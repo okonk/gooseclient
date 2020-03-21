@@ -124,8 +124,9 @@ namespace AsperetaClient
                 if (inputHistory.LastOrDefault() != message)
                 {
                     inputHistory.Add(message);
-                    inputHistoryIndex = inputHistory.Count;
                 }
+
+                inputHistoryIndex = inputHistory.Count;
             }
 
             inputBox.SetValue("");

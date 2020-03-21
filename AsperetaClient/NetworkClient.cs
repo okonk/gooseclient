@@ -111,7 +111,7 @@ namespace AsperetaClient
                     string receivedString = System.Text.Encoding.ASCII.GetString(buffer, 0, received);
                     packetBuffer += receivedString;
 
-                    //Console.WriteLine($"Received: {receivedString}");
+                    //Console.WriteLine($"Received: {receivedString.Replace('\x1', '\n')}");
 
                     if (packetBuffer.Length == 0) continue;
 
@@ -121,7 +121,7 @@ namespace AsperetaClient
                     if (!packetBuffer.EndsWith("\x1"))
                     {
                         packetBuffer = packets[packets.Length - 1];// packetBuffer.Substring(packetBuffer.Length - packets[limit - 1].Length - 1);
-                        limit--;
+                        //limit--;
                     }
                     else
                     {
@@ -130,6 +130,7 @@ namespace AsperetaClient
 
                     for (int i = 0; i < limit; i++)
                     {
+                        //Console.WriteLine($"P: {packets[i]}");
                         PacketManager.Handle(packets[i]);
                     }
                 }
