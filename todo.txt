@@ -5,7 +5,6 @@ Next release:
 windows need to check if they're focused before events
 
 Loading screen on client launch (for loading datafiles)
-Script to build/package release
 Load login screen info from skin .ini files
 Support names/vita/etc commands and config settings
 Alt enter
@@ -143,3 +142,4 @@ Fix tint colour rendering
 Split inventory items
 Fix map item tooltips staying on screen after moving character and mouse no longer on an item.
 Load chat colours from user settings. This supports r,g,b,a format for colours as well as the colour name aliases
+Script to build/package release

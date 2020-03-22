@@ -29,7 +29,6 @@ namespace AsperetaClient
         public event Action<int, int> LeftClickUnhandled;
         public event Action<int, int> DoubleClickUnhandled;
         public event Action<int, int> RightClickUnhandled;
-        public event Action<int, int> MouseOverMap;
 
         public RootPanel() : this(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {

@@ -78,7 +78,6 @@ namespace AsperetaClient
             this.uiRoot = new RootPanel();
             this.uiRoot.DropWasUnhandled += OnDropWasUnhandled;
             this.uiRoot.RightClickUnhandled += OnRightClick;
-            this.uiRoot.MouseOverMap += OnMouseOverMap;
 
             chatWindow = new ChatWindow();
             chatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
