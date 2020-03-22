@@ -2,7 +2,7 @@ TODO list
 ----------------------------------------------
 Next release:
 
-tooltips remain even when the object is moved
+load chat colours from .ini
 
 windows need to check if they're focused before events
 
@@ -142,3 +142,4 @@ fix autopickup to only pick up if item is under you
 2020-03-22
 Fix tint colour rendering
 Split inventory items
+tooltips remain even when the object is moved

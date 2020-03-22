@@ -122,21 +122,6 @@ namespace AsperetaClient
                         DragDropY = ev.motion.y;
                     }
 
-                    bool mouseOverWindow = false;
-                    foreach (var element in Children.Where(c => c is BaseWindow).Cast<BaseWindow>())
-                    {
-                        if (!element.Hidden && element.Contains(xOffset, yOffset, ev.button.x, ev.button.y))
-                        {
-                            mouseOverWindow = true;
-                            break;
-                        }
-                    }
-
-                    if (!mouseOverWindow)
-                    {
-                        MouseOverMap?.Invoke(ev.button.x, ev.button.y);
-                    }
-
                     break;
             }
 

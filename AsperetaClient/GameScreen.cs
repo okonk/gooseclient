@@ -29,6 +29,9 @@ namespace AsperetaClient
 
         private ChatWindow chatWindow;
 
+        private int mouseX;
+        private int mouseY;
+
         public GameScreen(int mapNumber, string mapName)
         {
             this.mapNumber = mapNumber;
@@ -223,6 +226,21 @@ namespace AsperetaClient
             }
 
             this.uiRoot.Update(dt);
+
+            bool mouseOverWindow = false;
+            foreach (var element in this.uiRoot.Children.Where(c => c is BaseWindow).Cast<BaseWindow>())
+            {
+                if (!element.Hidden && element.Contains(0, 0, mouseX, mouseY))
+                {
+                    mouseOverWindow = true;
+                    break;
+                }
+            }
+
+            if (!mouseOverWindow)
+            {
+                OnMouseOverMap(mouseX, mouseY);
+            }
         }
 
         public override void HandleEvent(SDL.SDL_Event ev)
@@ -237,6 +255,11 @@ namespace AsperetaClient
             {
                 case SDL.SDL_EventType.SDL_QUIT:
                     SaveUserSettings();
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                    mouseX = ev.motion.x;
+                    mouseY = ev.motion.y;
                     break;
 
                 case SDL.SDL_EventType.SDL_KEYDOWN:
