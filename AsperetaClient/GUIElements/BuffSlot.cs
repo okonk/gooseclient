@@ -15,7 +15,7 @@ namespace AsperetaClient
         public void SetSlot(string name, int graphicId)
         {
             this.Name = name;
-            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId);
+            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, null);
         }
 
         public override void HandleDrop(object data)

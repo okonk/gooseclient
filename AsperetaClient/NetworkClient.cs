@@ -120,8 +120,7 @@ namespace AsperetaClient
 
                     if (!packetBuffer.EndsWith("\x1"))
                     {
-                        packetBuffer = packets[packets.Length - 1];// packetBuffer.Substring(packetBuffer.Length - packets[limit - 1].Length - 1);
-                        //limit--;
+                        packetBuffer = packets[packets.Length - 1];
                     }
                     else
                     {

@@ -11,9 +11,9 @@ namespace AsperetaClient
     {
         public AdfManager AdfManager { get; set; }
 
-        public Dictionary<int, IntPtr> AdfFileToSDLTexture { get; set; }
+        public Dictionary<long, IntPtr> ColouredAdfFileToSDLTexture { get; set; }
 
-        public Dictionary<int, Texture> FrameIdToTexture { get; set; }
+        public Dictionary<long, Texture> ColouredFrameIdToTexture { get; set; }
 
         public Dictionary<string, Texture> FileToTexture { get; set; }
 
@@ -22,16 +22,32 @@ namespace AsperetaClient
         public ResourceManager(string dataPath, IntPtr renderer)
         {
             this.AdfManager = new AdfManager(dataPath);
-            this.AdfFileToSDLTexture = new Dictionary<int, IntPtr>();
-            this.FrameIdToTexture = new Dictionary<int, Texture>();
+            this.ColouredAdfFileToSDLTexture = new Dictionary<long, IntPtr>();
+            this.ColouredFrameIdToTexture = new Dictionary<long, Texture>();
             this.FileToTexture = new Dictionary<string, Texture>();
             this.Renderer = renderer;
         }
 
-        public IntPtr GetSDLTexture(AdfFile adfFile)
+        public long PackColourIntoId(Colour colour, int id)
         {
+            if (colour == null || colour.A == 0)
+                return id;
+
+            long result = (long)colour.R << 56;
+            result |= (long)colour.G << 48;
+            result |= (long)colour.B << 40;
+            result |= (long)colour.A << 32;
+            result |= (long)id;
+
+            return result;
+        }
+
+        public IntPtr GetSDLTexture(AdfFile adfFile, Colour colour)
+        {
+            long colouredId = PackColourIntoId(colour, adfFile.FileNumber);
+
             IntPtr texture;
-            if (!this.AdfFileToSDLTexture.TryGetValue(adfFile.FileNumber, out texture))
+            if (!this.ColouredAdfFileToSDLTexture.TryGetValue(colouredId, out texture))
             {
                 var handle = GCHandle.Alloc(adfFile.FileData, GCHandleType.Pinned);
                 var ptr = handle.AddrOfPinnedObject();
@@ -40,14 +56,14 @@ namespace AsperetaClient
                 handle.Free();
 
                 var surface = SDL_image.IMG_Load_RW(sdlRWops, 1);
-                if (adfFile.FileNumber == 10056)
-                    TintSurface(surface, 90, 200, 40, 150);
+                if (colour != null && colour.A > 0)
+                    TintSurface(surface, colour.R, colour.G, colour.B, colour.A);
                 SDL.SDL_SetColorKey(surface, 1, 0); // TODO: This isn't the best way, this is setting top left pixel as transparent. Which works for sprites but not for tiles
                 texture = SDL.SDL_CreateTextureFromSurface(this.Renderer, surface);
 
                 SDL.SDL_FreeSurface(surface);
 
-                this.AdfFileToSDLTexture[adfFile.FileNumber] = texture;
+                this.ColouredAdfFileToSDLTexture[colouredId] = texture;
             }
 
             return texture;
@@ -67,11 +83,26 @@ namespace AsperetaClient
 
                 if (fmt->BitsPerPixel == 8)
                 {
-                    // TODO: Modify palette
+                    var palette = (SDL.SDL_Palette*)fmt->palette;
+                    var colours = (SDL.SDL_Color*)palette->colors;
+
+                    for (int i = 0; i < palette->ncolors; i++)
+                    {
+                        SDL.SDL_Color colour = *(colours + i);
+                        if (colour.r == 0 && colour.g == 0 && colour.b == 0) continue;
+
+                        colour.r = (byte)(((ta * ((tr + 256) - colour.r)) >> 8) + colour.r - ta);
+                        colour.g = (byte)(((ta * ((tg + 256) - colour.g)) >> 8) + colour.g - ta);
+                        colour.b = (byte)(((ta * ((tb + 256) - colour.b)) >> 8) + colour.b - ta);
+                        //colour.a = (byte)(((ta * ((ta + 256) - colour.a)) >> 8) + colour.a - ta);
+
+                        *(colours + i) = colour;
+                    }
+
                     return;
                 }
 
-                Console.WriteLine($"Format: {SDL.SDL_GetPixelFormatName(fmt->format)}");
+                //Console.WriteLine($"Format: {SDL.SDL_GetPixelFormatName(fmt->format)}");
 
                 for (int y = 0; y < surfacePtr->h; y++)
                 {
@@ -84,9 +115,9 @@ namespace AsperetaClient
 
                         if (r == 0 && g == 0 && b == 0) continue;
 
-                        r = (byte)((ta * ((tr + 256) - r)) / 256 + r - ta);
-                        g = (byte)((ta * ((tg + 256) - g)) / 256 + g - ta);
-                        b = (byte)((ta * ((tb + 256) - b)) / 256 + b - ta);
+                        r = (byte)(((ta * ((tr + 256) - r)) >> 8) + r - ta);
+                        g = (byte)(((ta * ((tg + 256) - g)) >> 8) + g - ta);
+                        b = (byte)(((ta * ((tb + 256) - b)) >> 8) + b - ta);
 
                         *(s + 0) = b;
                         *(s + 1) = g;
@@ -99,31 +130,33 @@ namespace AsperetaClient
             }
         }
 
-        public Texture GetTexture(int frameId, bool usedInMap = false, bool usedInSpell = false)
+        public Texture GetTexture(int frameId, Colour colour, bool usedInMap = false, bool usedInSpell = false)
         {
             if (!this.AdfManager.FrameToFile.TryGetValue(frameId, out AdfFile adfFile))
                 return null;
 
+            long colouredId = PackColourIntoId(colour, frameId);
+
             Texture frameTexture;
-            if (this.FrameIdToTexture.TryGetValue(frameId, out frameTexture))
+            if (this.ColouredFrameIdToTexture.TryGetValue(colouredId, out frameTexture))
                 return frameTexture;
 
-            var texture = GetSDLTexture(adfFile);
+            var texture = GetSDLTexture(adfFile, colour);
 
             var frame = adfFile.Frames[frameId];
             frameTexture = new Texture(texture, frame.X, frame.Y, frame.W, frame.H, mapOffset: usedInMap, spellOffset: usedInSpell);
 
-            this.FrameIdToTexture[frameId] = frameTexture;
+            this.ColouredFrameIdToTexture[colouredId] = frameTexture;
             return frameTexture;
         }
 
-        public Animation GetAnimation(int animationId, bool spellAnimation = false)
+        public Animation GetAnimation(int animationId, Colour colour, bool spellAnimation = false)
         {
             if (!this.AdfManager.Animations.TryGetValue(animationId, out AnimationData animationData))
                 return null;
 
             var animation = new Animation();
-            animation.Frames = animationData.Frames.Select(f => GetTexture(f, usedInSpell: spellAnimation)).ToArray();
+            animation.Frames = animationData.Frames.Select(f => GetTexture(f, colour, usedInSpell: spellAnimation)).ToArray();
             animation.Interval = 1.0d / animationData.Interval / 2;
 
             return animation;

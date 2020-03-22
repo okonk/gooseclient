@@ -3,10 +3,10 @@ TODO list
 Next release:
 
 tooltips remain even when the object is moved
-Fix tint colour rendering
+Split inventory items
 
 windows need to check if they're focused before events
-Split inventory items
+
 Loading screen on client launch (for loading datafiles)
 Script to build/package release
 Load login screen info from skin .ini files
@@ -134,8 +134,11 @@ fix targetting being able to keep target off screen
 Fixed bug where able to get chat box stuck hidden
 large resolution mode (800x600 -- same as Illutia)
 
-2020-03-22
+2020-03-21
 pressing comma in chat picks up items
 bug in packet receiving
 add sp window
 fix autopickup to only pick up if item is under you
+
+2020-03-22
+Fix tint colour rendering

@@ -30,7 +30,7 @@ namespace AsperetaClient
             this.ItemId = itemId;
             this.Name = itemName;
             this.StackSize = stackSize;
-            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId);
+            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, colour);
             this.Colour = colour;
         }
 

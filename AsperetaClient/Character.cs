@@ -182,7 +182,7 @@ namespace AsperetaClient
 
             int attackOffset = (Attacking ? 16 : 0);
             int bodyState = (this.BodyId >= 100 ? 1 : this.BodyState);
-            var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[attackOffset + (bodyState - 1) + ((int)this.Facing) * 4]);
+            var animation = GameClient.ResourceManager.GetAnimation(compiledAnimation.AnimationIndexes[attackOffset + (bodyState - 1) + ((int)this.Facing) * 4], colour);
             if (animation == null)
             {
                 this.EquippedAnimations[(int)slot] = null;

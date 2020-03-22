@@ -19,7 +19,7 @@ namespace AsperetaClient
         public void SetSlot(string name, int graphicId, bool targetable)
         {
             this.Name = name;
-            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId);
+            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, null);
             this.targetable = targetable;
         }
 

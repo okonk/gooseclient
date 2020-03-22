@@ -114,7 +114,7 @@ namespace AsperetaClient
                 for (int x = 0; x < this.Width; x++)
                 {
                     var tileData = MapFile[x, y];
-                    var tile = new Tile(tileData.Blocked, tileData.Layers.Select(l => l > 0 ? GameClient.ResourceManager.GetTexture(l, usedInMap: true) : null).ToArray());
+                    var tile = new Tile(tileData.Blocked, tileData.Layers.Select(l => l > 0 ? GameClient.ResourceManager.GetTexture(l, null, usedInMap: true) : null).ToArray());
 
                     this[x, y] = tile;
                 }
@@ -469,7 +469,7 @@ namespace AsperetaClient
             var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
             if (character == null) return;
 
-            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, spellAnimation: true);
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, null, spellAnimation: true);
             character.SpellAnimation = animation;
         }
 
@@ -480,7 +480,7 @@ namespace AsperetaClient
             if (!ValidTile(p.TileX, p.TileY))
                 return;
 
-            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, spellAnimation: true);
+            var animation = GameClient.ResourceManager.GetAnimation(p.AnimationId, null, spellAnimation: true);
             var spellTileAnimation = new SpellTileAnimation(p.TileX, p.TileY, animation);
             SpellAnimations.Add(spellTileAnimation);
             this[p.TileX, p.TileY].SpellAnimation = spellTileAnimation;
@@ -489,11 +489,12 @@ namespace AsperetaClient
         public void OnMapObject(object packet)
         {
             var p = (MapObjectPacket)packet;
+            var colour = new Colour(p.GraphicR, p.GraphicG, p.GraphicB, p.GraphicA);
 
             var mapObject = new MapObject
             {
-                Graphic = GameClient.ResourceManager.GetTexture(p.GraphicId),
-                Colour = new Colour(p.GraphicR, p.GraphicG, p.GraphicB, p.GraphicA),
+                Graphic = GameClient.ResourceManager.GetTexture(p.GraphicId, colour),
+                Colour = colour,
                 Name = p.ItemName,
                 StackSize = p.StackSize
             };
@@ -628,7 +629,7 @@ namespace AsperetaClient
             var character = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
             if (character == null) return;
 
-            var animation = GameClient.ResourceManager.GetAnimation(179 + p.AnimationId);
+            var animation = GameClient.ResourceManager.GetAnimation(179 + p.AnimationId, null);
             animation.Interval = 0.5;
             character.EmoteAnimation = animation;
         }

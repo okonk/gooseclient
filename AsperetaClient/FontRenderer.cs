@@ -16,7 +16,7 @@ namespace AsperetaClient
 
         public FontRenderer()
         {
-            this.FontTexture = GameClient.ResourceManager.GetSDLTexture(GameClient.ResourceManager.AdfManager.Files[101]);
+            this.FontTexture = GameClient.ResourceManager.GetSDLTexture(GameClient.ResourceManager.AdfManager.Files[101], null);
 
             SDL.SDL_SetTextureBlendMode(this.FontTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
