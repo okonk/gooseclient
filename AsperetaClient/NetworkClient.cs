@@ -196,7 +196,10 @@ namespace AsperetaClient
             Send($"CHANGE{fromSlot + 1},{toSlot + 1}");
         }
 
-        // SPLITslotid1,slotid2
+        public void Split(int fromSlot, int toSlot)
+        {
+            Send($"SPLIT{fromSlot + 1},{toSlot + 1}");
+        }
 
         public void InventoryToWindow(int fromSlot, int windowId, int toSlot)
         {

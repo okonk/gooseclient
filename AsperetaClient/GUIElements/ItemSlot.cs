@@ -48,7 +48,15 @@ namespace AsperetaClient
                 {
                     if (this.Parent is InventoryWindow && fromSlot.Parent is InventoryWindow)
                     {
-                        GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
+                        var keyMod = SDL.SDL_GetModState();
+                        if ((keyMod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE)
+                        {
+                            GameClient.NetworkClient.Split(fromSlot.SlotNumber, this.SlotNumber);
+                        }
+                        else
+                        {
+                            GameClient.NetworkClient.Change(fromSlot.SlotNumber, this.SlotNumber);
+                        }
                     }
                     else if (fromSlot.Parent is InventoryWindow && this.Parent is ContainerWindow)
                     {
