@@ -132,7 +132,7 @@ namespace AsperetaClient
             if (this.AutoPickup)
                 this.player.MovementFinished += this.OnOurCharacterMoved;
 
-            chatWindow.AddText(8, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
+            chatWindow.AddText(ChatType.Client, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
         }
 
         private int RenderOffsetX()

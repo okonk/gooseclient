@@ -85,9 +85,9 @@ namespace AsperetaClient
         {
             var p = (ServerMessagePacket)packet;
 
-            chatListBox.AddText(p.Colour, p.Message);
+            chatListBox.AddText(p.ChatType, p.Message);
 
-            if (p.Colour == 6 && p.Message.StartsWith("[tell from] "))
+            if (p.ChatType == ChatType.Tell && p.Message.StartsWith("[tell from] "))
             {
                 replyToName = p.Message.Substring(12, p.Message.IndexOf(':') - 12);
             }
@@ -97,14 +97,14 @@ namespace AsperetaClient
         {
             var p = (ChatPacket)packet;
 
-            chatListBox.AddText(1, p.Message);
+            chatListBox.AddText(ChatType.Chat, p.Message);
         }
 
         public void OnHashMessage(object packet)
         {
             var p = (HashMessagePacket)packet;
 
-            chatListBox.AddText(1, p.Message);
+            chatListBox.AddText(ChatType.Chat, p.Message);
         }
 
         public void ChatEnterPressed()
@@ -180,13 +180,13 @@ namespace AsperetaClient
         {
             if (string.IsNullOrWhiteSpace(arguments))
             {
-                chatListBox.AddText(8, $"/filter [pickup]");
+                chatListBox.AddText(ChatType.Client, $"/filter [pickup]");
             }
             else if (arguments == "pickup")
             {
                 chatListBox.FilterPickupMessages = !chatListBox.FilterPickupMessages;
 
-                AddText(8, $"Group item pick up messages are now {(chatListBox.FilterPickupMessages ? "hidden" : "visible")}.");
+                AddText(ChatType.Client, $"Group item pick up messages are now {(chatListBox.FilterPickupMessages ? "hidden" : "visible")}.");
             }
         }
 
@@ -264,9 +264,9 @@ namespace AsperetaClient
             }
         }
 
-        public void AddText(int colour, string text)
+        public void AddText(ChatType chatType, string text)
         {
-            chatListBox.AddText(colour, text);
+            chatListBox.AddText(chatType, text);
         }
     }
 }

@@ -5,39 +5,34 @@ using SDL2;
 
 namespace AsperetaClient
 {
+    enum ChatType
+    {
+        Chat = 1,
+        Guild,
+        Group,
+        Melee,
+        Spells,
+        Tell,
+        Server,
+        Client = 8,
+    }
+
     class ChatLine
     {
         public Colour Colour { get; set; }
         public string Text { get; set; }
 
-        public ChatLine(int colourInt, string text)
+        public ChatLine(Colour colour, string text)
         {
-            this.Colour = IntToColour(colourInt);
+            this.Colour = colour;
             this.Text = text;
-        }
-
-        public Colour IntToColour(int colour)
-        {
-            switch (colour)
-            {
-                case 1:
-                    return Colour.White;
-                case 2: // guild // TODO: Map these based on config
-                case 3: // group
-                case 6: // tell
-                    return Colour.Yellow;
-                case 7: // server
-                    return Colour.Green;
-                case 8: // Dunno what this actually is, using it for my client messages now...
-                    return Colour.Blue;
-            }
-
-            return Colour.White;
         }
     }
 
     class ChatListBox : GuiElement
     {
+        private static Dictionary<ChatType, Colour> chatColours = new Dictionary<ChatType, Colour>();
+
         private int displayedLines;
         private int lastViewIndex = -1;
 
@@ -50,7 +45,47 @@ namespace AsperetaClient
             this.displayedLines = numLines;
             this.Padding = 6;
 
+            var filterColours = GameClient.UserSettings["FilterColors"];
+            foreach (var kvp in filterColours)
+            {
+                if (Enum.TryParse<ChatType>(kvp.Key, true, out ChatType chatType))
+                {
+                    chatColours[chatType] = ParseColour(kvp.Value);
+                }
+            }
 
+            if (!chatColours.ContainsKey(ChatType.Client))
+                chatColours[ChatType.Client] = Colour.Blue;
+        }
+
+        private Colour ParseColour(string colourString)
+        {
+            switch (colourString.ToLowerInvariant())
+            {
+                case "white": return Colour.White;
+                case "black": return Colour.Black;
+                case "yellow": return Colour.Yellow;
+                case "green": return Colour.Green;
+                case "red": return Colour.Red;
+                case "blue": return Colour.Blue;
+                case "purple": return Colour.Purple;
+                default:
+                    var splits = colourString.Split(',');
+                    if (splits.Length >= 3)
+                    {
+                        byte.TryParse(splits[0], out byte r);
+                        byte.TryParse(splits[1], out byte g);
+                        byte.TryParse(splits[2], out byte b);
+                        byte a = 255;
+                        if (splits.Length > 3)
+                            byte.TryParse(splits[3], out a);
+                        return new Colour(r, g, b, a);
+                    }
+                    else
+                    {
+                        return Colour.White;
+                    }
+            }
         }
 
         public override void Update(double dt)
@@ -95,9 +130,9 @@ namespace AsperetaClient
             return false;
         }
 
-        public void AddText(int colour, string text)
+        public void AddText(ChatType chatType, string text)
         {
-            if (FilterPickupMessages && colour == 3 && text.Contains("picked up") && !text.StartsWith("[group]")) return;
+            if (FilterPickupMessages && chatType == ChatType.Group && text.Contains("picked up") && !text.StartsWith("[group]")) return;
 
             foreach (var line in GameClient.FontRenderer.WordWrap(text, this.W, "  "))
             {
@@ -106,7 +141,7 @@ namespace AsperetaClient
                     lastViewIndex++;
                 }
 
-                lines.Add(new ChatLine(colour, line));
+                lines.Add(new ChatLine(chatColours[chatType], line));
             }
 
             if (lines.Count > 500)

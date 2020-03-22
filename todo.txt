@@ -2,8 +2,6 @@ TODO list
 ----------------------------------------------
 Next release:
 
-load chat colours from .ini
-
 windows need to check if they're focused before events
 
 Loading screen on client launch (for loading datafiles)
@@ -14,6 +12,7 @@ Alt enter
 Hide console window
 Rounded tooltips
 cursor image
+word wrap bug
 
 crash arrowing/editing text
 Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be less than zero. (Parameter 'startIndex')
@@ -134,12 +133,13 @@ Fixed bug where able to get chat box stuck hidden
 large resolution mode (800x600 -- same as Illutia)
 
 2020-03-21
-pressing comma in chat picks up items
-bug in packet receiving
-add sp window
-fix autopickup to only pick up if item is under you
+Fix pressing comma in chat picks up items
+Fix bug in packet receiving ignoring packets that were split
+Add SP window
+Fix autopickup to only pick up if item is under you
 
 2020-03-22
 Fix tint colour rendering
 Split inventory items
-tooltips remain even when the object is moved
+Fix map item tooltips staying on screen after moving character and mouse no longer on an item.
+Load chat colours from user settings. This supports r,g,b,a format for colours as well as the colour name aliases

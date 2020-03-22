@@ -5,7 +5,7 @@ namespace AsperetaClient
 {
     class ServerMessagePacket : PacketHandler
     {
-        public int Colour { get; set; }
+        public ChatType ChatType { get; set; }
 
         public string Message { get; set; }
 
@@ -15,7 +15,7 @@ namespace AsperetaClient
         {
             return new ServerMessagePacket()
             {  
-                Colour = Convert.ToInt32(p.GetSubstring(1)),
+                ChatType = (ChatType)Convert.ToInt32(p.GetSubstring(1)),
                 Message = p.GetRemaining()
             };
         }
