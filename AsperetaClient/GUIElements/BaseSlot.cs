@@ -76,7 +76,7 @@ namespace AsperetaClient
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
                     bool contains = Contains(xOffset, yOffset, ev.motion.x, ev.motion.y);
                     
-                    if (contains && Graphic != null)
+                    if (contains && Name != null)
                     {
                         int x = ev.motion.x;
                         int y = ev.motion.y - GameClient.FontRenderer.CharHeight - 10;

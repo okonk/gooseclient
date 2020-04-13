@@ -35,7 +35,7 @@ zip -r $X64_ZIP $X64_OUTPUT_DIR
 mkdir $X86_OUTPUT_DIR
 cp -r $RELEASE_DIR/netcoreapp3.1/win-x86/publish/* $X86_OUTPUT_DIR/
 cp -r $DATA_DIR/* $X86_OUTPUT_DIR/
-cp -r $X64_LIB_DIR/* $X86_OUTPUT_DIR/
+cp -r $X86_LIB_DIR/* $X86_OUTPUT_DIR/
 zip -r $X86_ZIP $X86_OUTPUT_DIR
 
 rm -r $X86_OUTPUT_DIR

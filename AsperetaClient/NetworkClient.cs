@@ -99,13 +99,13 @@ namespace AsperetaClient
 
             var readSockets = new List<Socket> { socket };
 
-            Socket.Select(readSockets, null, null, 1000);
+            Socket.Select(readSockets, null, null, 500);
 
             foreach (var socket in readSockets)
             {
                 try
                 {
-                    var buffer = new byte[4196];
+                    var buffer = new byte[8192];
 
                     int received = socket.Receive(buffer);
                     string receivedString = System.Text.Encoding.ASCII.GetString(buffer, 0, received);

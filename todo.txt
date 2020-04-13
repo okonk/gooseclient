@@ -12,8 +12,10 @@ Hide console window
 Rounded tooltips
 cursor image
 word wrap bug
+facing up hair should render before chest
 
-crash arrowing/editing text
+crash arrowing/editing text (press end)
+
 Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be less than zero. (Parameter 'startIndex')
    at System.String.Substring(Int32 startIndex, Int32 length)
    at AsperetaClient.TextBox.RenderText(String text, Int32 xOffset, Int32 yOffset, Int32 centeredY) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/TextBox.cs:line 95
@@ -26,6 +28,22 @@ Unhandled exception. System.ArgumentOutOfRangeException: StartIndex cannot be le
    at AsperetaClient.StateManager.Render(Double dt) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 98
    at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 151
    at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11
+   
+also press down when nothing there...
+Unhandled exception. System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter 'index')
+   at System.Collections.Generic.List`1.get_Item(Int32 index)
+   at AsperetaClient.ChatWindow.ChatUpPressed() in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/ChatWindow.cs:line 249
+   at AsperetaClient.TextBox.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/TextBox.cs:line 163
+   at AsperetaClient.BaseContainer.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 40
+   at AsperetaClient.BaseWindow.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseWindow.cs:line 173
+   at AsperetaClient.ChatWindow.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GameGUI/ChatWindow.cs:line 243
+   at AsperetaClient.BaseContainer.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/BaseContainer.cs:line 40
+   at AsperetaClient.RootPanel.HandleEvent(SDL_Event ev, Int32 xOffset, Int32 yOffset) in /home/hayden/code/GooseClient/AsperetaClient/GUIElements/RootPanel.cs:line 127
+   at AsperetaClient.GameScreen.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/GameScreen.cs:line 258
+   at AsperetaClient.StateManager.HandleEvent(SDL_Event ev) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 106
+   at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 150
+   at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11
+
 
 
 ----------------------------------------------
@@ -143,3 +161,17 @@ Split inventory items
 Fix map item tooltips staying on screen after moving character and mouse no longer on an item.
 Load chat colours from user settings. This supports r,g,b,a format for colours as well as the colour name aliases
 Script to build/package release
+
+2020-04-14
+Fix crashes when being killed by player
+Socket error receiving data: System.NullReferenceException: Object reference not set to an instance of an object.
+   at AsperetaClient.Map.OnSpellTile(Object packet) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 486
+   at AsperetaClient.PacketHandler.CallObservers(Object obj) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 18
+   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 64
+   at AsperetaClient.NetworkClient.Update() in /home/hayden/code/GooseClient/AsperetaClient/NetworkClient.cs:line 133
+Unhandled exception. System.NullReferenceException: Object reference not set to an instance of an object.
+   at AsperetaClient.Map.Render(Int32 start_x, Int32 start_y) in /home/hayden/code/GooseClient/AsperetaClient/Map.cs:line 170
+   at AsperetaClient.GameScreen.Render(Double dt) in /home/hayden/code/GooseClient/AsperetaClient/GameScreen.cs:line 158
+   at AsperetaClient.StateManager.Render(Double dt) in /home/hayden/code/GooseClient/AsperetaClient/StateManager.cs:line 98
+   at AsperetaClient.GameClient.Run() in /home/hayden/code/GooseClient/AsperetaClient/GameClient.cs:line 163
+   at AsperetaClient.Program.Main(String[] args) in /home/hayden/code/GooseClient/AsperetaClient/Program.cs:line 11

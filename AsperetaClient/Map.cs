@@ -128,6 +128,8 @@ namespace AsperetaClient
 
         public void Update(double dt)
         {
+            if (!Loaded) return;
+
             foreach (var character in Characters)
             {
                 character.Update(dt);
@@ -152,6 +154,8 @@ namespace AsperetaClient
 
         public void Render(int start_x, int start_y)
         {
+            if (!Loaded) return;
+
             for (int l = 0; l < NUM_LAYERS; l++)
             {
                 for (int y = (start_y - OVERDRAW) / Constants.TileSize; y < this.Height; y++)
@@ -475,6 +479,8 @@ namespace AsperetaClient
 
         public void OnSpellTile(object packet)
         {
+            if (!Loaded) return;
+
             var p = (SpellTilePacket)packet;
 
             if (!ValidTile(p.TileX, p.TileY))
