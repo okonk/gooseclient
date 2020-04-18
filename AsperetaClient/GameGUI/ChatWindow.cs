@@ -245,12 +245,16 @@ namespace AsperetaClient
 
         public void ChatUpPressed()
         {
+            if (inputHistory.Count == 0) return;
+
             inputHistoryIndex = Math.Max(0, inputHistoryIndex - 1);
             inputBox.SetValue(inputHistory[inputHistoryIndex]);
         }
 
         public void ChatDownPressed()
         {
+            if (inputHistory.Count == 0) return;
+
             inputHistoryIndex = inputHistoryIndex + 1;
 
             if (inputHistoryIndex < inputHistory.Count)

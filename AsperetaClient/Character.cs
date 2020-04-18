@@ -149,10 +149,10 @@ namespace AsperetaClient
         {
             Body,
             Face,
-            Hair,
             Feet,
             Legs,
             Chest,
+            Hair,
             Head,
             Shield,
             Weapon

@@ -193,7 +193,8 @@ namespace AsperetaClient
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_END)
                     {
                         this.CursorPosition = Value.Length;
-                        this.ScrollPosition = this.CursorPosition - maxRenderChars + 1;
+                        if (this.CursorPosition >= this.ScrollPosition + maxRenderChars)
+                            this.ScrollPosition = this.CursorPosition - maxRenderChars + 1;
                         ShowCursor();
                     }
 
