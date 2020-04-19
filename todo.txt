@@ -161,3 +161,4 @@ Fix rendering order to render hair after chest equipment
 2020-04-19
 Login screen skin can be edited through skin/Window.ini now
 On socket exception go back to login screen and show Disconnected message
+Fix button on connecting window and message window to work in different skins

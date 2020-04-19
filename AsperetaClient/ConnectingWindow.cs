@@ -20,8 +20,9 @@ namespace AsperetaClient
 
             backgroundTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/Working.bmp");
 
-            var cancelButton = new Button(-1, 55, 66, 34, "Cancel");
-            cancelButton.UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttonup.bmp");
+            var upTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttonup.bmp");
+            var cancelButton = new Button(-1, 55, upTexture.W, upTexture.H, "Cancel");
+            cancelButton.UpTexture = upTexture;
             cancelButton.DownTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttondown.bmp");
             cancelButton.Clicked += CancelConnect;
             AddChild(cancelButton);

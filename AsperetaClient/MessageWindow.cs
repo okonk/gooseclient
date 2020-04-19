@@ -17,8 +17,9 @@ namespace AsperetaClient
 
             backgroundTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/Working.bmp");
 
-            var closeButton = new Button(-1, 55, 66, 34, "Close");
-            closeButton.UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttonup.bmp");
+            var upTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttonup.bmp");
+            var closeButton = new Button(-1, 55, upTexture.W, upTexture.H, "Close");
+            closeButton.UpTexture = upTexture;
             closeButton.DownTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/blankbuttondown.bmp");
             closeButton.Clicked += OnClose;
             AddChild(closeButton);
