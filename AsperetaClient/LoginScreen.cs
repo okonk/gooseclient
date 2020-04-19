@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using SDL2;
 
 namespace AsperetaClient
@@ -8,6 +9,9 @@ namespace AsperetaClient
     {
         private Texture background;
         private Texture loginBox;
+
+        private int loginBoxX;
+        private int loginBoxY;
 
         private TextBox usernameTextbox;
         private TextBox passwordTextbox;
@@ -35,13 +39,22 @@ namespace AsperetaClient
             GameClient.ScreenHeight = 600;
             SDL.SDL_RenderSetLogicalSize(GameClient.Renderer, GameClient.ScreenWidth, GameClient.ScreenHeight);
 
-            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/backdrop.bmp");
-            loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/login_box.bmp");
+            background = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings["LoginScreen"]["image"]}");
+            loginBox = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings["LoginScreen"]["box_image"]}");
 
-            usernameTextbox = new TextBox(608, 366, 125, 31, new Colour(192, 255, 192), Colour.Black);
+            var loginBoxCoords = GameClient.WindowSettings.GetCoords("LoginScreen", "login_box").ToArray();
+            this.loginBoxX = loginBoxCoords[0];
+            this.loginBoxY = loginBoxCoords[1];
+
+            var foregroundColour = GameClient.ParseColour(GameClient.WindowSettings["LoginScreen"]["foreground_colour"]);
+            var backgroundColour = GameClient.ParseColour(GameClient.WindowSettings["LoginScreen"]["background_colour"]);
+
+            var usernameCoords = GameClient.WindowSettings.GetCoords("LoginScreen", "username_textbox").ToArray();
+            usernameTextbox = new TextBox(usernameCoords[0], usernameCoords[1], usernameCoords[2], usernameCoords[3], backgroundColour, foregroundColour);
             usernameTextbox.TabPressed += UsernameTabbed;
 
-            passwordTextbox = new TextBox(608, 408, 125, 31, new Colour(192, 255, 192), Colour.Black) { PasswordMask = '*' };
+            var passwordCoords = GameClient.WindowSettings.GetCoords("LoginScreen", "password_textbox").ToArray();
+            passwordTextbox = new TextBox(passwordCoords[0], passwordCoords[1], passwordCoords[2], passwordCoords[3], backgroundColour, foregroundColour) { PasswordMask = '*' };
             passwordTextbox.EnterPressed += Connect;
 
             usernameTextbox.SetValue(GameClient.GameSettings["INIT"]["Name"]);
@@ -56,15 +69,19 @@ namespace AsperetaClient
             guiContainer.AddChild(usernameTextbox);
             guiContainer.AddChild(passwordTextbox);
 
-            var loginButton = new Button(524, 450, 83, 43)
+            var loginTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings["LoginScreen"]["login_image"]}");
+            var loginCoords = GameClient.WindowSettings.GetCoords("LoginScreen", "login_button").ToArray();
+            var loginButton = new Button(loginCoords[0], loginCoords[1], loginTexture.W, loginTexture.H)
             { 
-                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/login_button.bmp")
+                UpTexture = loginTexture
             };
             loginButton.Clicked += Connect;
 
-            var exitButton = new Button(640, 450, 83, 43)
+            var exitTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{GameClient.WindowSettings["LoginScreen"]["exit_image"]}");
+            var exitCoords = GameClient.WindowSettings.GetCoords("LoginScreen", "exit_button").ToArray();
+            var exitButton = new Button(exitCoords[0], exitCoords[1], exitTexture.W, exitTexture.H)
             {
-                UpTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/exit_button.bmp")
+                UpTexture = exitTexture
             };
             exitButton.Clicked += (_) => { GameClient.Running = false; };
 
@@ -80,7 +97,7 @@ namespace AsperetaClient
         public override void Render(double dt)
         {
             background.Render(0, 0);
-            loginBox.Render(464, 328);
+            loginBox.Render(loginBoxX, loginBoxY);
 
             guiContainer.Render(dt, 0, 0);
         }

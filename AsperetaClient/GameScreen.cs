@@ -108,11 +108,8 @@ namespace AsperetaClient
         {
             if (GameClient.UserSettings.Sections.ContainsKey("Bubble"))
             {
-                var backgroundRGB = GameClient.UserSettings.GetCoords("Bubble", "Background");
-                Colour.ChatBackground = new Colour(backgroundRGB.ElementAt(0), backgroundRGB.ElementAt(1), backgroundRGB.ElementAt(2));
-
-                var foregroundRGB = GameClient.UserSettings.GetCoords("Bubble", "Foreground");
-                Colour.ChatForeground = new Colour(foregroundRGB.ElementAt(0), foregroundRGB.ElementAt(1), foregroundRGB.ElementAt(2));
+                Colour.ChatBackground = GameClient.ParseColour(GameClient.UserSettings.Sections["Bubble"]["Background"]);
+                Colour.ChatForeground = GameClient.ParseColour(GameClient.UserSettings.Sections["Bubble"]["Foreground"]);
             }
         }
 

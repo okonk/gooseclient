@@ -2,7 +2,6 @@ TODO list
 ----------------------------------------------
 Next release:
 
-Load login screen info from skin .ini files
 Support names/vita/etc commands and config settings
 Hide console window
 cursor image
@@ -13,6 +12,7 @@ Loading screen on client launch (for loading datafiles)
 Alt enter
 Rounded tooltips
 word wrap bug
+Follow command
 
 This may have been the server...
 Exception handling packet 'MOB110014,13,99,Skull of kidi,1,1,1,1,255MOC214,39,62': System.FormatException: Input string was not in a correct format.
@@ -157,3 +157,6 @@ Unhandled exception. System.NullReferenceException: Object reference not set to 
 Fix crash when pressing up/down when haven't typed anything before
 Fix crash when pressing end in chatbox
 Fix rendering order to render hair after chest equipment
+
+2020-04-19
+Login screen skin can be edited through skin/Window.ini now

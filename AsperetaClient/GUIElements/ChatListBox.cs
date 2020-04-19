@@ -50,42 +50,12 @@ namespace AsperetaClient
             {
                 if (Enum.TryParse<ChatType>(kvp.Key, true, out ChatType chatType))
                 {
-                    chatColours[chatType] = ParseColour(kvp.Value);
+                    chatColours[chatType] = GameClient.ParseColour(kvp.Value);
                 }
             }
 
             if (!chatColours.ContainsKey(ChatType.Client))
                 chatColours[ChatType.Client] = Colour.Blue;
-        }
-
-        private Colour ParseColour(string colourString)
-        {
-            switch (colourString.ToLowerInvariant())
-            {
-                case "white": return Colour.White;
-                case "black": return Colour.Black;
-                case "yellow": return Colour.Yellow;
-                case "green": return Colour.Green;
-                case "red": return Colour.Red;
-                case "blue": return Colour.Blue;
-                case "purple": return Colour.Purple;
-                default:
-                    var splits = colourString.Split(',');
-                    if (splits.Length >= 3)
-                    {
-                        byte.TryParse(splits[0], out byte r);
-                        byte.TryParse(splits[1], out byte g);
-                        byte.TryParse(splits[2], out byte b);
-                        byte a = 255;
-                        if (splits.Length > 3)
-                            byte.TryParse(splits[3], out a);
-                        return new Colour(r, g, b, a);
-                    }
-                    else
-                    {
-                        return Colour.White;
-                    }
-            }
         }
 
         public override void Update(double dt)
