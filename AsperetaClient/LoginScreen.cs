@@ -18,21 +18,6 @@ namespace AsperetaClient
 
         private RootPanel guiContainer = new RootPanel();
 
-        // login box: 464, 328
-        // login button: 544, 472
-        // exit button: 648, 472
-        // username textbox: 624, 354, 133, 26
-        // password textbox: 625, 416, 133, 26
-        // back colour: H00002474 // Abgr
-        // foreground colour: H0080FFFF
-
-
-        // old asp username: 608; 366; 125; 31, comic sans ms 12, foregound black, background: &H00C0FFC0&
-        // old asp password: 608; 408; 125; 31
-        // login button: 524; 450; 83; 43
-        // exit button: 640; 450; 83; 43
-        // login box: 464; 4920; 4800; 3000
-
         public override void Starting()
         {
             GameClient.ScreenWidth = 800;
