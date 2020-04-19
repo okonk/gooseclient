@@ -44,6 +44,7 @@ namespace AsperetaClient
             GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
             GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
+            GameClient.NetworkClient.PacketManager.Listen<SendMapNamePacket>(OnSendMapName);
             GameClient.NetworkClient.PacketManager.Listen<WeaponSpeedPacket>(OnWeaponSpeed);
             GameClient.NetworkClient.PacketManager.Listen<MakeWindowPacket>(OnMakeWindow);
             GameClient.NetworkClient.PacketManager.Listen<EndWindowPacket>(OnEndWindow);
@@ -396,6 +397,11 @@ namespace AsperetaClient
             this.mapNumber = sendCurrentMapPacket.MapNumber;
             this.mapName = sendCurrentMapPacket.MapName;
             LoadMap();
+        }
+
+        public void OnSendMapName(object packet)
+        {
+            // Do nothing, hides the message "Can't handle packet"
         }
 
         public void OnSetYourPosition(object packet)

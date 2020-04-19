@@ -23,6 +23,7 @@ namespace AsperetaClient
             PacketManager.Register<LoginSuccessPacket>();
             PacketManager.Register<LoginFailPacket>();
             PacketManager.Register<SendCurrentMapPacket>();
+            PacketManager.Register<SendMapNamePacket>();
             PacketManager.Register<DoneSendingMapPacket>();
             PacketManager.Register<MakeCharacterPacket>();
             PacketManager.Register<SetYourCharacterPacket>();
