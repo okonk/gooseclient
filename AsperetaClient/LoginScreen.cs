@@ -103,15 +103,19 @@ namespace AsperetaClient
                 return;
 
             GameClient.NetworkClient = new NetworkClient();
-            GameClient.NetworkClient.ReceiveError += OnReceiveError;
+            GameClient.NetworkClient.SocketError += OnSocketError;
 
             var connectingWindow = new ConnectingWindow(usernameTextbox.Value, passwordTextbox.Value);
             guiContainer.AddChild(connectingWindow);
         }
 
-        public void OnReceiveError(Exception e)
+        public void OnSocketError(Exception e)
         {
-            Console.WriteLine($"Socket error receiving data: {e}");
+            Console.WriteLine($"Socket exception: {e}");
+
+            var messageWindow = new MessageWindow($"Disconnected: {e.Message}");
+            guiContainer.AddChild(messageWindow);
+
             GameClient.StateManager.RemoveState();
         }
 

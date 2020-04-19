@@ -8,7 +8,7 @@ namespace AsperetaClient
     {
         public event Action<Exception> ConnectionError;
         public event Action Connected;
-        public event Action<Exception> ReceiveError;
+        public event Action<Exception> SocketError;
 
         public PacketManager PacketManager { get; set; } = new PacketManager();
 
@@ -90,7 +90,14 @@ namespace AsperetaClient
         public void Send(string packet)
         {
             packet += '\x1';
-            socket.Send(System.Text.Encoding.ASCII.GetBytes(packet));
+            try
+            {
+                socket.Send(System.Text.Encoding.ASCII.GetBytes(packet));
+            }
+            catch (Exception e)
+            {
+                SocketError?.Invoke(e);
+            }
         }
 
         public void Update()
@@ -135,7 +142,7 @@ namespace AsperetaClient
                 }
                 catch (Exception e)
                 {
-                    ReceiveError?.Invoke(e);
+                    SocketError?.Invoke(e);
                 }
             }
         }
