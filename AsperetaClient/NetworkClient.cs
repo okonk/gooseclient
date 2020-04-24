@@ -18,45 +18,6 @@ namespace AsperetaClient
 
         private string packetBuffer;
 
-        public NetworkClient()
-        {
-            PacketManager.Register<LoginSuccessPacket>();
-            PacketManager.Register<LoginFailPacket>();
-            PacketManager.Register<SendCurrentMapPacket>();
-            PacketManager.Register<SendMapNamePacket>();
-            PacketManager.Register<DoneSendingMapPacket>();
-            PacketManager.Register<MakeCharacterPacket>();
-            PacketManager.Register<SetYourCharacterPacket>();
-            PacketManager.Register<PingPacket>();
-            PacketManager.Register<MoveCharacterPacket>();
-            PacketManager.Register<ChangeHeadingPacket>();
-            PacketManager.Register<SetYourPositionPacket>();
-            PacketManager.Register<VitalsPercentagePacket>();
-            PacketManager.Register<EraseCharacterPacket>();
-            PacketManager.Register<ServerMessagePacket>();
-            PacketManager.Register<ChatPacket>();
-            PacketManager.Register<HashMessagePacket>();
-            PacketManager.Register<StatusInfoPacket>();
-            PacketManager.Register<ExperienceBarPacket>();
-            PacketManager.Register<InventorySlotPacket>();
-            PacketManager.Register<WindowLinePacket>();
-            PacketManager.Register<UpdateCharacterPacket>();
-            PacketManager.Register<SpellbookSlotPacket>();
-            PacketManager.Register<SpellCharacterPacket>();
-            PacketManager.Register<SpellTilePacket>();
-            PacketManager.Register<MapObjectPacket>();
-            PacketManager.Register<EraseObjectPacket>();
-            PacketManager.Register<BuffBarPacket>();
-            PacketManager.Register<BattleTextPacket>();
-            PacketManager.Register<AttackPacket>();
-            PacketManager.Register<WeaponSpeedPacket>();
-            PacketManager.Register<MakeWindowPacket>();
-            PacketManager.Register<EndWindowPacket>();
-            PacketManager.Register<GroupUpdatePacket>();
-            PacketManager.Register<AdminModeActivatePacket>();
-            PacketManager.Register<EmotePacket>();
-        }
-
         public void Connect()
         {
             try

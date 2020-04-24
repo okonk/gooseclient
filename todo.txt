@@ -13,6 +13,7 @@ Alt enter
 Rounded tooltips
 word wrap bug
 Follow command
+Target lock heal. Hold button to heal last target without spamming 1 + enter.
 
 This may have been the server...
 Exception handling packet 'MOB110014,13,99,Skull of kidi,1,1,1,1,255MOC214,39,62': System.FormatException: Input string was not in a correct format.

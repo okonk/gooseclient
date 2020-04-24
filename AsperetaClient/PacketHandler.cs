@@ -25,16 +25,17 @@ namespace AsperetaClient
         private Dictionary<string, PacketHandler> handlers = new Dictionary<string, PacketHandler>();
         private Dictionary<Type, PacketHandler> typeToHandler = new Dictionary<Type, PacketHandler>();
 
-        public void Register<T>() where T : PacketHandler, new()
-        {
-            var handler = new T();
-            handlers[handler.Prefix] = handler;
-            typeToHandler[typeof(T)] = handler;
-        }
-
         public void Listen<T>(Action<object> callback) where T : PacketHandler, new()
         {
-            typeToHandler[typeof(T)].Observers.Add(callback);
+            PacketHandler handler = null;
+            if (!typeToHandler.TryGetValue(typeof(T), out handler))
+            {
+                handler = new T();
+                handlers[handler.Prefix] = handler;
+                typeToHandler[typeof(T)] = handler;
+            }
+
+            handler.Observers.Add(callback);
         }
 
         public void Remove<T>(Action<object> callback) where T : PacketHandler, new()
