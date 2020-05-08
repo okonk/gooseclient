@@ -105,6 +105,8 @@ namespace AsperetaClient
             GameClient.NetworkClient = new NetworkClient();
             GameClient.NetworkClient.SocketError += OnSocketError;
 
+            GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
+
             var connectingWindow = new ConnectingWindow(usernameTextbox.Value, passwordTextbox.Value);
             guiContainer.AddChild(connectingWindow);
         }
@@ -117,6 +119,11 @@ namespace AsperetaClient
             guiContainer.AddChild(messageWindow);
 
             GameClient.StateManager.RemoveState();
+        }
+
+        public void OnPing(object packet)
+        {
+            GameClient.NetworkClient.Pong();
         }
 
         public void UsernameTabbed()

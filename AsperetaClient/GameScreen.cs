@@ -41,7 +41,6 @@ namespace AsperetaClient
             SetGooseSettings();
             
             GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
-            GameClient.NetworkClient.PacketManager.Listen<PingPacket>(OnPing);
             GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
             GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
             GameClient.NetworkClient.PacketManager.Listen<SendMapNamePacket>(OnSendMapName);
@@ -79,6 +78,7 @@ namespace AsperetaClient
             this.uiRoot = new RootPanel();
             this.uiRoot.DropWasUnhandled += OnDropWasUnhandled;
             this.uiRoot.RightClickUnhandled += OnRightClick;
+            this.uiRoot.DoubleClickUnhandled += OnDoubleClick;
 
             chatWindow = new ChatWindow();
             chatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
@@ -386,11 +386,6 @@ namespace AsperetaClient
             this.uiRoot.Player = this.player;
         }
 
-        public void OnPing(object packet)
-        {
-            GameClient.NetworkClient.Pong();
-        }
-
         public void OnSendCurrentMap(object packet)
         {
             var sendCurrentMapPacket = (SendCurrentMapPacket)packet;
@@ -448,6 +443,14 @@ namespace AsperetaClient
             Map.OnRightClick(startX, startY, x, y);
         }
 
+        public void OnDoubleClick(int x, int y)
+        {
+            int startX = RenderOffsetX();
+            int startY = RenderOffsetY();
+
+            Map.OnDoubleClick(startX, startY, x, y);
+        }
+
         public void OnMouseOverMap(int x, int y)
         {
             int startX = RenderOffsetX();
@@ -459,6 +462,12 @@ namespace AsperetaClient
         public void OnMakeWindow(object packet)
         {
             var p = (MakeWindowPacket)packet;
+
+            var existingWindow = this.uiRoot.Children.FirstOrDefault(c => c is BaseWindow && ((BaseWindow)c).WindowId == p.WindowId);
+            if (existingWindow != null)
+            {
+                this.uiRoot.RemoveChild(existingWindow);
+            }
             
             switch (p.WindowFrame)
             {
@@ -467,6 +476,9 @@ namespace AsperetaClient
                     break;
                 case WindowFrames.GenericInfo:
                     this.uiRoot.AddChild(new GenericInfoWindow(p));
+                    break;
+                case WindowFrames.Quest:
+                    this.uiRoot.AddChild(new QuestWindow(p));
                     break;
                 case WindowFrames.TwoSlot:
                     this.uiRoot.AddChild(new ContainerWindow(p, "Container2"));

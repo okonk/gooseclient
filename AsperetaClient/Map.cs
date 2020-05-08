@@ -551,6 +551,22 @@ namespace AsperetaClient
             }
         }
 
+        public void OnDoubleClick(int offsetX, int offsetY, int clickX, int clickY)
+        {
+            foreach (var character in Characters)
+            {
+                int charX = character.PixelXi - offsetX + character.GetXOffset();
+                int charY = character.PixelYi - offsetY + character.GetYOffset();
+
+                if (clickX >= charX && clickX <= charX + character.GetWidth() && 
+                    clickY >= charY && clickY <= charY + character.GetHeight())
+                {
+                    GameClient.NetworkClient.LeftClick(character.TileX, character.TileY);
+                    return;
+                }
+            }
+        }
+
         public void OnMouseOverMap(int offsetX, int offsetY, int mouseX, int mouseY)
         {
             int tileX = (offsetX + mouseX) / Constants.TileSize;
