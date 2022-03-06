@@ -16,4 +16,5 @@ struct RECORD {
     int32 id;
 
     int32 animations[4 * 11];
+    int32 files[11];
 } records[FileSize() / sizeof(RECORD)];
