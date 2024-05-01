@@ -1,3 +1,0 @@
-Load Illutia Graphics
-Load Illutia Maps
-Convert Illutia Packets
