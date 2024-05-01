@@ -42,7 +42,7 @@ namespace AsperetaClient
 
         public static string RealmName { get; set; }
 
-        public static uint DRAG_DROP_EVENT_ID;
+        public static SDL.SDL_EventType DRAG_DROP_EVENT_ID;
 
         public static int ViewRangeX { get; set; } = 10;
         public static int ViewRangeY { get; set; } = 8;
@@ -178,7 +178,7 @@ namespace AsperetaClient
 
         public void RegisterCustomEvents()
         {
-            DRAG_DROP_EVENT_ID = SDL.SDL_RegisterEvents(1);
+            DRAG_DROP_EVENT_ID = (SDL.SDL_EventType)SDL.SDL_RegisterEvents(1);
         }
 
         public static void Quit()
