@@ -84,19 +84,11 @@ namespace AsperetaClient
 
                     if (packetBuffer.Length == 0) continue;
 
-                    string[] packets = packetBuffer.Split("\x1".ToCharArray());
-                    int limit = packets.Length - 1;
+                    string[] packets = packetBuffer.Split('\x1');
+                    packetBuffer = packets[packets.Length - 1];
 
-                    if (!packetBuffer.EndsWith("\x1"))
-                    {
-                        packetBuffer = packets[packets.Length - 1];
-                    }
-                    else
-                    {
-                        packetBuffer = "";
-                    }
-
-                    for (int i = 0; i < limit; i++)
+                    // skip the last packet since it will either be empty, or an incomplete packet
+                    for (int i = 0; i < packets.Length - 1; i++)
                     {
                         //Console.WriteLine($"P: {packets[i]}");
                         PacketManager.Handle(packets[i]);
