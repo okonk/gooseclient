@@ -13,7 +13,7 @@ namespace AsperetaClient
 
         public SpellbookWindow() : base("SpellBook")
         {
-            hideShortcutKey = SDL.SDL_Keycode.SDLK_s;
+            hideShortcutKey = GameClient.KeyMap.OpenSpellbook;
 
             slots = new SpellSlot[rows * columns];
             for (int r = 0; r < rows; r++)

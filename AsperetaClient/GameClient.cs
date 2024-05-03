@@ -40,6 +40,8 @@ namespace AsperetaClient
 
         public static NetworkClient NetworkClient { get; set; } = new NetworkClient();
 
+        public static KeyMap KeyMap { get; private set; } = new();
+
         public static string RealmName { get; set; }
 
         public static SDL.SDL_EventType DRAG_DROP_EVENT_ID;
@@ -96,6 +98,11 @@ namespace AsperetaClient
                 if (GameSettings.GetBool("INIT", "FullscreenBorderless"))
                 {
                     flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
+                }
+
+                if (GameSettings.GetBool("INIT", "WASD"))
+                {
+                    KeyMap.BindWasdMode();
                 }
 
                 Window = IntPtr.Zero;

@@ -175,19 +175,19 @@ namespace AsperetaClient
 
             if (!Map.Targeting && uiRoot.FocusedTextBox == null)
             {
-                if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
+                if (keys[GameClient.KeyMap.MoveUp] == 1)
                 {
                     MoveKeyPressed(Direction.Up);
                 }
-                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
+                else if (keys[GameClient.KeyMap.MoveRight] == 1)
                 {
                     MoveKeyPressed(Direction.Right);
                 }
-                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
+                else if (keys[GameClient.KeyMap.MoveDown] == 1)
                 {
                     MoveKeyPressed(Direction.Down);
                 }
-                else if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
+                else if (keys[GameClient.KeyMap.MoveLeft] == 1)
                 {
                     MoveKeyPressed(Direction.Left);
                 }
@@ -197,7 +197,7 @@ namespace AsperetaClient
                     moveKeyPressedTime = 0;
                 }
 
-                if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
+                if (keys[GameClient.KeyMap.Attack] == 1)
                 {
                     AttackKeyPressed();
                 }

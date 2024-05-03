@@ -261,27 +261,27 @@ namespace AsperetaClient
 
                     if (!Targeting) return false;
 
-                    if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_UP)
+                    if (ev.key.keysym.sym == GameClient.KeyMap.TargetUp)
                     {
                         SetNextSpellCastTarget(searchDown: false);
                         return true;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT)
+                    else if (ev.key.keysym.sym == GameClient.KeyMap.TargetRight)
                     {
                         SetNextSpellCastTarget(searchDown: true);
                         return true;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN)
+                    else if (ev.key.keysym.sym == GameClient.KeyMap.TargetDown)
                     {
                         SetNextSpellCastTarget(searchDown: true);
                         return true;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT)
+                    else if (ev.key.keysym.sym == GameClient.KeyMap.TargetLeft)
                     {
                         SetNextSpellCastTarget(searchDown: false);
                         return true;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_HOME)
+                    else if (ev.key.keysym.sym == GameClient.KeyMap.TargetHome)
                     {
                         spellCastTarget = player;
                         return true;
