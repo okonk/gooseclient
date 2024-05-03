@@ -24,6 +24,7 @@ namespace AsperetaClient
             {
                 packetBuffer = "";
                 socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                socket.NoDelay = true;
                 socket.Connect(GameClient.ServerInfoSettings.Sections["Settings"]["IP"], GameClient.ServerInfoSettings.GetInt("Settings", "Port"));
 
                 Connected?.Invoke();

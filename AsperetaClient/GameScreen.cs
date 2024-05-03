@@ -26,6 +26,7 @@ namespace AsperetaClient
         private RootPanel uiRoot;
 
         private bool AutoPickup { get; set; } = false;
+        public bool ShowBlockedTiles { get; private set; } = false;
 
         private ChatWindow chatWindow;
 
@@ -82,6 +83,8 @@ namespace AsperetaClient
 
             chatWindow = new ChatWindow();
             chatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
+            chatWindow.CommandHandlers["/showblockedtiles"] = OnShowBlockedTilesCommand;
+
             this.uiRoot.AddChild(chatWindow);
             this.uiRoot.AddChild(new FpsWindow());
             this.uiRoot.AddChild(new BuffBarWindow());
@@ -130,6 +133,13 @@ namespace AsperetaClient
                 this.player.MovementFinished += this.OnOurCharacterMoved;
 
             chatWindow.AddText(ChatType.Client, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
+        }
+
+        private void OnShowBlockedTilesCommand(string command, string arguments)
+        {
+            this.ShowBlockedTiles = !this.ShowBlockedTiles;
+
+            chatWindow.AddText(ChatType.Client, $"Blocked tiles are now {(this.ShowBlockedTiles ? "visible" : "hidden")}.");
         }
 
         private int RenderOffsetX()

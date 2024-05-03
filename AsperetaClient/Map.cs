@@ -77,10 +77,13 @@ namespace AsperetaClient
 
         private int[] groupMembers = new int[50];
 
-        public Map(MapFile fileData)
+        private GameScreen gameScreen;
+
+        public Map(MapFile fileData, GameScreen gameScreen)
         {
             this.MapFile = fileData;
             this.Tiles = new Tile[this.Width * this.Height];
+            this.gameScreen = gameScreen;
 
             GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
             GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
@@ -184,9 +187,23 @@ namespace AsperetaClient
                             if (tile.SpellAnimation != null)
                                 tile.SpellAnimation.Animation.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
                         }
-
+                        
                         if (graphic != null)
                             graphic.Render(x * Constants.TileSize - start_x, y * Constants.TileSize - start_y);
+
+                        if (l == NUM_LAYERS - 1 && tile.Blocked && this.gameScreen.ShowBlockedTiles)
+                        {
+                            var rect = new SDL.SDL_Rect
+                            {
+                                x = x * Constants.TileSize - start_x,
+                                y = y * Constants.TileSize - start_y,
+                                w = Constants.TileSize,
+                                h = Constants.TileSize
+                            };
+
+                            SDL.SDL_SetRenderDrawColor(GameClient.Renderer, 255, 0, 0, 160);
+                            SDL.SDL_RenderDrawRect(GameClient.Renderer, ref rect);
+                        }
                     }
                 }
             }

@@ -50,7 +50,7 @@ namespace AsperetaClient
         {
             if (this.gameScreen.Map == null)
             {
-                this.gameScreen.Map = new Map(AsperetaMapLoader.Load(mapNumber));
+                this.gameScreen.Map = new Map(AsperetaMapLoader.Load(mapNumber), this.gameScreen);
                 mapLoader = this.gameScreen.Map.Load().GetEnumerator();
             }
             else if (this.gameScreen.Map.Loaded)

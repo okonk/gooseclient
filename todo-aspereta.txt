@@ -2,6 +2,10 @@ TODO list
 ----------------------------------------------
 Next release:
 
+Add smooth scrolling
+Server picker
+Tooltips don't update if mouse is over them
+
 Support names/vita/etc commands and config settings
 Hide console window
 cursor image
@@ -14,15 +18,6 @@ Rounded tooltips
 word wrap bug
 Follow command
 Target lock heal. Hold button to heal last target without spamming 1 + enter.
-
-This may have been the server...
-Exception handling packet 'MOB110014,13,99,Skull of kidi,1,1,1,1,255MOC214,39,62': System.FormatException: Input string was not in a correct format.
-   at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, TypeCode type)
-   at System.Number.ParseInt32(ReadOnlySpan`1 value, NumberStyles styles, NumberFormatInfo info)
-   at System.Convert.ToInt32(String value)
-   at AsperetaClient.PacketParser.GetInt32() in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 132
-   at AsperetaClient.MapObjectPacket.Parse(PacketParser p) in /home/hayden/code/GooseClient/AsperetaClient/Packets/MapObjectPacket.cs:line 45
-   at AsperetaClient.PacketManager.Handle(String packet) in /home/hayden/code/GooseClient/AsperetaClient/PacketHandler.cs:line 56
 
 ----------------------------------------------
 Future future extended things:
