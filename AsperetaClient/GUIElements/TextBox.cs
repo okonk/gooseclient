@@ -9,7 +9,7 @@ namespace AsperetaClient
     // * clicking in textbox to change cursor position
     // * Selecting text and associated functions (copy/overwrite/delete)
 
-    class TextBox : GuiElement
+    public class TextBox : GuiElement
     {
         public char PasswordMask { get; set; }
 

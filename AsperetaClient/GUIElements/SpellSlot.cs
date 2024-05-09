@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class SpellSlot : BaseSlot
+    public class SpellSlot : BaseSlot
     {
         public bool Targetable { get { return targetable; } }
 

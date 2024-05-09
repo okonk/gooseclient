@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    enum BattleTextType
+    public enum BattleTextType
     {
         White = 0,
         Red1 = 1,
@@ -22,7 +22,7 @@ namespace AsperetaClient
         Red61 = 61
     }
 
-    class BattleTextPacket : PacketHandler
+    public class BattleTextPacket : PacketHandler
     {
         public int LoginId { get; set; }
         public BattleTextType BattleTextType { get; set; }

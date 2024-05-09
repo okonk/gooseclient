@@ -3,7 +3,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class Texture
+    public class Texture
     {
         public IntPtr SDLTexture { get; set; }
 

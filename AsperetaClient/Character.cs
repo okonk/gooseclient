@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    enum Direction
+    public enum Direction
     {
         Up,
         Right,
@@ -13,7 +13,7 @@ namespace AsperetaClient
         Left
     }
 
-    class BattleTextLine
+    public class BattleTextLine
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -36,7 +36,7 @@ namespace AsperetaClient
         }
     }
 
-    class Character
+    public class Character
     {
         public int LoginId { get; set; }
 

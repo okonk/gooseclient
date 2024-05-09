@@ -2,7 +2,7 @@ using System;
 
 namespace AsperetaClient
 {
-    internal class TileData
+    public class TileData
     {
         public bool Blocked { get; set; }
         public int[] Layers { get; set; }
@@ -13,7 +13,7 @@ namespace AsperetaClient
         }
     }
 
-    internal class MapFile
+    public class MapFile
     {
         public int MapNumber { get; set; }
         public int Width { get; set; }

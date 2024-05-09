@@ -40,6 +40,8 @@ namespace AsperetaClient
 
         public static NetworkClient NetworkClient { get; set; } = new NetworkClient();
 
+        public static ScriptManager ScriptManager { get; set; }
+
         public static KeyMap KeyMap { get; private set; } = new();
 
         public static string RealmName { get; set; }
@@ -130,6 +132,7 @@ namespace AsperetaClient
 
                     ResourceManager = new ResourceManager("data", Renderer);
                     FontRenderer = new FontRenderer();
+                    ScriptManager = new();
 
                     StateManager.AppendState(new LoginScreen());
 

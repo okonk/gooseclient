@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    abstract class GuiElement
+    public abstract class GuiElement
     {
         public SDL.SDL_Rect Rect;
 

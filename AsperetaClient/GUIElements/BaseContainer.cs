@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class BaseContainer : GuiElement
+    public class BaseContainer : GuiElement
     {
         public BaseContainer() : base(0, 0, GameClient.ScreenWidth, GameClient.ScreenHeight)
         {

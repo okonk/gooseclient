@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class State
+    public class State
     {
         public virtual void Update(double dt)
         {
@@ -42,7 +42,7 @@ namespace AsperetaClient
         }
     }
 
-    class StateManager
+    public class StateManager
     {
         private Stack<State> states = new Stack<State>();
 

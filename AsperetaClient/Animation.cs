@@ -2,7 +2,7 @@
 
 namespace AsperetaClient
 {
-    class Animation
+    public class Animation
     {
         public bool Animating { get; set; }
 

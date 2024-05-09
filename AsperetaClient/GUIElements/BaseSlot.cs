@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    abstract class BaseSlot : GuiElement
+    public abstract class BaseSlot : GuiElement
     {
         public int SlotNumber { get; set; }
         public Texture Graphic { get; protected set; }

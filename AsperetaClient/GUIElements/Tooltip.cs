@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class Tooltip : GuiElement
+    public class Tooltip : GuiElement
     {
         public override int W { get { return GameClient.FontRenderer.CharWidth * Value.Length + this.Padding * 2; } }
 

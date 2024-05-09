@@ -2,7 +2,7 @@
 
 namespace AsperetaClient
 {
-    class Colour
+    public class Colour
     {
         public static Colour White = new Colour(255, 255, 255, 255);
         public static Colour Black = new Colour(1, 1, 1, 255);

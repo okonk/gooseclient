@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    abstract class PacketHandler
+    public abstract class PacketHandler
     {
         public abstract string Prefix { get; }
 
@@ -20,7 +20,7 @@ namespace AsperetaClient
         }
     }
 
-    class PacketManager
+    public class PacketManager
     {
         private Dictionary<string, PacketHandler> handlers = new Dictionary<string, PacketHandler>();
         private Dictionary<Type, PacketHandler> typeToHandler = new Dictionary<Type, PacketHandler>();
@@ -72,7 +72,7 @@ namespace AsperetaClient
         }
     }
 
-    class PacketParser
+    public class PacketParser
     {
         private string packet;
         private string prefix;

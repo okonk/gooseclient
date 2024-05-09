@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class GameScreen : State
+    public class GameScreen : State
     {
         private int mapNumber;
         private string mapName;
@@ -65,6 +65,8 @@ namespace AsperetaClient
             Resuming();
 
             CreateGui();
+
+            GameClient.ScriptManager.OnGameScreenCreated(this);
 
             LoadMap();
         }

@@ -6,7 +6,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class RootPanel : BaseContainer
+    public class RootPanel : BaseContainer
     {
         public bool IsDragging { get; set; } = false;
         public object DragDropData { get; set; }

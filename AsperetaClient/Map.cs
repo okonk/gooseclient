@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    internal class MapObject
+    public class MapObject
     {
         public Texture Graphic { get; set; }
         public Colour Colour { get; set; }
@@ -13,7 +13,7 @@ namespace AsperetaClient
         public int StackSize { get; set; }
     }
 
-    internal class Tile
+    public class Tile
     {
         public bool Blocked { get; set; }
         public Texture[] Layers { get; set; }
@@ -33,7 +33,7 @@ namespace AsperetaClient
         }
     }
 
-    internal class SpellTileAnimation
+    public class SpellTileAnimation
     {
         public int TileX { get; set; }
 
@@ -49,7 +49,7 @@ namespace AsperetaClient
         }
     }
 
-    internal class Map
+    public class Map
     {
         const int NUM_LAYERS = 4;
 
