@@ -17,7 +17,7 @@ namespace AsperetaClient
         {
             var packet = new ExperienceBarPacket()
             {
-                Percentage = p.GetInt32(),
+                Percentage = Math.Min(100, p.GetInt32()),
                 Experience = p.GetInt64(),
                 ExperienceToNextLevel = p.GetInt64()
             };

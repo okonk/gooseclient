@@ -79,11 +79,14 @@ namespace AsperetaClient
 
         private GameScreen gameScreen;
 
+        private bool hotkeysToCast = false;
+
         public Map(MapFile fileData, GameScreen gameScreen)
         {
             this.MapFile = fileData;
             this.Tiles = new Tile[this.Width * this.Height];
             this.gameScreen = gameScreen;
+            this.hotkeysToCast = GameClient.GameSettings.GetBool("INIT", "HotkeysToCast");
 
             GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
             GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
@@ -286,7 +289,10 @@ namespace AsperetaClient
                         spellCastTarget = player;
                         return true;
                     }
-                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN || ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER)
+                    else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN 
+                        || ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER
+                        || hotkeysToCast && ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_0 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_9
+                        || hotkeysToCast && ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_KP_1 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_KP_0)
                     {
                         Targeting = false;
                         GameClient.NetworkClient.Cast(spellCastSlotNumber, spellCastTarget.LoginId);
@@ -307,6 +313,12 @@ namespace AsperetaClient
         // Esssentially what the Asp client does is searches up or down going row by row with a wrap around to opposite end of screen
         private void SetNextSpellCastTarget(bool searchDown)
         {
+            if (spellCastTarget is null)
+            {
+                Targeting = false;
+                return;
+            }
+
             int currentPosition = spellCastTarget.TileY * this.Width + spellCastTarget.TileX;
             int lowestPosition = currentPosition;
             int highestPosition = currentPosition;
