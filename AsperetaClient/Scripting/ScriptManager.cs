@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsperetaClient.Scripting.GameState;
 
 namespace AsperetaClient;
 
@@ -10,6 +11,8 @@ internal class ScriptManager
     private Dictionary<string, IScript> scriptMapping = new();
 
     private IReadOnlyCollection<IClientScript> scripts;
+
+    public GameState GameState { get; private set; }
 
     public ScriptManager()
     {
@@ -29,9 +32,20 @@ internal class ScriptManager
 
     public void OnGameScreenCreated(GameScreen screen)
     {
+        this.GameState = new();
+
         foreach (var script in scripts)
         {
+            script.GameState = this.GameState;
             script.OnGameScreenCreated(screen);
+        }
+    }
+
+    public void OnMapLoaded(Map map)
+    {
+        foreach (var script in scripts)
+        {
+            script.OnMapLoaded(map);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace AsperetaClient;
 
             var scriptOptions = ScriptOptions.Default
                 .WithReferences(Assembly.GetExecutingAssembly())
-                .WithImports("System", "System.Collections.Generic", "System.Linq", "AsperetaClient");
+                .WithImports("System", "System.Collections.Generic", "System.Linq", "AsperetaClient", "AsperetaClient.Scripting.GameState");
 
             var script = CSharpScript.Create(scriptContents, scriptOptions);
             script.Compile();

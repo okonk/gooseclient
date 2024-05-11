@@ -9,4 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.9.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Scripting/GameState/" />
+  </ItemGroup>
 </Project>

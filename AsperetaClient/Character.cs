@@ -113,6 +113,8 @@ namespace AsperetaClient
 
         public event Action<Character> MovementFinished;
 
+        public bool Erased { get; set; } = false;
+
         public Character(MakeCharacterPacket p)
         {
             this.Moving = false;

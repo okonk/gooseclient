@@ -33,6 +33,8 @@ namespace AsperetaClient
         private int mouseX;
         private int mouseY;
 
+        public ScriptsWindow ScriptsWindow { get; private set; }
+
         public GameScreen(int mapNumber, string mapName)
         {
             this.mapNumber = mapNumber;
@@ -105,6 +107,9 @@ namespace AsperetaClient
             this.uiRoot.AddChild(spellbookWindow);
 
             this.uiRoot.AddChild(new InventoryWindow());
+
+            this.ScriptsWindow = new ScriptsWindow();
+            this.uiRoot.AddChild(ScriptsWindow);
 
             // This needs to be added last since it has to take the slots from character/spellbook/inventory
             this.uiRoot.AddChild(new HotkeyBarWindow());

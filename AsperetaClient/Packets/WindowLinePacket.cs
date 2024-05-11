@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    class WindowLinePacket : PacketHandler
+    public class WindowLinePacket : PacketHandler
     {
         public int WindowId { get; set; }
 

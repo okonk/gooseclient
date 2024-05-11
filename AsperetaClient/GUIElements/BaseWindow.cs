@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class BaseWindow : BaseContainer
+    public class BaseWindow : BaseContainer
     {
         public int WindowId { get; set; }
 

@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class Label : GuiElement
+    public class Label : GuiElement
     {
         public override int W { get { return GameClient.FontRenderer.CharWidth * Value.Length; } }
 

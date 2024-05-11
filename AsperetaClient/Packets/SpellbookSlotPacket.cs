@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    class SpellbookSlotPacket : PacketHandler
+    public class SpellbookSlotPacket : PacketHandler
     {
         public int SlotNumber { get; set; }
 

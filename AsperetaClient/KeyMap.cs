@@ -19,6 +19,7 @@ namespace AsperetaClient
         public SDL.SDL_Keycode TargetHome { get; set; } = SDL.SDL_Keycode.SDLK_HOME;
 
         public SDL.SDL_Keycode OpenSpellbook { get; set; } = SDL.SDL_Keycode.SDLK_s;
+        public SDL.SDL_Keycode OpenScriptbook { get; set; } = SDL.SDL_Keycode.SDLK_k;
 
         public void BindWasdMode()
         {
@@ -33,6 +34,7 @@ namespace AsperetaClient
             TargetDown = SDL.SDL_Keycode.SDLK_s;
 
             OpenSpellbook = SDL.SDL_Keycode.SDLK_j;
+            OpenScriptbook = SDL.SDL_Keycode.SDLK_k;
         }
     }
 }

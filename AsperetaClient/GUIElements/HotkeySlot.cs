@@ -101,20 +101,20 @@ namespace AsperetaClient
 
         public void HandleDrop(object data)
         {
-            if (data is ItemSlot)
+            if (data is ItemSlot itemSlot)
             {
-                var fromSlot = data as ItemSlot;
-
-                if (fromSlot.Parent is CharacterWindow || fromSlot.Parent is InventoryWindow)
+                if (itemSlot.Parent is CharacterWindow || itemSlot.Parent is InventoryWindow)
                 {
-                    SetSlot(fromSlot);
+                    SetSlot(itemSlot);
                 }
             }
-            else if (data is SpellSlot)
+            else if (data is SpellSlot spellSlot)
             {
-                var fromSlot = data as SpellSlot;
-
-                SetSlot(fromSlot);
+                SetSlot(spellSlot);
+            }
+            else if (data is ScriptSlot scriptSlot)
+            {
+                SetSlot(scriptSlot);
             }
         }
 

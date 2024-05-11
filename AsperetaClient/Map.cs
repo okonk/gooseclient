@@ -70,8 +70,9 @@ namespace AsperetaClient
 
         public bool Targeting { get; private set; } = false;
         private Character spellCastTarget;
-        private int spellCastSlotNumber;
-        private Character player;
+        private Action<Character> targetAction;
+
+        public Character Player { get; private set; }
 
         private Tooltip tooltip;
 
@@ -286,7 +287,7 @@ namespace AsperetaClient
                     }
                     else if (ev.key.keysym.sym == GameClient.KeyMap.TargetHome)
                     {
-                        spellCastTarget = player;
+                        spellCastTarget = Player;
                         return true;
                     }
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN 
@@ -295,7 +296,7 @@ namespace AsperetaClient
                         || hotkeysToCast && ev.key.keysym.sym >= SDL.SDL_Keycode.SDLK_KP_1 && ev.key.keysym.sym <= SDL.SDL_Keycode.SDLK_KP_0)
                     {
                         Targeting = false;
-                        GameClient.NetworkClient.Cast(spellCastSlotNumber, spellCastTarget.LoginId);
+                        targetAction?.Invoke(spellCastTarget);
                         return true;
                     }
                     else if (ev.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
@@ -328,8 +329,8 @@ namespace AsperetaClient
             {
                 // Filter out things off screen and current target
                 if (character == spellCastTarget || 
-                    Math.Abs(character.TileX - player.TileX) > GameClient.ViewRangeX || 
-                    Math.Abs(character.TileY - player.TileY) > GameClient.ViewRangeY)
+                    Math.Abs(character.TileX - Player.TileX) > GameClient.ViewRangeX || 
+                    Math.Abs(character.TileY - Player.TileY) > GameClient.ViewRangeY)
                 {
                     continue;
                 }
@@ -356,7 +357,7 @@ namespace AsperetaClient
 
             if (nextTarget != currentPosition)
             {
-                spellCastTarget = Tiles[nextTarget].Character ?? player;
+                spellCastTarget = Tiles[nextTarget].Character ?? Player;
             }
         }
 
@@ -442,10 +443,12 @@ namespace AsperetaClient
             if (this[character.TileX, character.TileY].Character == character)
                 this[character.TileX, character.TileY].Character = null;
 
+            character.Erased = true;
+
             Characters.Remove(character);
 
             if (character == spellCastTarget)
-                spellCastTarget = player;
+                spellCastTarget = Player;
         }
 
         public void OnUpdateCharacter(object packet)
@@ -462,7 +465,10 @@ namespace AsperetaClient
         {
             var p = (SetYourCharacterPacket)packet;
 
-            this.player = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
+            if (this.Player == null)
+                GameClient.ScriptManager.OnMapLoaded(this);
+
+            this.Player = this.Characters.FirstOrDefault(c => c.LoginId == p.LoginId);
         }
 
         private Character CheckSpellCastTarget()
@@ -470,13 +476,20 @@ namespace AsperetaClient
             var target = spellCastTarget;
             
             if (target == null || 
-                Math.Abs(spellCastTarget.TileX - player.TileX) > GameClient.ViewRangeX || 
-                Math.Abs(spellCastTarget.TileY - player.TileY) > GameClient.ViewRangeY)
+                Math.Abs(spellCastTarget.TileX - Player.TileX) > GameClient.ViewRangeX || 
+                Math.Abs(spellCastTarget.TileY - Player.TileY) > GameClient.ViewRangeY)
             {
-                target = this.player;
+                target = this.Player;
             }
 
             return target;
+        }
+
+        public void OpenTarget(Action<Character> action)
+        {
+            Targeting = true;
+            spellCastTarget = CheckSpellCastTarget();
+            targetAction = action;
         }
 
         public void OnCastSpell(SpellSlot slot)
@@ -485,13 +498,11 @@ namespace AsperetaClient
 
             if (slot.Targetable)
             {
-                Targeting = true;
-                spellCastTarget = CheckSpellCastTarget();
-                spellCastSlotNumber = slot.SlotNumber;
+                OpenTarget(target => GameClient.NetworkClient.Cast(slot.SlotNumber, target.LoginId));
             }
             else
             {
-                GameClient.NetworkClient.Cast(slot.SlotNumber, this.player.LoginId);
+                GameClient.NetworkClient.Cast(slot.SlotNumber, this.Player.LoginId);
             }
         }
 

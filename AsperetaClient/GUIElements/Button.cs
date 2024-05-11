@@ -4,7 +4,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class Button : GuiElement
+    public class Button : GuiElement
     {
         public Texture UpTexture { get; set; }
         public Texture DownTexture { get; set; }
