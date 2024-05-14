@@ -13,6 +13,7 @@ public class GameState
     public Character Player { get; private set; }
     public PlayerStats Stats { get; init; } = new();
     public Group Group { get; init; } = new();
+    public Buffs Buffs { get; init; } = new();
 
     public GameState()
     {
@@ -230,7 +231,12 @@ public class Map
 
     public int DistanceTo(Character character)
     {
-        return Math.Abs(gameState.Player.X - character.X) + Math.Abs(gameState.Player.Y - character.Y);
+        return DistanceBetween(gameState.Player, character);
+    }
+
+    public int DistanceBetween(Character a, Character b)
+    {
+        return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
     }
 
     public void Face(Character character)
@@ -257,8 +263,8 @@ public class Map
     public void Face(Direction direction)
     {
         // Facing is inconsistent, I think when walking into something it breaks, so this check isn't good
-        if (gameState.Player.Facing == direction)
-            return;
+        //if (gameState.Player.Facing == direction)
+        //    return;
 
         // Bit of a hack, easiest way to keep client and script state in sync by simulating a CHH packet being received
         GameClient.NetworkClient.PacketManager.Handle($"CHH{gameState.Player.LoginId},{((int)direction) + 1}");
@@ -585,5 +591,26 @@ public class Group
         if (p.LineNumber > MaxMembers) return;
 
         MemberLoginIds[p.LineNumber] = p.LoginId;
+    }
+}
+
+public class Buffs
+{
+    private const int MaxBuffs = 50;
+
+    public string[] Active { get; init; } = new string[MaxBuffs];
+
+    public Buffs()
+    {
+        GameClient.NetworkClient.PacketManager.Listen<BuffBarPacket>(OnBuffBar);
+    }
+
+    private void OnBuffBar(object packet)
+    {
+        var p = (BuffBarPacket)packet;
+
+        if (p.SlotNumber > MaxBuffs) return;
+
+        Active[p.SlotNumber] = p.Name;
     }
 }
