@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    class SetYourPositionPacket : PacketHandler
+    public class SetYourPositionPacket : PacketHandler
     {
         public int MapX { get; set; }
 

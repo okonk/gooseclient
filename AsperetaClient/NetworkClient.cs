@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace AsperetaClient
 {
@@ -17,6 +18,8 @@ namespace AsperetaClient
         private Socket socket;
 
         private string packetBuffer;
+
+        private ConcurrentQueue<byte[]> sendQueue = new();
 
         public void Connect()
         {
@@ -53,14 +56,7 @@ namespace AsperetaClient
         public void Send(string packet)
         {
             packet += '\x1';
-            try
-            {
-                socket.Send(System.Text.Encoding.ASCII.GetBytes(packet));
-            }
-            catch (Exception e)
-            {
-                SocketError?.Invoke(e);
-            }
+            sendQueue.Enqueue(System.Text.Encoding.ASCII.GetBytes(packet));
         }
 
         public void Update()
@@ -100,6 +96,18 @@ namespace AsperetaClient
                     SocketError?.Invoke(e);
                 }
             }
+
+            while (!sendQueue.IsEmpty && sendQueue.TryDequeue(out var packet))
+            {
+                try
+                {
+                    socket.Send(packet);
+                }
+                catch (Exception e)
+                {
+                    SocketError?.Invoke(e);
+                }
+            }
         }
 
 
@@ -126,9 +134,9 @@ namespace AsperetaClient
 
         public void Facing(Direction d)
         {
-            int facing = (int)d + 1;
             // old asp client remaps facing for some reason...
-            facing = (facing == 3 ? 2 : (facing == 4 ? 3 : (facing == 2 ? 4 : facing)));
+            int[] directionRemap = [1, 4, 2, 3];
+            int facing = directionRemap[(int)d];
 
             Send($"F{facing}");
         }

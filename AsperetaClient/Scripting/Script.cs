@@ -26,16 +26,23 @@ namespace AsperetaClient;
 
             string scriptContents = File.ReadAllText(this.FilePath);
 
-            var scriptOptions = ScriptOptions.Default
-                .WithReferences(Assembly.GetExecutingAssembly())
-                .WithImports("System", "System.Collections.Generic", "System.Linq", "AsperetaClient", "AsperetaClient.Scripting.GameState");
+            try
+            {
+                var scriptOptions = ScriptOptions.Default
+                    .WithReferences(Assembly.GetExecutingAssembly())
+                    .WithImports("System", "System.Collections.Generic", "System.Linq", "AsperetaClient", "AsperetaClient.Scripting.GameState");
 
-            var script = CSharpScript.Create(scriptContents, scriptOptions);
-            script.Compile();
+                var script = CSharpScript.Create(scriptContents, scriptOptions);
+                script.Compile();
 
-            var result = script.RunAsync().Result.ReturnValue;
-            var scriptType = (Type)result;
+                var result = script.RunAsync().Result.ReturnValue;
+                var scriptType = (Type)result;
 
-            this.Object = (T)Activator.CreateInstance(scriptType);
+                this.Object = (T)Activator.CreateInstance(scriptType);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception loading script '{FilePath}': {e}");
+            }
         }
     }

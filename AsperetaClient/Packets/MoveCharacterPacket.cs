@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsperetaClient
 {
-    class MoveCharacterPacket : PacketHandler
+    public class MoveCharacterPacket : PacketHandler
     {
         public int LoginId { get; set; }
 

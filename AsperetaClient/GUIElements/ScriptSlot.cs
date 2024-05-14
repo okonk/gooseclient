@@ -16,10 +16,11 @@ namespace AsperetaClient
             this.onUsed?.Invoke(element);
         }
 
-        public void SetScript(string name, int graphicId, Action<GuiElement> onUsed)
+        public void SetScript(string name, int graphicId, Colour colour, Action<GuiElement> onUsed)
         {
             this.Name = name;
             this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, null);
+            this.Colour = colour;
             this.onUsed = onUsed;
         }
 

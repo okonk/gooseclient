@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
-using SDL2;
 
 namespace AsperetaClient
 {
@@ -38,9 +36,9 @@ namespace AsperetaClient
             }
         }
 
-        public void AddScript(string name, int graphicId, Action<GuiElement> onUsed)
+        public void AddScript(string name, int graphicId, Colour colour, Action<GuiElement> onUsed)
         {
-            slots[numberOfScripts].SetScript(name, graphicId, onUsed);
+            slots[numberOfScripts].SetScript(name, graphicId, colour, onUsed);
             numberOfScripts++;
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace AsperetaClient.Scripting.GameState;
@@ -7,6 +9,32 @@ namespace AsperetaClient.Scripting.GameState;
 public class GameState
 {
     public Spellbook Spellbook { get; init; } = new();
+    public Map Map { get; init; }
+    public Character Player { get; private set; }
+    public PlayerStats Stats { get; init; } = new();
+    public Group Group { get; init; } = new();
+
+    public GameState()
+    {
+        GameClient.NetworkClient.PacketManager.Listen<SetYourCharacterPacket>(OnSetYourCharacter);
+
+        Map = new Map(this);
+    }
+
+    private void OnSetYourCharacter(object packet)
+    {
+        var p = (SetYourCharacterPacket)packet;
+        
+        if (Map.Characters.TryGetValue(p.LoginId, out var character))
+            Player = character;
+    }
+
+    public IEnumerable<Character> GetGroupMembers()
+    {
+        var groupMembers = Group.MemberLoginIds.TakeWhile(c => c != 0).ToArray();
+
+        return Map.Characters.Values.Where(c => groupMembers.Contains(c.LoginId));
+    }
 }
 
 public class Spellbook
@@ -48,11 +76,15 @@ public class Spell
 
     public DateTime LastCastTimeUtc { get; private set; }
 
-    public TimeSpan Cooldown { get; private set; }
+    public TimeSpan Cooldown { get; set; }
 
     public TimeSpan CooldownRemaining => TimeSpan.FromMilliseconds(Math.Max(0, (this.Cooldown - (DateTime.UtcNow - this.LastCastTimeUtc)).TotalMilliseconds));
 
     public bool CanCast => DateTime.UtcNow - this.LastCastTimeUtc >= this.Cooldown;
+
+    public int HPCost { get; set; }
+    public int MPCost { get; set; }
+    public TimeSpan Duration { get; set;}
 
     public Spell(SpellbookSlotPacket spellSlotPacket)
     {
@@ -66,7 +98,7 @@ public class Spell
         this.Cooldown = TimeSpan.FromSeconds(0);
     }
 
-    public bool Cast(Character target)
+    public bool Cast(AsperetaClient.Character target)
     {
         if (!CanCast || target.Erased)
             return false;
@@ -77,8 +109,481 @@ public class Spell
         return true;
     }
 
+    public bool Cast(Character target)
+    {
+        if (!CanCast)
+            return false;
+
+        GameClient.NetworkClient.Cast(this.SlotNumber, target.LoginId);
+        this.LastCastTimeUtc = DateTime.UtcNow;
+
+        return true;
+    }
+
+
     public void SetCooldown(TimeSpan cooldown)
     {
         this.Cooldown = cooldown;
+    }
+}
+
+public class MapTile
+{
+    public bool Blocked { get; private set; }
+
+    public Character Character { get; set; }
+
+    public MapTile(bool blocked)
+    {
+        Blocked = blocked;
+    }
+}
+
+internal record Position(int X, int Y);
+
+public class Map
+{
+    public string Name { get; private set; }
+    public int MapNumber { get; private set; }
+    public ConcurrentDictionary<int, Character> Characters { get; init; } = new();
+
+    public int Width { get; private set; }
+    public int Height { get; private set; }
+
+    public MapTile[] Tiles { get; private set; }
+
+    private GameState gameState;
+    private DateTime lastMoveTime = DateTime.MinValue;
+    private TimeSpan moveSpeedPerTile = TimeSpan.FromMilliseconds(290);
+    private TimeSpan attackDelay = TimeSpan.FromSeconds(1);
+    private DateTime lastAttackTime = DateTime.MinValue;
+
+    private Position[] directionOffsets = [new(0, -1), new(1, 0), new(0, 1), new(-1, 0)];
+
+    public Map(GameState gameState)
+    {
+        GameClient.NetworkClient.PacketManager.Listen<SendCurrentMapPacket>(OnSendCurrentMap);
+        GameClient.NetworkClient.PacketManager.Listen<MakeCharacterPacket>(OnMakeCharacter);
+        GameClient.NetworkClient.PacketManager.Listen<EraseCharacterPacket>(OnEraseCharacter);
+        GameClient.NetworkClient.PacketManager.Listen<VitalsPercentagePacket>(OnVitalsPercentage);
+        GameClient.NetworkClient.PacketManager.Listen<MoveCharacterPacket>(OnMoveCharacter);
+        GameClient.NetworkClient.PacketManager.Listen<ChangeHeadingPacket>(OnChangeHeading);
+        GameClient.NetworkClient.PacketManager.Listen<WeaponSpeedPacket>(OnWeaponSpeed);
+        GameClient.NetworkClient.PacketManager.Listen<SetYourPositionPacket>(OnSetYourPosition);
+        GameClient.NetworkClient.PacketManager.Listen<GroupUpdatePacket>(OnGroupUpdate);
+
+        this.gameState = gameState;
+    }
+
+    public MapTile this[int x, int y]
+    {
+        get { return this.Tiles[y * this.Width + x]; }
+    }
+
+    public bool CanAttack()
+    {
+        return DateTime.UtcNow - lastAttackTime >= attackDelay;
+    }
+
+    public bool Attack()
+    {
+        if (!CanAttack())
+            return false;
+
+        GameClient.NetworkClient.PacketManager.Handle($"ATT{gameState.Player.LoginId}");
+
+        GameClient.NetworkClient.Attack();
+
+        lastAttackTime = DateTime.UtcNow;
+
+        return true;
+    }
+
+    public bool CanMove()
+    {
+        return DateTime.UtcNow - lastMoveTime >= moveSpeedPerTile;
+    }
+
+    public (Character character, int distance) GetClosestMonster(IReadOnlyCollection<string> filterNames = null)
+    {
+        Character closestCharacter = null;
+        int closestDistance = int.MaxValue;
+
+        foreach (var character in Characters.Values)
+        {
+            if (character.CharacterType != CharacterType.Monster)
+                continue;
+
+            if (filterNames != null && !filterNames.Contains(character.Name))
+                continue;
+
+            var distance = DistanceTo(character);
+            if (distance < closestDistance || distance == closestDistance && character.HPPercent < closestCharacter.HPPercent)
+            {
+                closestCharacter = character;
+                closestDistance = distance;
+            }
+        }
+
+        return (closestCharacter, closestDistance);
+    }
+
+    public int DistanceTo(Character character)
+    {
+        return Math.Abs(gameState.Player.X - character.X) + Math.Abs(gameState.Player.Y - character.Y);
+    }
+
+    public void Face(Character character)
+    {
+        var xDist = gameState.Player.X - character.X;
+        var yDist = gameState.Player.Y - character.Y;
+
+        if (Math.Abs(yDist) > Math.Abs(xDist))
+        {
+            if (yDist > 0)
+                Face(Direction.Up);
+            else
+                Face(Direction.Down);
+        }
+        else
+        {
+            if (xDist > 0)
+                Face(Direction.Left);
+            else
+                Face(Direction.Right);
+        }
+    }
+
+    public void Face(Direction direction)
+    {
+        // Facing is inconsistent, I think when walking into something it breaks, so this check isn't good
+        if (gameState.Player.Facing == direction)
+            return;
+
+        // Bit of a hack, easiest way to keep client and script state in sync by simulating a CHH packet being received
+        GameClient.NetworkClient.PacketManager.Handle($"CHH{gameState.Player.LoginId},{((int)direction) + 1}");
+
+        GameClient.NetworkClient.Facing(direction);
+    }
+
+    public bool Move(Direction direction)
+    {
+        var offset = directionOffsets[(int)direction];
+        var position = new Position(gameState.Player.X + offset.X, gameState.Player.Y + offset.Y);
+
+        return Move(direction, position);
+    }
+
+    private bool Move(Direction direction, Position position)
+    {
+        if (!CanMove())
+            return false;
+
+        // Bit of a hack, easiest way to keep client and script state in sync by simulating a move packet being received
+        GameClient.NetworkClient.PacketManager.Handle($"MOC{gameState.Player.LoginId},{position.X + 1},{position.Y + 1}");
+
+        GameClient.NetworkClient.Move(direction);
+
+        gameState.Player.Facing = direction;
+
+        lastMoveTime = DateTime.UtcNow;
+
+        return true;
+    }
+
+    public bool MoveTowards(Character character)
+    {
+        return MoveTowards(character.X, character.Y);
+    }
+
+    public bool MoveTowards(int x, int y)
+    {
+        if (!CanMove())
+            return false;
+
+        var nextPos = MoveTowardsPosition(new Position(gameState.Player.X, gameState.Player.Y), new Position(x, y));
+        if (nextPos is null)
+            return false;
+
+        if (nextPos.Y < gameState.Player.Y)
+            return Move(Direction.Up);
+        else if (nextPos.X > gameState.Player.X)
+            return Move(Direction.Right);
+        else if (nextPos.Y > gameState.Player.Y)
+            return Move(Direction.Down);
+        else if (nextPos.X < gameState.Player.X)
+            return Move(Direction.Left);
+
+        return false;
+    }
+
+    private Position NextPosition(Dictionary<Position, Position> cameFrom, Position endPosition)
+    {
+        var path = new List<Position>();
+
+        var current = endPosition;
+        while (current != null)
+        {
+            path.Add(current);
+            current = cameFrom[current];
+        }
+
+        if (path.Count >= 2)
+            return path[^2];
+
+        return null;
+    }
+
+    private IEnumerable<Position> GetAdjacentFreePositions(Position fromPosition, Position endPosition)
+    {
+        foreach (var offset in directionOffsets)
+        {
+            var position = new Position(fromPosition.X + offset.X, fromPosition.Y + offset.Y);
+
+            if (position.X < 0 || position.X >= Width || position.Y < 0 || position.Y >= Height)
+                continue;
+
+            var tile = this[position.X, position.Y];
+            if (tile.Blocked || position != endPosition && tile.Character is not null)
+                continue;
+
+            yield return position;
+        }
+    }
+
+    private Position MoveTowardsPosition(Position startPosition, Position endPosition)
+    {
+        var openSet = new PriorityQueue<Position, int>();
+        var cameFrom = new Dictionary<Position, Position>();
+        var gScores = new Dictionary<Position, int>();
+
+        openSet.Enqueue(startPosition, 0);
+        cameFrom[startPosition] = null;
+        gScores[startPosition] = 0;
+
+        while (openSet.Count > 0)
+        {
+            var current = openSet.Dequeue();
+            if (current == endPosition)
+                return NextPosition(cameFrom, endPosition);
+
+            foreach (var adjacent in GetAdjacentFreePositions(current, endPosition))
+            {
+                var tentativeGScore = gScores[current] + 1;
+
+                if (gScores.TryGetValue(adjacent, out var gScore) && tentativeGScore >= gScore)
+                    continue;
+
+                cameFrom[adjacent] = current;
+                gScores[adjacent] = tentativeGScore;
+
+                if (!openSet.UnorderedItems.Any(x => x.Element == adjacent))
+                    openSet.Enqueue(adjacent, tentativeGScore + AStarHeuristic(adjacent, endPosition));
+            }
+        }
+
+        return null;
+    }
+
+    private int AStarHeuristic(Position a, Position b)
+    {
+        return (int)Math.Pow(a.X - b.X, 2) + (int)Math.Pow(a.Y - b.Y, 2);
+    }
+
+    private void OnSendCurrentMap(object packet)
+    {
+        var p = (SendCurrentMapPacket)packet;
+
+        Name = p.MapName;
+        MapNumber = p.MapNumber;
+
+        var mapData = AsperetaMapLoader.Load(MapNumber);
+        Width = mapData.Width;
+        Height = mapData.Height;
+
+        Tiles = mapData.Tiles.Select(t => new MapTile(t.Blocked)).ToArray();
+    }
+
+    private void OnMakeCharacter(object packet)
+    {
+        var p = (MakeCharacterPacket)packet;
+
+        Characters.TryAdd(p.LoginId, new Character(p));
+    }
+
+    private void OnEraseCharacter(object packet)
+    {
+        var p = (EraseCharacterPacket)packet;
+
+        if (Characters.TryRemove(p.LoginId, out var character))
+        {
+            if (this[character.X, character.Y].Character == character)
+                this[character.X, character.Y].Character = null;
+        }
+    }
+
+    private void OnVitalsPercentage(object packet)
+    {
+        var p = (VitalsPercentagePacket)packet;
+
+        if (Characters.TryGetValue(p.LoginId, out var character))
+            character.OnVitalsPercentage(p);
+    }
+
+    private void OnMoveCharacter(object packet)
+    {
+        var p = (MoveCharacterPacket)packet;
+
+        if (Characters.TryGetValue(p.LoginId, out var character))
+        {
+            this[character.X, character.Y].Character = null;
+            this[p.MapX, p.MapY].Character = character;
+
+            character.OnMoveCharacter(p);
+        }
+    }
+
+    private void OnChangeHeading(object packet)
+    {
+        var p = (ChangeHeadingPacket)packet;
+
+        if (Characters.TryGetValue(p.LoginId, out var character))
+            character.OnChangeHeading(p);
+    }
+
+    private void OnWeaponSpeed(object packet)
+    {
+        var p = (WeaponSpeedPacket)packet;
+
+        attackDelay = TimeSpan.FromMilliseconds(p.Speed);
+    }
+
+    private void OnSetYourPosition(object packet)
+    {
+        var p = (SetYourPositionPacket)packet;
+
+        if (this[gameState.Player.X, gameState.Player.Y].Character == gameState.Player)
+            this[gameState.Player.X, gameState.Player.Y].Character = null;
+        this[p.MapX, p.MapY].Character = gameState.Player;
+
+        gameState.Player.OnSetYourPosition(p);
+    }
+
+    private void OnGroupUpdate(object packet)
+    {
+        var p = (GroupUpdatePacket)packet;
+        if (p.LoginId == 0)
+            return;
+
+        if (Characters.TryGetValue(p.LoginId, out var character))
+            character.ClassName = p.ClassName;
+    }
+}
+
+public enum CharacterType
+{
+    Player = 1,
+    Monster = 2,
+    Vendor = 10,
+    Banker = 11,
+    Quest = 12
+}
+
+public class Character
+{
+    public int LoginId { get; private set; }
+    public CharacterType CharacterType { get; private set; }
+    public string Name { get; private set; }
+    public int X { get; private set; }
+    public int Y { get; private set; }
+    public int HPPercent { get; private set; }
+    public int MPPercent { get; private set; }
+    public Direction Facing { get; set; }
+    public string ClassName { get; set; }
+
+    public Character(MakeCharacterPacket packet)
+    {
+        LoginId = packet.LoginId;
+        CharacterType = (CharacterType)packet.CharacterType;
+        Name = packet.Name;
+        X = packet.MapX;
+        Y = packet.MapY;
+        HPPercent = packet.HPPercent;
+        Facing = (Direction)packet.Facing;
+    }
+
+    public void OnVitalsPercentage(VitalsPercentagePacket packet)
+    {
+        HPPercent = packet.HPPercentage;
+        MPPercent = packet.MPPercentage;
+    }
+
+    public void OnMoveCharacter(MoveCharacterPacket packet)
+    {
+        X = packet.MapX;
+        Y = packet.MapY;
+    }
+
+    public void OnChangeHeading(ChangeHeadingPacket packet)
+    {
+        Facing = (Direction)packet.Facing;
+    }
+
+    public void OnSetYourPosition(SetYourPositionPacket packet)
+    {
+        X = packet.MapX;
+        Y = packet.MapY;
+    }
+}
+
+public class PlayerStats
+{
+    public string ClassName { get; private set; }
+    public int Level { get; private set; }
+    public long MaxHP { get; private set; }
+    public long MaxMP { get; private set; }
+    public long MaxSP { get; private set; }
+    public long CurrentHP { get; private set; }
+    public long CurrentMP { get; private set; }
+    public long CurrentSP { get; private set; }
+
+    public PlayerStats()
+    {
+        GameClient.NetworkClient.PacketManager.Listen<StatusInfoPacket>(OnStatusInfo);
+    }
+
+    public void OnStatusInfo(object packet)
+    {
+        var p = (StatusInfoPacket)packet;
+
+        this.ClassName = p.ClassName;
+        this.Level = p.Level;
+        this.MaxHP = p.MaxHP;
+        this.MaxMP = p.MaxMP;
+        this.MaxSP = p.MaxSP;
+        this.CurrentHP = p.CurrentHP;
+        this.CurrentMP = p.CurrentMP;
+        this.CurrentSP = p.CurrentSP;
+    }
+}
+
+public class Group
+{
+    private const int MaxMembers = 10;
+
+    public int[] MemberLoginIds { get; init; } = new int[MaxMembers];
+
+    public Group()
+    {
+        GameClient.NetworkClient.PacketManager.Listen<GroupUpdatePacket>(OnGroupUpdate);
+    }
+
+    private void OnGroupUpdate(object packet)
+    {
+        var p = (GroupUpdatePacket)packet;
+
+        if (p.LineNumber > MaxMembers) return;
+
+        MemberLoginIds[p.LineNumber] = p.LoginId;
     }
 }
