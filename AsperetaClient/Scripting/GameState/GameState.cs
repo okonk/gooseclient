@@ -14,6 +14,7 @@ public class GameState
     public PlayerStats Stats { get; init; } = new();
     public Group Group { get; init; } = new();
     public Buffs Buffs { get; init; } = new();
+    public Inventory Inventory { get; init; } = new();
 
     public GameState()
     {
@@ -28,6 +29,8 @@ public class GameState
         
         if (Map.Characters.TryGetValue(p.LoginId, out var character))
             Player = character;
+        else
+            Console.WriteLine($"Character to set not found");
     }
 
     public IEnumerable<Character> GetGroupMembers()
@@ -35,6 +38,16 @@ public class GameState
         var groupMembers = Group.MemberLoginIds.TakeWhile(c => c != 0).ToArray();
 
         return Map.Characters.Values.Where(c => groupMembers.Contains(c.LoginId));
+    }
+
+    public void SellItem(int npcId, Item item)
+    {
+        GameClient.NetworkClient.VendorSellItem(npcId, item.SlotNumber, item.StackSize);
+    }
+
+    public void BuyItem(int npcId, int slotNumber)
+    {
+        GameClient.NetworkClient.VendorPurchaseItem(npcId, slotNumber);
     }
 }
 
@@ -408,13 +421,15 @@ public class Map
         Height = mapData.Height;
 
         Tiles = mapData.Tiles.Select(t => new MapTile(t.Blocked)).ToArray();
+
+        Characters.Clear();
     }
 
     private void OnMakeCharacter(object packet)
     {
         var p = (MakeCharacterPacket)packet;
 
-        Characters.TryAdd(p.LoginId, new Character(p));
+        Characters[p.LoginId] = new Character(p);
     }
 
     private void OnEraseCharacter(object packet)
@@ -612,5 +627,52 @@ public class Buffs
         if (p.SlotNumber > MaxBuffs) return;
 
         Active[p.SlotNumber] = p.Name;
+    }
+}
+
+public class Inventory
+{
+    private const int MaxItems = 30;
+    private Item[] items = new Item[MaxItems];
+
+    public Inventory()
+    {
+        GameClient.NetworkClient.PacketManager.Listen<InventorySlotPacket>(OnInventorySlot);
+    }
+
+    public void OnInventorySlot(object packet)
+    {
+        var p = (InventorySlotPacket)packet;
+
+        items[p.SlotNumber] = p.ItemName is null ? null : new Item(p);
+    }
+
+    public Item Find(string name)
+    {
+        return items.FirstOrDefault(s => s?.Name == name);
+    }
+
+    public IEnumerable<Item> All()
+    {
+        return items.Where(i => i is not null);
+    }
+}
+
+public class Item
+{
+    public int SlotNumber { get; init; }
+
+    public int ItemId { get; init; }
+
+    public string Name { get; init; }
+
+    public int StackSize { get; init; }
+
+    public Item(InventorySlotPacket packet)
+    {
+        SlotNumber = packet.SlotNumber;
+        ItemId = packet.ItemId;
+        Name = packet.ItemName;
+        StackSize = packet.StackSize;
     }
 }

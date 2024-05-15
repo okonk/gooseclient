@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class VendorWindow : BaseWindow
+    public class VendorWindow : BaseWindow
     {
         public VendorSlot[] slots;
 

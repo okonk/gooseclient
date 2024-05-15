@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class VendorSlot : BaseSlot
+    public class VendorSlot : BaseSlot
     {
         public int ItemId { get; private set; }
 

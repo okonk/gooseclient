@@ -6,7 +6,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    class ChatWindow : BaseWindow
+    public class ChatWindow : BaseWindow
     {
         private ChatListBox chatListBox;
 

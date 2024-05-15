@@ -5,7 +5,7 @@ using SDL2;
 
 namespace AsperetaClient
 {
-    enum ChatType
+    public enum ChatType
     {
         Chat = 1,
         Guild,

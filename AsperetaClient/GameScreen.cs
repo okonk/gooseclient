@@ -28,7 +28,7 @@ namespace AsperetaClient
         private bool AutoPickup { get; set; } = false;
         public bool ShowBlockedTiles { get; private set; } = false;
 
-        private ChatWindow chatWindow;
+        public ChatWindow ChatWindow { get; set; }
 
         private int mouseX;
         private int mouseY;
@@ -85,11 +85,11 @@ namespace AsperetaClient
             this.uiRoot.RightClickUnhandled += OnRightClick;
             this.uiRoot.DoubleClickUnhandled += OnDoubleClick;
 
-            chatWindow = new ChatWindow();
-            chatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
-            chatWindow.CommandHandlers["/showblockedtiles"] = OnShowBlockedTilesCommand;
+            ChatWindow = new ChatWindow();
+            ChatWindow.CommandHandlers["/autopickup"] = OnAutoPickupCommand;
+            ChatWindow.CommandHandlers["/showblockedtiles"] = OnShowBlockedTilesCommand;
 
-            this.uiRoot.AddChild(chatWindow);
+            this.uiRoot.AddChild(ChatWindow);
             this.uiRoot.AddChild(new FpsWindow());
             this.uiRoot.AddChild(new BuffBarWindow());
             this.uiRoot.AddChild(new HPBarWindow());
@@ -139,14 +139,14 @@ namespace AsperetaClient
             if (this.AutoPickup)
                 this.player.MovementFinished += this.OnOurCharacterMoved;
 
-            chatWindow.AddText(ChatType.Client, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
+            ChatWindow.AddText(ChatType.Client, $"Automatic item pickup is now {(this.AutoPickup ? "enabled" : "disabled")}.");
         }
 
         private void OnShowBlockedTilesCommand(string command, string arguments)
         {
             this.ShowBlockedTiles = !this.ShowBlockedTiles;
 
-            chatWindow.AddText(ChatType.Client, $"Blocked tiles are now {(this.ShowBlockedTiles ? "visible" : "hidden")}.");
+            ChatWindow.AddText(ChatType.Client, $"Blocked tiles are now {(this.ShowBlockedTiles ? "visible" : "hidden")}.");
         }
 
         private int RenderOffsetX()
@@ -529,6 +529,11 @@ namespace AsperetaClient
         {
             if (this.Map[c.TileX, c.TileY].MapObject != null)
                 GameClient.NetworkClient.Get();
+        }
+
+        public BaseWindow FindWindow(string name)
+        {
+            return this.uiRoot.Children.Where(w => w is BaseWindow).Cast<BaseWindow>().FirstOrDefault(w => w.Name == name);
         }
     }
 }
