@@ -11,7 +11,7 @@ namespace AsperetaClient
 
             var map = new MapFile(mapNumber, 100, 100);
 
-            using (var reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
+            using (var reader = new BinaryReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 // Think these are version number which doesn't matter
                 reader.ReadInt16();
