@@ -78,7 +78,12 @@ namespace AsperetaClient
                     equipped[i][j++] = p.GetInt32(); // r
                     equipped[i][j++] = p.GetInt32(); // g
                     equipped[i][j++] = p.GetInt32(); // b
-                    equipped[i][j++] = p.GetInt32(); // a
+
+                    var aString = p.GetString();
+                    if (aString.EndsWith('*'))
+                        aString = aString.Substring(0, aString.Length - 1);
+
+                    equipped[i][j++] = Convert.ToInt32(aString); // a
                 }
             }
 
