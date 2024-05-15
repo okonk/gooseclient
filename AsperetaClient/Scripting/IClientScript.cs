@@ -13,4 +13,8 @@ public interface IClientScript
     void OnGameScreenCreated(GameScreen screen) { }
 
     void OnMapLoaded(Map map) { }
+
+    void Stop();
+
+    void OnReloaded() {}
 }

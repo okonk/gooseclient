@@ -14,6 +14,8 @@ internal class ScriptManager
 
     public GameState GameState { get; private set; }
 
+    private GameScreen gameScreen;
+
     public ScriptManager()
     {
         LoadScripts();
@@ -32,6 +34,7 @@ internal class ScriptManager
 
     public void OnGameScreenCreated(GameScreen screen)
     {
+        this.gameScreen = screen;
         this.GameState = new();
 
         foreach (var script in scripts)
@@ -47,5 +50,28 @@ internal class ScriptManager
         {
             script.OnMapLoaded(map);
         }
+    }
+
+    public void ReloadScripts()
+    {
+        foreach (var script in scripts)
+        {
+            script.Stop();
+        }
+
+        LoadScripts();
+
+        foreach (var script in scripts)
+        {
+            script.GameState = this.GameState;
+            script.OnGameScreenCreated(gameScreen);
+        }
+
+        foreach (var script in scripts)
+        {
+            script.OnReloaded();
+        }
+
+        Console.WriteLine("Scripts reloaded");
     }
 }

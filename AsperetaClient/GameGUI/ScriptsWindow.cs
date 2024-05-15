@@ -16,7 +16,7 @@ namespace AsperetaClient
             titleLabel.Value = "Scripts";
 
             rows = 6;
-            columns = 5;
+            columns = 8;
             objW = 32;
             objH = 32;
 
@@ -34,21 +34,52 @@ namespace AsperetaClient
                     slots[r * columns + c] = slot;
                 }
             }
+
+            AddReloadButton();
         }
 
-        public void AddScript(string name, int graphicId, Colour colour, Action<GuiElement> onUsed)
+        public ScriptSlot AddScript(string name, int graphicId, Colour colour, Action<GuiElement> onUsed)
         {
-            slots[numberOfScripts].SetScript(name, graphicId, colour, onUsed);
+            var slot = slots[numberOfScripts];
+            slot.SetScript(name, graphicId, colour, onUsed);
             numberOfScripts++;
-        }
 
-        public override void OnCloseButtonClicked(Button b)
-        {
-            this.Parent.RemoveChild(this);
+            return slot;
         }
 
         public override void SaveState()
         {
+        }
+
+        private void AddReloadButton()
+        {
+            var buttonSection = GameClient.ButtonSettings.Sections[WindowButtons.Blank.ToString()];
+            var buttonTextures = buttonSection["image"].Split(',');
+
+            var upTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{buttonTextures[0]}");
+            var downTexture = GameClient.ResourceManager.GetTexture($"skins/{GameClient.GameSettings["INIT"]["Skin"]}/{buttonTextures[1]}");
+
+            var button = new Button(95, 267, upTexture.W, upTexture.H, "Reload");
+            button.UpTexture = upTexture;
+            button.DownTexture = downTexture;
+            button.Clicked += OnReloadClicked;
+            this.AddChild(button);
+        }
+
+        private void OnReloadClicked(Button button)
+        {
+            ClearSlots();
+            GameClient.ScriptManager.ReloadScripts();
+        }
+
+        private void ClearSlots()
+        {
+            foreach (var slot in slots)
+            {
+                slot?.Clear();
+            }
+
+            numberOfScripts = 0;
         }
     }
 }

@@ -168,7 +168,7 @@ public class Map
 
     private GameState gameState;
     private DateTime lastMoveTime = DateTime.MinValue;
-    private TimeSpan moveSpeedPerTile = TimeSpan.FromMilliseconds(290);
+    private TimeSpan moveSpeedPerTile = TimeSpan.FromMilliseconds(320);
     private TimeSpan attackDelay = TimeSpan.FromSeconds(1);
     private DateTime lastAttackTime = DateTime.MinValue;
 

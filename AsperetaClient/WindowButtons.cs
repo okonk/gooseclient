@@ -6,6 +6,7 @@ namespace AsperetaClient
         Close,
         Back,
         Next,
-        OK
+        OK,
+        Blank
     }
 }

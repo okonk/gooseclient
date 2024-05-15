@@ -19,9 +19,16 @@ namespace AsperetaClient
         public void SetScript(string name, int graphicId, Colour colour, Action<GuiElement> onUsed)
         {
             this.Name = name;
-            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, null);
+            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, colour);
             this.Colour = colour;
             this.onUsed = onUsed;
+        }
+
+        public void SetIcon(string name, int graphicId, Colour colour)
+        {
+            this.Name = name;
+            this.Graphic = GameClient.ResourceManager.GetTexture(graphicId, colour);
+            this.Colour = colour;
         }
 
         public override void HandleDrop(object data)
