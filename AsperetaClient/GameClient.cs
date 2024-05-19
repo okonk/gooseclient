@@ -81,6 +81,12 @@ namespace AsperetaClient
                     GameScreenHeight = 600;
                 }
 
+                if (GameSettings.GetBool("INIT", "1024x768"))
+                {
+                    GameScreenWidth = 1024;
+                    GameScreenHeight = 768;
+                }
+
                 if (GameSettings.GetBool("INIT", "2xScale"))
                 {
                     windowWidth = GameScreenWidth * 2;

@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using AsperetaClient.Scripting.GameData;
 
 namespace AsperetaClient.Scripting.GameState;
 
@@ -15,6 +17,7 @@ public class GameState
     public Group Group { get; init; } = new();
     public Buffs Buffs { get; init; } = new();
     public Inventory Inventory { get; init; } = new();
+    public GameDatabase GameDatabase { get; init; } = new();
 
     public GameState()
     {
@@ -143,13 +146,18 @@ public class Spell
 
 public class MapTile
 {
-    public bool Blocked { get; private set; }
+    public bool Blocked { get; }
 
     public Character Character { get; set; }
 
-    public MapTile(bool blocked)
+    public WarpTile Warp { get; }
+
+    public bool IsWalkable => !Blocked && Character is null && Warp is null;
+
+    public MapTile(bool blocked, WarpTile warpTile)
     {
         Blocked = blocked;
+        Warp = warpTile;
     }
 }
 
@@ -192,6 +200,14 @@ public class Map
     public MapTile this[int x, int y]
     {
         get { return this.Tiles[y * this.Width + x]; }
+    }
+
+    public Character GetCharacter(int x, int y)
+    {
+        if (x < 0 || x >= this.Width || y < 0 || y >= this.Height)
+            return null;
+
+        return this[x, y].Character;
     }
 
     public bool CanAttack()
@@ -240,6 +256,11 @@ public class Map
         }
 
         return (closestCharacter, closestDistance);
+    }
+
+    public IReadOnlyCollection<Character> GetMonsters()
+    {
+        return Characters.Values.Where(c => c.CharacterType == CharacterType.Monster).ToArray();
     }
 
     public int DistanceTo(Character character)
@@ -363,7 +384,7 @@ public class Map
                 continue;
 
             var tile = this[position.X, position.Y];
-            if (tile.Blocked || position != endPosition && tile.Character is not null)
+            if (position != endPosition && !tile.IsWalkable)
                 continue;
 
             yield return position;
@@ -420,7 +441,33 @@ public class Map
         Width = mapData.Width;
         Height = mapData.Height;
 
-        Tiles = mapData.Tiles.Select(t => new MapTile(t.Blocked)).ToArray();
+        var warpTiles = gameState.GameDatabase.GetWarpTiles(MapNumber, Name);
+
+        var tiles = new MapTile[Width * Height];
+        for (int y = 0; y < Height; y++)
+        {
+            for (var x = 0; x < Width; x++)
+            {
+                var warp = warpTiles.FirstOrDefault(w => w.X == x && w.Y == y);
+                var blocked = mapData[x, y].Blocked;
+
+                tiles[y * Width + x] = new MapTile(blocked, warp);
+            }
+        }
+
+        Tiles = tiles;
+
+        // Hack to block mindless mines
+        // if (MapNumber == 12)
+        // {
+        //     for (int y = 13; y < 16; y++)
+        //     {
+        //         for (int x = 84; x < 87; x++)
+        //         {
+        //             this[x, y].Blocked = true;
+        //         }
+        //     }
+        // }
 
         Characters.Clear();
     }
@@ -429,7 +476,10 @@ public class Map
     {
         var p = (MakeCharacterPacket)packet;
 
-        Characters[p.LoginId] = new Character(p);
+        var character = new Character(p);
+        Characters[p.LoginId] = character;
+
+        this[character.X, character.Y].Character = character;
     }
 
     private void OnEraseCharacter(object packet)
@@ -521,6 +571,7 @@ public class Character
     public int MPPercent { get; private set; }
     public Direction Facing { get; set; }
     public string ClassName { get; set; }
+    public DateTime SpawnTime { get; private set; }
 
     public Character(MakeCharacterPacket packet)
     {
@@ -531,6 +582,7 @@ public class Character
         Y = packet.MapY;
         HPPercent = packet.HPPercent;
         Facing = (Direction)packet.Facing;
+        SpawnTime = DateTime.UtcNow;
     }
 
     public void OnVitalsPercentage(VitalsPercentagePacket packet)
@@ -565,8 +617,27 @@ public class PlayerStats
     public long MaxMP { get; private set; }
     public long MaxSP { get; private set; }
     public long CurrentHP { get; private set; }
-    public long CurrentMP { get; private set; }
+
+    public long CurrentMP
+    {
+        get
+        {
+            return Interlocked.CompareExchange(ref _currentMp, 0, 0);
+        }
+    }
+
     public long CurrentSP { get; private set; }
+    public DateTime LastUpdate 
+    {
+        get
+        {
+            long lastUpdate = Interlocked.CompareExchange(ref _lastUpdate, 0, 0);
+            return DateTime.FromBinary(lastUpdate);
+        }
+    }
+
+    private long _lastUpdate;
+    private long _currentMp;
 
     public PlayerStats()
     {
@@ -583,8 +654,10 @@ public class PlayerStats
         this.MaxMP = p.MaxMP;
         this.MaxSP = p.MaxSP;
         this.CurrentHP = p.CurrentHP;
-        this.CurrentMP = p.CurrentMP;
         this.CurrentSP = p.CurrentSP;
+        
+        Interlocked.Exchange(ref _currentMp, p.CurrentMP);
+        Interlocked.Exchange(ref _lastUpdate, DateTime.UtcNow.ToBinary());
     }
 }
 

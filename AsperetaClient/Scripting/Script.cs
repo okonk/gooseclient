@@ -12,6 +12,8 @@ namespace AsperetaClient;
 
         public T Object { get; private set; }
 
+        public bool Loaded { get; private set; }
+
         public Script(string filePath)
         {
             this.FilePath = filePath;
@@ -39,10 +41,13 @@ namespace AsperetaClient;
                 var scriptType = (Type)result;
 
                 this.Object = (T)Activator.CreateInstance(scriptType);
+
+                Loaded = true;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Exception loading script '{FilePath}': {e}");
+                Loaded = false;
             }
         }
     }

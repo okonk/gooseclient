@@ -6,10 +6,16 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers>linux-x64;win-x64;osx-x64;win-x86</RuntimeIdentifiers>
   </PropertyGroup>
+  
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.9.2" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
   </ItemGroup>
+
   <ItemGroup>
-    <Folder Include="Scripting/GameState/" />
+    <Reference Include="CsvToSql.Core">
+      <HintPath>../libs/CsvToSql.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

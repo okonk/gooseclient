@@ -26,7 +26,9 @@ internal class ScriptManager
         foreach (var file in Directory.EnumerateFiles("Scripts", "*.csx", new EnumerationOptions { MatchCasing = MatchCasing.CaseInsensitive }))
         {
             var script = new Script<IClientScript>(file);
-            scriptMapping[file] = script;
+
+            if (script.Loaded)
+                scriptMapping[file] = script;
         }
 
         scripts = scriptMapping.Values.Cast<Script<IClientScript>>().Select(s => s.Object).ToList();
@@ -35,6 +37,10 @@ internal class ScriptManager
     public void OnGameScreenCreated(GameScreen screen)
     {
         this.gameScreen = screen;
+
+        if (!scripts.Any())
+            return;
+
         this.GameState = new();
 
         foreach (var script in scripts)
@@ -60,6 +66,9 @@ internal class ScriptManager
         }
 
         LoadScripts();
+
+        if (GameState is null)
+            this.GameState = new();
 
         foreach (var script in scripts)
         {
