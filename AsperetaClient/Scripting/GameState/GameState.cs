@@ -210,6 +210,14 @@ public class Map
         return this[x, y].Character;
     }
 
+    public MapTile GetTile(int x, int y)
+    {
+        if (x < 0 || x >= this.Width || y < 0 || y >= this.Height)
+            return null;
+
+        return this[x, y];
+    }
+
     public bool CanAttack()
     {
         return DateTime.UtcNow - lastAttackTime >= attackDelay;
@@ -268,9 +276,19 @@ public class Map
         return DistanceBetween(gameState.Player, character);
     }
 
+    public int DistanceTo(int x, int y)
+    {
+        return DistanceBetween(gameState.Player.X, gameState.Player.Y, x, y);
+    }
+
     public int DistanceBetween(Character a, Character b)
     {
-        return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        return DistanceBetween(a.X, a.Y, b.X, b.Y);
+    }
+
+    public int DistanceBetween(int x1, int y1, int x2, int y2)
+    {
+        return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
 
     public void Face(Character character)
@@ -456,18 +474,6 @@ public class Map
         }
 
         Tiles = tiles;
-
-        // Hack to block mindless mines
-        // if (MapNumber == 12)
-        // {
-        //     for (int y = 13; y < 16; y++)
-        //     {
-        //         for (int x = 84; x < 87; x++)
-        //         {
-        //             this[x, y].Blocked = true;
-        //         }
-        //     }
-        // }
 
         Characters.Clear();
     }
