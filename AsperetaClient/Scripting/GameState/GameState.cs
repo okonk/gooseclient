@@ -271,6 +271,11 @@ public class Map
         return Characters.Values.Where(c => c.CharacterType == CharacterType.Monster).ToArray();
     }
 
+    public Character GetCharacter(string name)
+    {
+        return Characters.Values.FirstOrDefault(c => c.Name == name);
+    }
+
     public int DistanceTo(Character character)
     {
         return DistanceBetween(gameState.Player, character);
@@ -587,6 +592,7 @@ public class Character
         X = packet.MapX;
         Y = packet.MapY;
         HPPercent = packet.HPPercent;
+        MPPercent = 100;
         Facing = (Direction)packet.Facing;
         SpawnTime = DateTime.UtcNow;
     }
@@ -644,6 +650,9 @@ public class PlayerStats
 
     private long _lastUpdate;
     private long _currentMp;
+
+    public double HPPercent => (double)CurrentHP / MaxHP;
+    public double MPPercent => (double)CurrentMP / MaxMP;
 
     public PlayerStats()
     {
